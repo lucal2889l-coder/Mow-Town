@@ -96,7 +96,7 @@ kbd{font-family:var(--font);font-size:11px;background:rgba(255,255,255,.14);bord
   background:repeating-linear-gradient(90deg,#b9f56c 0 24px,#86cf3a 24px 48px);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 5px 0 #2b4a10) drop-shadow(0 14px 22px rgba(0,0,0,.6))}
 .tagline{font-weight:900;letter-spacing:6px;font-size:15px;text-shadow:0 2px 6px #000;margin-bottom:18px}
-.titleBtns{display:flex;flex-direction:column;gap:10px;width:260px}
+.titleBtns{display:flex;flex-direction:column;gap:10px;width:min(310px,92vw)}
 .dlg{width:min(780px,95vw);max-height:92vh;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
 .dlgHead{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .dlgHead h2{font-size:24px}
@@ -138,8 +138,43 @@ kbd{font-family:var(--font);font-size:11px;background:rgba(255,255,255,.14);bord
 .story.done{opacity:.55}
 /* workbench */
 #scr-bench{justify-content:flex-end}
-.bpanel{width:min(500px,100vw);margin:12px;padding:15px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 24px)}
-.bbody{overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:11px;padding-right:4px}
+.bpanel{width:min(620px,100vw);margin:10px;height:calc(100vh - 20px);overflow:hidden;display:grid;grid-template-columns:78px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto}
+.gHead{grid-column:1/3;display:flex;gap:12px;align-items:center;padding:10px 12px;background:linear-gradient(120deg,#2c4a2e,#16241a);border-bottom:1px solid var(--line)}
+.gHead img{width:96px;aspect-ratio:16/10;border-radius:10px;object-fit:cover;flex:none;border:2px solid rgba(255,255,255,.15)}
+.gWho{flex:1;min-width:0}.gWho h2{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gStats{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;font-weight:800;color:#d6e6d8;margin-top:3px}
+.gTop{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.gTop .btn{padding:4px 10px}.gTop .chip{font-size:14px;padding:3px 9px}
+.gRail{display:flex;flex-direction:column;gap:3px;padding:7px 5px;background:rgba(0,0,0,.28);overflow-y:auto;scrollbar-width:none}
+.gTab{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px;border-radius:11px;font-size:11px;font-weight:800;color:var(--mut);transition:background .12s}
+.gTab i{font-style:normal;font-size:21px;line-height:1.1}.gTab:hover{background:rgba(255,255,255,.08);color:var(--txt)}
+.gTab.sel{background:#34553a;color:#fff;box-shadow:inset 3px 0 0 var(--acc)}.gTab:focus-visible,.gTile:focus-visible,.pTile:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.bbody{overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:11px 12px}
+.gFoot{grid-column:1/3;text-align:center;font-size:11px;font-weight:700;color:var(--mut);padding:5px;border-top:1px solid var(--line)}
+.gTitle{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.gTitle h3{font-size:19px}.gTitle small{color:var(--mut);font-weight:700;font-size:12px}
+.gGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:7px}
+.gTile{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;min-height:54px;padding:7px 10px;text-align:left;font-size:13px;line-height:1.2;background:var(--panel2);border:2px solid var(--line);border-radius:12px;transition:border-color .12s,background .12s}
+.gTile:hover{border-color:rgba(155,232,74,.5);background:#2f4635}.gTile.sel{border-color:var(--acc);background:#2f4a2a}.gTile.sel::after{content:'✔';position:absolute;top:5px;right:8px;color:var(--acc);font-weight:900}
+.gTile.lock b{color:#c2cfc5}.gTile .gIc{font-style:normal;font-size:18px}.gDot{display:block;width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.35)}
+.gSub{font-size:11px;font-weight:800;color:var(--mut)}.gSub.use{color:var(--acc)}.gSub.price{color:var(--cash)}.gSub.poor{color:var(--bad)}.gSub.how{color:var(--gold)}
+.pGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px}
+.pTile{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 3px;border-radius:11px;border:2px solid transparent;background:rgba(255,255,255,.04);font-size:10px;line-height:1.15;text-align:center}
+.pTile:hover{background:rgba(255,255,255,.1)}.pTile.sel{border-color:var(--acc);background:#2f4a2a}.pTile b{font-weight:800}
+.pTile i{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;border:2px solid rgba(255,255,255,.3);font-style:normal;font-size:13px}.pTile.lock i{opacity:.55}
+.gNote{background:rgba(255,207,74,.1);border:1px solid rgba(255,207,74,.35);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700}
+.gMowers{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.gMower{display:flex;flex-direction:column;gap:4px;background:var(--panel2);border:2px solid var(--line);border-radius:13px;padding:7px;font-size:13px}.gMower.sel{border-color:var(--acc)}
+.gMower img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:9px;display:block}.gMower small{color:var(--mut);font-weight:700;font-size:11px;flex:1}
+.gLinks{display:flex;flex-direction:column;gap:6px;margin-top:3px}
+/* recommendations + update log */
+.titleExtra{display:flex;gap:7px}.titleExtra .btn{flex:1;padding:8px 6px;font-size:12px;white-space:nowrap}
+.btn .newTag{position:absolute;top:-8px;right:-6px;background:var(--bad);color:#fff;border-radius:9px;font-size:10px;padding:1px 6px;font-weight:900}
+textarea.inp{resize:none;min-height:112px;line-height:1.4;display:block}.inp{user-select:text;-webkit-user-select:text}
+.ideaT{display:flex;gap:6px;flex-wrap:wrap}.ideaT .btn{padding:7px 12px;font-size:13px}
+.ideaC{float:right;font-weight:700;letter-spacing:0;text-transform:none}
+.logV{background:var(--panel2);border:2px solid var(--line);border-radius:13px;padding:10px 13px}.logV.now{border-color:var(--acc)}
+.logV h4{font-size:15px;margin:2px 0 5px}.logV .lv{font-family:var(--display);font-size:12px;color:var(--gold)}.logV .ld{color:var(--mut);font-size:11px;font-weight:700;margin-left:6px}
+.logV ul{list-style:none;display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:600;line-height:1.35}.logV li::before{content:'＋ ';color:var(--acc);font-weight:900}
+@media (max-width:640px){.bpanel{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto}.gHead,.gFoot{grid-column:1}.gRail{flex-direction:row;overflow-x:auto}.gTab{min-width:60px}}
 #livery{width:100%;aspect-ratio:2/1;border-radius:10px;background:#000;cursor:crosshair;touch-action:none;outline:2px solid rgba(255,255,255,.15)}
 #livery:focus{outline:2px solid var(--acc)}
 .stkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
@@ -249,6 +284,20 @@ kbd{font-family:var(--font);font-size:11px;background:rgba(255,255,255,.14);bord
 #tutCard .tneed{margin-top:6px;font-size:12px;font-weight:800;color:var(--bad)}
 #tutCard .tbtns{display:flex;gap:6px;margin-top:10px;justify-content:space-between}
 #tutCard .tbtns .btn{padding:6px 11px;font-size:12px}
+/* ⚔️ limited event */
+#hudBtns{align-items:stretch;flex-wrap:wrap}
+.evBtn{flex-direction:column;gap:1px;padding:3px 11px 5px;border-color:rgba(255,207,74,.6)}
+.evT{font-family:var(--display);font-size:11px;color:var(--gold);line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums}
+.mcard.limited{border-color:rgba(255,207,74,.6)}
+.evTime{text-align:center;font-family:var(--display);font-size:24px;color:var(--gold);font-variant-numeric:tabular-nums}
+.evPick{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.evSide{background:var(--panel2);border:3px solid var(--sc);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:7px}
+.evSide img,.evMine img{width:100%;aspect-ratio:16/10;border-radius:10px;display:block;background:#1a2a1e}
+.evSide h3{font-size:18px;color:#fff}.evSide ul{list-style:none;font-size:12px;font-weight:700;display:flex;flex-direction:column;gap:3px}
+.evSw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid rgba(255,255,255,.5)}
+.evMine{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:12px;align-items:center;background:var(--panel2);border:3px solid var(--sc);border-radius:14px;padding:10px}
+.evAward{display:flex;align-items:center;gap:10px;background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
+.evAward.got{border-color:var(--acc)}.evAward.max{border-color:var(--gold)}.evAward .n{font-family:var(--display);width:70px;color:var(--gold)}.evAward .r{flex:1}
 /* "you can do this now" helpers: red box + red arrow (toggle in phone → Settings) */
 .redHL{outline:3px solid #ff3b3b!important;outline-offset:2px;animation:redPulse .9s ease-in-out infinite alternate!important;position:relative}
 @keyframes redPulse{from{box-shadow:0 0 4px 0 rgba(255,59,59,.45)}to{box-shadow:0 0 20px 4px rgba(255,59,59,.85)}}
@@ -291,6 +340,7 @@ kbd{font-family:var(--font);font-size:11px;background:rgba(255,255,255,.14);bord
         <button class="hbtn" id="btnQuests" data-act="openQuests">🎯 Quests <kbd>Q</kbd><span class="badge" id="bdgQuests"></span></button>
         <button class="hbtn" id="btnShop" data-act="openShop">🛒 Shop <kbd>B</kbd><span class="badge" id="bdgShop"></span></button>
         <button class="hbtn" id="btnPass" data-act="openPass">🎟️ Pass <kbd>P</kbd><span class="badge" id="bdgPass"></span></button>
+        <button class="hbtn evBtn" id="btnEvent" data-act="openEvent"><span class="evT evTimer"></span><span>⚔️ Event <kbd>V</kbd></span></button>
       </div>
     </div>
     <div id="minimapWrap"><canvas id="minimap" width="190" height="190"></canvas></div>
@@ -367,8 +417,10 @@ function fmtClock(m) { const h = Math.floor(m / 60) % 24, mm = Math.floor(m % 60
 // Realistic-ish specs. speed = max m/s with blades engaged, transport = blades off. tank in litres, burn = L per minute at full load.
 // The first six mowers are close together in price so you feel each step quickly; after that the gaps grow
 // (and the pro machines need a few finished jobs on your record first). `model` = which 3D model it uses.
+// ⚔️ Limited event brands: change a name or colour here and the mower, paint, sticker and top all follow
+const BRAND = { scott: { name: 'Scott Bonnar', col: '#2f7d4f', colName: 'Alpine Green' }, rover: { name: 'Rover', col: '#c8102e', colName: 'Rover Red' } };
 const MOWERS = {
-  push:    { id: 'push',    model: 'push',  name: 'Hand-Me-Down 21"',    type: 'Push mower',            icon: '🧑‍🌾', price: 0,    speed: 1.7,  transport: 1.9, width: 0.56, tank: 1.0, burn: 0.16, turn: 2.6, accel: 3,   radius: 0.4,  push: true,  cam: [3.6, 2.6], desc: "Grandpa's old mower. Faded paint, still runs." },
+  push:    { id: 'push',   model: 'push',  name: 'Hand-Me-Down 21"',    type: 'Push mower',            icon: '🧑‍🌾', price: 0,    speed: 1.7,  transport: 1.9, width: 0.56, tank: 1.0, burn: 0.16, turn: 2.6, accel: 3,   radius: 0.4,  push: true,  cam: [3.6, 2.6], desc: "Grandpa's old mower. Faded paint, still runs." },
   lite:    { id: 'lite',    model: 'push',  name: 'Greenline 21" Lite',  type: 'Push mower',            icon: '🌱',  price: 50,   speed: 1.95, transport: 2.1, width: 0.6,  tank: 1.3, burn: 0.15, turn: 2.75, accel: 3.3, radius: 0.4,  push: true,  cam: [3.6, 2.6], desc: 'Lighter deck, sharper blade, bigger tank. A real first upgrade.' },
   sp:      { id: 'sp',      model: 'sp',    name: 'TurboPush SP 22"',    type: 'Self-propelled push',   icon: '🚶',  price: 120,  speed: 2.3,  transport: 2.5, width: 0.62, tank: 1.5, burn: 0.15, turn: 2.8, accel: 4,   radius: 0.4,  push: true,  cam: [3.6, 2.6], desc: 'Drives itself forward. Your legs will thank you.' },
   wide:    { id: 'wide',    model: 'sp',    name: 'WideBody 26" SP',     type: 'Wide self-propelled',   icon: '↔️',  price: 200,  speed: 2.5,  transport: 2.7, width: 0.72, tank: 1.9, burn: 0.17, turn: 2.6, accel: 4.2, radius: 0.45, push: true,  cam: [3.6, 2.6], desc: 'A wider deck means fewer passes on every lawn.' },
@@ -379,9 +431,12 @@ const MOWERS = {
   zeropro: { id: 'zeropro', model: 'zero',  name: 'Z-Spin 60 Pro',       type: 'Pro zero-turn',         icon: '💨',  price: 1450, speed: 5.4,  transport: 7.8, width: 1.52, tank: 14,  burn: 0.8,  turn: 3.1, accel: 5.5, radius: 0.78, push: false, zero: true, cam: [6.4, 4.1], req: { jobs: 11 }, desc: 'Commercial deck and a seat with actual suspension.' },
   monster: { id: 'monster', model: 'ride',  look: 'monster', name: 'Mud Monster LT', type: 'Lifted lawn tractor', icon: '🦖',  price: 1950, speed: 4.4,  transport: 8.0, width: 1.3,  tank: 12,  burn: 0.75, turn: 2.1, accel: 4.6, radius: 0.78, push: false, cam: [6.4, 4.4], req: { jobs: 14 }, desc: 'A lawn tractor on monster-truck tyres. Ridiculous. Glorious.' },
   platinum:{ id: 'platinum',model: 'zero',  look: 'platinum', name: 'Z-Spin Platinum 66', type: 'Luxury zero-turn', icon: '💎', price: 2600, speed: 6.0,  transport: 8.6, width: 1.68, tank: 18,  burn: 0.95, turn: 3.3, accel: 6,   radius: 0.86, push: false, zero: true, cam: [6.7, 4.3], req: { jobs: 17 }, desc: 'Factory platinum finish, 66" deck. Sounds like money.' },
-  titan:   { id: 'titan',   model: 'titan', name: 'Fairway 5-Gang Reel', type: 'Commercial reel mower', icon: '🏟️', price: 3400, speed: 5.2,  transport: 7.5, width: 2.6,  tank: 25,  burn: 1.2,  turn: 1.7, accel: 3.5, radius: 1.05, push: false, cam: [8.8, 6.0], req: { jobs: 20 }, desc: 'Five reel units. Built for parks & sports fields.' }
+  titan:   { id: 'titan',   model: 'titan', name: 'Fairway 5-Gang Reel', type: 'Commercial reel mower', icon: '🏟️', price: 3400, speed: 5.2,  transport: 7.5, width: 2.6,  tank: 25,  burn: 1.2,  turn: 1.7, accel: 3.5, radius: 1.05, push: false, cam: [8.8, 6.0], req: { jobs: 20 }, desc: 'Five reel units. Built for parks & sports fields.' },
+  // ⚔️ limited event mowers: never for sale, you get the one you pick. Same mowing rate, different strengths.
+  scott:   { id: 'scott',   model: 'sp',    look: 'brand', limited: true, brand: 'scott', bigOK: true, name: BRAND.scott.name + ' Classic 30"', type: 'Limited reel mower', icon: '🟢', price: 0, speed: 2.9, transport: 3.2, width: 0.76, tank: 2.6, burn: 0.16, turn: 3.0, accel: 4.4, radius: 0.46, push: true,  cam: [3.6, 2.6], desc: 'Green-keeper\'s reel mower: nimble, thrifty on fuel and allowed on big jobs.' },
+  rover:   { id: 'rover',   model: 'ride',  look: 'brand', limited: true, brand: 'rover', name: BRAND.rover.name + ' Mini Rider 30"', type: 'Limited ride-on', icon: '🔴', price: 0, speed: 2.9, transport: 5.2, width: 0.76, tank: 4.9, burn: 0.38, turn: 2.0, accel: 3.6, radius: 0.6, push: false, cam: [5.6, 3.6], desc: 'Compact ride-on: sit down, big tank and fast between lawns.' }
 };
-const MOWER_ORDER = ['push', 'lite', 'sp', 'wide', 'ride', 'tractor', 'zero', 'hover', 'zeropro', 'monster', 'platinum', 'titan'];
+const MOWER_ORDER = ['push', 'lite', 'sp', 'wide', 'ride', 'tractor', 'zero', 'hover', 'zeropro', 'monster', 'platinum', 'titan', 'scott', 'rover'];
 const mdl = id => (MOWERS[id] && MOWERS[id].model) || id;
 // Speed & Fuel Capacity are the headline upgrades (Ray's Upgrade Stall). Upgrades apply to every mower you own.
 const UPGRADES = [
@@ -405,7 +460,9 @@ const PAINTS = [
   { id: 'gold', c: '#d4a72c', name: '24K Gold', pass: true }, { id: 'ice', c: '#bfe6ff', name: 'Glacier', pass: true },
   // 🎯 quest-reward colours (only from Quests)
   { id: 'cherry', c: '#b0123a', name: 'Cherry Bomb', quest: true }, { id: 'sky', c: '#5ec8f2', name: 'Sky Blue', quest: true }, { id: 'coral', c: '#ff6f61', name: 'Coral Reef', quest: true },
-  { id: 'galaxy', c: '#3b2a8f', name: 'Galaxy', quest: true }, { id: 'aurora', c: '#3fe0b0', name: 'Aurora', quest: true }, { id: 'lava', c: '#e8460f', name: 'Lava Orange', quest: true }
+  { id: 'galaxy', c: '#3b2a8f', name: 'Galaxy', quest: true }, { id: 'aurora', c: '#3fe0b0', name: 'Aurora', quest: true }, { id: 'lava', c: '#e8460f', name: 'Lava Orange', quest: true },
+  // ⚔️ limited event colours
+  { id: 'ev_scott', c: BRAND.scott.col, name: BRAND.scott.name + ' ' + BRAND.scott.colName, event: true }, { id: 'ev_rover', c: BRAND.rover.col, name: BRAND.rover.colName, event: true }
 ];
 const FINISHES = [{ id: 'glossy', name: 'Glossy', rough: 0.25, metal: 0.05, price: 0 }, { id: 'matte', name: 'Matte', rough: 0.88, metal: 0, price: 40 }, { id: 'metallic', name: 'Metallic', rough: 0.33, metal: 0.75, price: 120 }, { id: 'chrome', name: 'Chrome', rough: 0.07, metal: 1, pass: true }];
 const WHEELS   = [{ id: 'standard', name: 'Standard', price: 0 }, { id: 'turf', name: 'Turf Tread', price: 50 }, { id: 'chrome', name: 'Chrome Rims', price: 140 }, { id: 'offroad', name: 'Off-Road', price: 110 }, { id: 'whitewall', name: 'Whitewall', pass: true }];
@@ -439,7 +496,8 @@ const DECOR = {
   shelf:  { name: 'Shelf', items: [{ id: 'none', name: 'None', price: 0 }, { id: 'cans', name: 'Oil Cans & Jars', price: 25 }, { id: 'trophies', name: 'Trophy Shelf', story: true }, { id: 'plants', name: 'Potted Plants', price: 30 }] }
 };
 const CAPS = [{ id: 'red', c: '#c8302a', name: 'Red Cap', price: 0 }, { id: 'blue', c: '#2a5fc8', name: 'Blue Cap', price: 10 }, { id: 'green', c: '#2f8a38', name: 'Green Cap', price: 10 }, { id: 'black', c: '#1b1d20', name: 'Black Cap', price: 10 }, { id: 'yellow', c: '#efbf2c', name: 'Yellow Cap', price: 10 }, { id: 'gold', c: '#d4a72c', name: 'Gold Cap', pass: true }, { id: 'pumpgo', c: '#e8402a', name: 'Pump & Go Cap', store: true }];
-const SHIRTS = [{ id: 'white', c: '#e8e8e2', name: 'White Tee', price: 0 }, { id: 'green', c: '#4f9a3a', name: 'Green Tee', price: 12 }, { id: 'orange', c: '#ec7a2c', name: 'Orange Tee', price: 12 }, { id: 'navy', c: '#2a3a6a', name: 'Navy Tee', price: 12 }, { id: 'hivis', c: '#d8f02a', name: 'Hi-Vis Vest', pass: true }];
+const SHIRTS = [{ id: 'white', c: '#e8e8e2', name: 'White Tee', price: 0 }, { id: 'green', c: '#4f9a3a', name: 'Green Tee', price: 12 }, { id: 'orange', c: '#ec7a2c', name: 'Orange Tee', price: 12 }, { id: 'navy', c: '#2a3a6a', name: 'Navy Tee', price: 12 }, { id: 'hivis', c: '#d8f02a', name: 'Hi-Vis Vest', pass: true },
+  { id: 'ev_scott', c: BRAND.scott.col, name: '"I ♥ ' + BRAND.scott.name + '" Top', event: true, print: 'scott' }, { id: 'ev_rover', c: BRAND.rover.col, name: '"I ♥ ' + BRAND.rover.name + '" Top', event: true, print: 'rover' }];
 
 /* ---------- Sticker library (procedural canvas art + emoji) ---------- */
 const STICKERS = [];
@@ -487,6 +545,17 @@ emo('e_rainbow', '🌈', true); emo('e_unicorn', '🦄', true); emo('e_100', '�
 // 🎯 quest-reward stickers (only from Quests)
 [['q_star', '⭐'], ['q_clover', '🍀'], ['q_medal', '🥇'], ['q_bolt', '⚡'], ['q_money', '💸'], ['q_flag', '🏁'], ['q_snow', '❄️'], ['q_leaf', '🍁'], ['q_sun', '🌻'], ['q_target', '🎯']]
   .forEach(([id, ch]) => STICKERS.push({ id, name: ch, emoji: ch, quest: true }));
+// ⚔️ limited event stickers: "I ♥ <brand>"
+['scott', 'rover'].forEach(k => {
+  const B = BRAND[k], words = B.name.split(' ');
+  stk('ev_' + k, 'I ♥ ' + B.name, c => {
+    c.beginPath(); c.roundRect ? c.roundRect(6, 16, 116, 96, 16) : c.rect(6, 16, 116, 96); c.fillStyle = '#fff'; c.fill(); c.lineWidth = 6; c.strokeStyle = B.col; c.stroke();
+    c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = B.col; c.font = '900 34px "Arial Black",Impact,sans-serif'; c.fillText('I ♥', 64, 42);
+    c.fillStyle = '#141414'; const big = words.length > 1 ? 19 : 28; c.font = '900 ' + big + 'px "Arial Black",Impact,sans-serif';
+    if (words.length > 1) { c.fillText(words[0].toUpperCase(), 64, 72); c.fillText(words[1].toUpperCase(), 64, 92); } else c.fillText(words[0].toUpperCase(), 64, 80);
+  });
+  STICKERS[STICKERS.length - 1].event = true;
+});
 
 /* ---------- Town layout ----------
    Main Street runs east–west along z = 0. Lots sit north (side -1) or south (side +1).
@@ -582,6 +651,7 @@ function defaultSave() {
     clientDone: {}, clientStars: {},
     stats: { jobs: 0, lawns: 0, earned: 0, refuels: 0, fiveStars: 0, area: 0, gnomes: 0, litres: 0, distance: 0, tips: 0 },
     quests: { claimed: {}, seen: {} }, jobsSeen: {},
+    event: { side: null, mower: null, lawns: 0, awarded: 0 }, // ⚔️ one pick per save, can't be changed
     settings: { master: 0.8, sfx: 0.9, engine: 0.55, amb: 0.5, music: 0.5, quality: 'auto', shake: 1, fps: false, sens: 1, tips: true, mowerCtl: 'wasd',
       hlAfford: true, hlJobs: true, popUpg: true, popQuest: true, weather: true, muted: false } // helper toggles live in phone → Settings
   };
@@ -1714,13 +1784,23 @@ function buildMower(id, cfg) {
   if (md === 'push' || md === 'sp') pushMowerModel(body, info, cfg.wheels, md === 'sp');
   else if (md === 'ride') rideModel(body, info, cfg.wheels); else if (md === 'zero') zeroModel(body, info, cfg.wheels); else titanModel(body, info, cfg.wheels);
   addExhaust(body, info); addLights(body, info, cfg.lights, cfg.glow || 0); addAccessories(body, info, cfg.acc || {});
-  applyMowerLook(body, info, (MOWERS[id] || {}).look);
+  applyMowerLook(body, info, (MOWERS[id] || {}).look, MOWERS[id] || {});
   body.traverse(o => { if (!o.isMesh) return; const m = Array.isArray(o.material) ? o.material[0] : o.material; if (m.isMeshStandardMaterial && !m.transparent) { o.castShadow = true; o.receiveShadow = true; } });
   return info;
 }
 // Special factory looks for the newest mowers (built on top of the existing models)
-function applyMowerLook(body, info, look) {
-  if (look === 'hover') { // no wheels — it floats on a glowing air cushion
+function repaintBody(body, mat) { // swaps the player's paint & livery for a fixed factory finish
+  const swap = m => m === MAT.paint || m === MAT.paintL ? mat : m;
+  body.traverse(o => { if (!o.isMesh) return; o.material = Array.isArray(o.material) ? o.material.map(swap) : swap(o.material); });
+}
+function applyMowerLook(body, info, look, def) {
+  if (look === 'brand') { // ⚔️ limited event mowers wear their brand's colour and a name badge
+    const B = BRAND[def.brand], ride = def.model === 'ride';
+    repaintBody(body, obm('brand' + def.brand, () => std(B.col, 0.42, 0.25)));
+    const tex = obm('badge' + def.brand, () => { const t = canvasTex(512, 128, (c, w, h) => { c.fillStyle = '#fff'; c.fillRect(0, 0, w, h); c.strokeStyle = B.col; c.lineWidth = 14; c.strokeRect(7, 7, w - 14, h - 14); c.fillStyle = '#141414'; c.font = '900 64px "Arial Black",Impact,sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(B.name.toUpperCase(), w / 2, h / 2 + 4, w - 44); }); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 }); });
+    const w = ride ? 0.56 : 0.34, plate = new THREE.Mesh(new THREE.PlaneGeometry(w, w / 4).rotateX(-Math.PI / 2).rotateY(Math.PI), tex);
+    plate.position.set(0, ride ? 0.775 : 0.277, ride ? 0.5 : 0.17); body.add(plate); // reads the right way up from behind, where the camera sits
+  } else if (look === 'hover') { // no wheels — it floats on a glowing air cushion
     info.wheels.forEach(w => w.g.visible = false); body.position.y += 0.13; info.hover = true;
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.31, 0.03, 8, 30), obm('hoverRing', () => new THREE.MeshBasicMaterial({ color: C('#39d0ff') }))); ring.rotation.x = Math.PI / 2; ring.position.set(0, 0.07, 0.03); body.add(ring);
     const gl = new THREE.Mesh(new THREE.CircleGeometry(0.55, 24).rotateX(-Math.PI / 2), obm('hoverGlow', () => new THREE.MeshBasicMaterial({ map: getGlowTex(), color: C('#39d0ff'), transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false })));
@@ -1731,7 +1811,7 @@ function applyMowerLook(body, info, look) {
     body.scale.setScalar(sc); info.bodyScale = sc; info.wheels.forEach(w => w.g.scale.setScalar(1.45)); body.position.y += sc * 0.45 * rMax;
   } else if (look === 'platinum') { // factory platinum finish with gold pin-striping
     const plat = obm('platinum', () => std('#e4e8ee', 0.12, 1)), gold = obm('platGold', () => std('#e0b030', 0.22, 0.95));
-    body.traverse(o => { if (o.isMesh && (o.material === MAT.paint || o.material === MAT.paintL)) o.material = plat; });
+    repaintBody(body, plat);
     [-1, 1].forEach(s => { const t = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 1.5), gold); t.position.set(s * 0.62, 0.62, 0.1); body.add(t); });
   }
 }
@@ -1754,6 +1834,7 @@ function buildPlayer() {
     bx(0.1, 0.24, 0.11, P.shirtMat, 0, -0.1, 0, sh); bx(0.085, 0.3, 0.09, skin, 0, -0.36, 0, sh); mk(new THREE.SphereGeometry(0.05, 8, 6), skin, 0, -0.53, 0, sh); P.arms.push(sh);
   });
   P.torso = bx(0.4, 0.5, 0.22, P.shirtMat, 0, 1.03, 0, g);
+  P.prints = [1, -1].map(s => { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.37, 0.28), P.shirtMat); m.position.z = s * 0.112; if (s < 0) m.rotation.y = Math.PI; m.visible = false; P.torso.add(m); return m; }); // printed tops: front + back
   const head = new THREE.Group(); head.position.set(0, 1.46, 0); g.add(head); P.head = head;
   mk(new THREE.SphereGeometry(0.135, 16, 12), skin, 0, 0, 0, head);
   const hair = mk(new THREE.SphereGeometry(0.14, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), std('#5a3a22', 0.9), 0, 0.01, -0.01, head); hair.scale.set(1, 0.9, 1.05);
@@ -1763,7 +1844,11 @@ function buildPlayer() {
   g.traverse(o => { if (o.isMesh) o.castShadow = true; });
   return P;
 }
-function updatePlayerLook() { Game.P.shirtMat.color.copy(C((SHIRTS.find(s => s.id === S.player.shirt) || SHIRTS[0]).c)); Game.P.capMat.color.copy(C((CAPS.find(s => s.id === S.player.cap) || CAPS[0]).c)); }
+function applyShirt(P, id) { // colour, plus the slogan on event tops
+  const sh = SHIRTS.find(s => s.id === id) || SHIRTS[0]; P.shirtMat.color.copy(C(sh.c));
+  P.prints.forEach(m => { m.visible = !!sh.print; if (sh.print) m.material = obm('print' + sh.print, () => { const B = BRAND[sh.print]; return new THREE.MeshStandardMaterial({ roughness: 0.85, transparent: true, map: canvasTex(256, 192, (c, w) => { c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff'; c.font = '900 76px "Arial Black",Impact,sans-serif'; c.fillText('I ♥', w / 2, 58); const parts = B.name.toUpperCase().split(' '); c.font = '900 ' + (parts.length > 1 ? 44 : 62) + 'px "Arial Black",Impact,sans-serif'; if (parts.length > 1) { c.fillText(parts[0], w / 2, 122, 240); c.fillText(parts[1], w / 2, 166, 240); } else c.fillText(parts[0], w / 2, 138, 240); }) }); }); });
+}
+function updatePlayerLook() { applyShirt(Game.P, S.player.shirt); Game.P.capMat.color.copy(C((CAPS.find(s => s.id === S.player.cap) || CAPS[0]).c)); netHello(); }
 function poseWalk(P, ph, amt) {
   resetPose(P);
   const a = Math.sin(ph) * 0.7 * amt; P.legs[0].rotation.x = a; P.legs[1].rotation.x = -a; P.arms[0].rotation.x = -a * 0.8; P.arms[1].rotation.x = a * 0.8;
@@ -2008,7 +2093,7 @@ function cutDeck(cx, cz, fx, fz, hw, hl, remote) {
       if (d[b] > 0 || d[b + 1] !== g) { d[b] = 0; d[b + 1] = g; dirty = true; }
     }
     if (dirty) Y.tex.needsUpdate = true;
-    if (n) { total += n; Y.lastWork = Game.t; noteCut(Y, n, remote); checkMilestone(Y); checkYardComplete(Y); }
+    if (n) { total += n; Y.lastWork = Game.t; noteCut(Y, n, remote); checkMilestone(Y); checkYardComplete(Y, remote); }
   }
   return total;
 }
@@ -2045,18 +2130,18 @@ function trimCircle(x, z, r, remote) {
       const idx = j * Y.nx + i; if (!Y.cuttable[idx]) continue; const b = idx * 4;
       if (d[b] >= 100) { n++; Y.doneCount++; d[b] = 20; }
     }
-    if (n) { Y.tex.needsUpdate = true; total += n; Y.lastWork = Game.t; noteCut(Y, n, remote); checkMilestone(Y); checkYardComplete(Y); }
+    if (n) { Y.tex.needsUpdate = true; total += n; Y.lastWork = Game.t; noteCut(Y, n, remote); checkMilestone(Y); checkYardComplete(Y, remote); }
   }
   return total;
 }
-function checkYardComplete(Y) {
+function checkYardComplete(Y, remote) {
   if (Y.complete || Y.doneCount < Y.total * 0.99) return;
   for (let i = 0; i < Y.cuttable.length; i++) if (Y.cuttable[i] && Y.data[i * 4] >= 100) { Y.data[i * 4] = 10; }
   Y.doneCount = Y.total; Y.complete = true; Y.tex.needsUpdate = true; Y.flash = 1;
   Sfx.ding(); const L = Town.lotsById[Y.lot], cl = CLIENTS[L.client];
   banner(`<span class="big">100%</span>${Y.part}<small>${cl.short} · lawn complete!</small>`);
   Y.doneT = Game.t; startCelebration(Y);
-  S.stats.area += Y.total / 16; if (!cl.race) S.stats.lawns = (S.stats.lawns || 0) + 1;
+  S.stats.area += Y.total / 16; if (!cl.race) { S.stats.lawns = (S.stats.lawns || 0) + 1; if (!remote) eventLawn(); }
   if (cl.race) { onRaceLawnDone(Y); return; }
   const j = activeJob(); if (j && j.yards.every(id => Yards.byId[id].complete) && !Net.isGuestCoop()) finishJob(j); // in co-op the host pays out
 }
@@ -2367,7 +2452,7 @@ function postJobs() {
 // Job requirements & difficulty (shown on the Jobs screen, enforced when accepting)
 function jobReq(j) {
   const cl = CLIENTS[j.client];
-  if (cl.big) { const ok = S.owned.some(id => !MOWERS[id].push); return { ok, text: 'Needs a ride-on mower (Shop)' }; }
+  if (cl.big) { const ok = S.owned.some(id => !MOWERS[id].push || MOWERS[id].bigOK); return { ok, text: 'Needs a ride-on mower (Shop)' }; }
   return { ok: true, text: 'Any mower' };
 }
 function jobArea(j) { return Math.round(j.yards.reduce((s, id) => s + Yards.byId[id].total / 16, 0)); }
@@ -2660,13 +2745,14 @@ function navFocus(dir) {
 
 /* ---------- Ownership helpers ---------- */
 const OWNK = { paint: PAINTS, finish: FINISHES, wheels: WHEELS, lights: LIGHTS, horn: HORNS, acc: ACCESSORIES, sticker: STICKERS, cap: CAPS, shirt: SHIRTS };
-function owns(kind, it) { if (it.store) return S.own[kind].includes(it.id); if (it.pass || it.story || it.quest) return S.own[kind].includes(it.id); if (kind === 'sticker' || !it.price) return true; return S.own[kind].includes(it.id); }
+function owns(kind, it) { if (it.store) return S.own[kind].includes(it.id); if (it.pass || it.story || it.quest || it.event) return S.own[kind].includes(it.id); if (kind === 'sticker' || !it.price) return true; return S.own[kind].includes(it.id); }
 const decorOwns = (slot, it) => !it.price && !it.pass && !it.story ? true : !!S.decorOwned[slot + ':' + it.id];
 function tryBuy(kind, it) {
   if (owns(kind, it)) return true;
   if (it.store) { toast('🏪 Sold at the Pump & Go', 'Go inside the gas station store to buy it.', 'var(--gold)'); Sfx.error(); return false; }
   if (it.pass) { toast('🎟️ Season Pass reward', 'Keep doing jobs to reach it in the Season Pass.', 'var(--gold)'); Sfx.error(); return false; }
   if (it.quest) { toast('🎯 Quest reward', 'Complete Quests (press Q) to unlock ' + it.name + '.', 'var(--gold)'); Sfx.error(); return false; }
+  if (it.event) { toast('⚔️ Limited event reward', it.name + ' can\'t be bought. Earn it in the Event (press V).', 'var(--gold)'); Sfx.error(); return false; }
   if (S.money < it.price) { toast('Not enough money', `${it.name} costs ${money(it.price)}`, 'var(--bad)'); Sfx.error(); return false; }
   S.money -= it.price; S.own[kind].push(it.id); Sfx.cash(); toast('🛒 Bought ' + it.name, '-' + money(it.price)); return true;
 }
@@ -2695,6 +2781,7 @@ function updateHud(dt) {
   $('#btnShop').classList.toggle('redHL', !!st.hlAfford && MOWER_ORDER.some(id => !S.owned.includes(id) && !mowerLock(id) && S.money >= MOWERS[id].price));
   $('#btnJobs').classList.toggle('redHL', !!st.hlJobs && !S.active && S.jobs.list.some(j => !S.jobsSeen[j.id] && jobReq(j).ok));
   $('#btnQuests').classList.toggle('redHL', !!st.hlAfford && questsReady() > 0);
+  $('#btnEvent').classList.toggle('redHL', !!st.hlAfford && !S.event.side && !eventOver());
   checkAffordPopup();
   const j = activeJob(), jp = $('#jobPanel'), bc = $('#boostChip');
   bc.style.display = Game.boostT > 0 ? 'inline-flex' : 'none'; if (Game.boostT > 0) setHTML('boostChip', `⚡ Boost ${Math.ceil(Game.boostT)}s`);
@@ -2820,7 +2907,7 @@ function renderPhone() {
   } else if (a === 'stats') {
     const st = S.stats, t = passTier();
     body = `<div class="statsT panel" style="padding:12px 14px"><span>Day</span><b>${S.day}</b><span>Season</span><b>${seasonOf(S.day).icon} ${seasonOf(S.day).name} · year ${seasonYear(S.day)}</b><span>Quests done</span><b>${Object.keys(S.quests.claimed).length} / ${QUESTS.length}</b><span>Money</span><b class="cash">${money(S.money)}</b><span>Jobs completed</span><b>${st.jobs}</b><span>Total earned</span><b>${money(st.earned)}</b><span>Tips earned</span><b>${money(st.tips)}</b><span>Five-star ratings</span><b>${st.fiveStars}</b><span>Lawn mowed</span><b>${Math.round(st.area)} m²</b>
-      <span>Mowers owned</span><b>${S.owned.length} / ${MOWER_ORDER.length}</b><span>Speed upgrade</span><b>Lv ${S.upgrades.engine} / ${UPG_MAX}</b><span>Fuel upgrade</span><b>Lv ${S.upgrades.tank} / ${UPG_MAX}</b><span>Season Pass</span><b>Tier ${t} / 50</b>
+      <span>Mowers owned</span><b>${S.owned.length} / ${MOWER_ORDER.length - 1}</b><span>Speed upgrade</span><b>Lv ${S.upgrades.engine} / ${UPG_MAX}</b><span>Fuel upgrade</span><b>Lv ${S.upgrades.tank} / ${UPG_MAX}</b><span>Season Pass</span><b>Tier ${t} / 50</b>
       <span>Fuel used</span><b>${st.litres.toFixed(1)} L</b><span>Distance travelled</span><b>${(st.distance / 1000).toFixed(2)} km</b><span>Best streak</span><b>${st.bestStreak || 0}</b><span>Gnomes toppled</span><b>${st.gnomes}</b>${st.raceWins ? `<span>Races won</span><b>${st.raceWins}</b>` : ''}</div>
       <div class="lbl">Clients</div>${Object.keys(CLIENTS).filter(k => !CLIENTS[k].race).map(k => `<div class="row small" style="justify-content:space-between"><span>${esc(CLIENTS[k].name)}</span><span>${S.clientDone[k] || 0} jobs ${S.clientStars[k] ? '· ' + '★'.repeat(S.clientStars[k]) : ''}</span></div>`).join('')}`;
   }
@@ -2847,56 +2934,71 @@ function openBench() {
   const p = lw(G.lot, 7.25, 15.8); Game.pl.x = p.x; Game.pl.z = p.z;
 }
 function closeBench() { const M = Game.mw, G = Town.garage; M.h = G.parkH; syncMowerModel(); Game.state = 'play'; showScreen(null); $('#hud').classList.remove('hidden'); save(); }
-function itemRow(kind, arr, cur, act, extra = '') {
-  return `<div class="opts">${arr.map(it => { const ok = owns(kind, it), label = ok ? it.name : it.store ? '🏪 ' + it.name : it.pass ? '🎟️ ' + it.name : `${it.name} · ${money(it.price)}`;
-    return `<button class="btn ${cur === it.id ? 'sel' : ''}" data-act="${act}" data-arg="${it.id}" ${!ok && it.pass ? 'title="Garage Pass reward"' : ''}>${label}</button>`; }).join('')}${extra}</div>`;
+// Garage tiles: every item shows its name plus what it takes to get it
+function itemSub(it, ok, cur, kind) {
+  if (cur) return ['In use', 'use']; if (ok) return ['Owned', ''];
+  if (it.store) return ['🏪 Pump & Go store', 'how']; if (it.pass) return ['🎟️ Season Pass', 'how']; if (it.quest) return ['🎯 Quest reward', 'how'];
+  if (it.event) return ['⚔️ Limited event', 'how']; if (it.story) return ['📖 Story reward', 'how'];
+  return [money(it.price), S.money >= it.price ? 'price' : 'poor'];
 }
+function gTile(act, arg, name, sub, o = {}) {
+  return `<button class="gTile ${o.sel ? 'sel' : ''} ${o.locked ? 'lock' : ''}" data-act="${act}" data-arg="${arg}" ${o.style ? `style="${o.style}"` : ''}>${o.dot ? `<i class="gDot" style="background:${o.dot}"></i>` : ''}${o.icon ? `<i class="gIc">${o.icon}</i>` : ''}<b>${esc(name)}</b><span class="gSub ${sub[1]}">${sub[0]}</span></button>`;
+}
+function itemRow(kind, arr, cur, act, extra = '') {
+  return `<div class="gGrid">${arr.map(it => { const ok = owns(kind, it), on = cur === it.id; return gTile(act, it.id, it.name, itemSub(it, ok, on), { sel: on, locked: !ok, dot: it.c }); }).join('')}${extra}</div>`;
+}
+const gHead = (title, hint) => `<div class="gTitle"><h3>${title}</h3>${hint ? `<small>${hint}</small>` : ''}</div>`;
 function renderBench() {
-  const t = Bench.tab, cfg = S.cfg;
-  const tabs = [['shop', '🚜 My mowers'], ['tools', '🧰 Tools'], ['paint', '🎨 Paint'], ['parts', '🔩 Parts'], ['acc', '🧢 Accessories'], ['stickers', '🏷️ Stickers'], ['garage', '🏠 Garage'], ['me', '👕 Me']];
-  let h = `<div class="bpanel panel"><div class="dlgHead"><h2 style="font-size:20px">🖥️ Garage Computer</h2><div class="row"><span class="chip cash">${money(S.money)}</span><button class="btn" data-act="closeBench">✕</button></div></div>
-    <div class="tabs">${tabs.map(([k, n]) => `<button class="btn ${t === k ? 'sel' : ''}" data-act="btab" data-arg="${k}">${n}</button>`).join('')}</div><div class="bbody scroll">`;
+  const t = Bench.tab, cfg = S.cfg, id = Game.mw ? Game.mw.id : S.mower, m = MOWERS[id], st = mowerStats(id), keep = $('.bbody'), sy = keep && Bench.lastTab === t ? keep.scrollTop : 0;
+  const tabs = [['shop', '🚜', 'Mowers'], ['tools', '🧰', 'Tools'], ['paint', '🎨', 'Paint'], ['parts', '🔩', 'Parts'], ['acc', '🧢', 'Extras'], ['stickers', '🏷️', 'Stickers'], ['garage', '🏠', 'Decor'], ['me', '👕', 'Me']];
+  let h = `<div class="bpanel panel"><div class="gHead"><img src="${mowerThumb(id)}" alt="${esc(m.name)}"><div class="gWho"><div class="lbl">Sam's Garage</div><h2>${esc(m.name)}</h2>
+      <div class="gStats"><span>⚡ ${st.speed.toFixed(1)} m/s</span><span>✂️ ${Math.round(m.width * 100)} cm</span><span>⛽ ${S.fuel[id].toFixed(1)} / ${st.tank.toFixed(1)} L</span></div></div>
+      <div class="gTop"><button class="btn" data-act="closeBench" aria-label="Close">✕</button><span class="chip cash">${money(S.money)}</span></div></div>
+    <div class="gRail">${tabs.map(([k, ic, n]) => `<button class="gTab ${t === k || (t === 'upgrades' && k === 'shop') ? 'sel' : ''}" data-act="btab" data-arg="${k}"><i>${ic}</i>${n}</button>`).join('')}</div><div class="bbody scroll">`;
   if (t === 'shop' || t === 'upgrades') {
-    h += '<div class="lbl">Your mowers · pick which one to use</div>' + MOWER_ORDER.filter(id => S.owned.includes(id)).map(id => {
-      const m = MOWERS[id], st = mowerStats(id), cur = S.mower === id;
-      return `<div class="card ${cur ? 'sel' : ''}"><div class="ic">${m.icon}</div><div class="t"><h4>${m.name}</h4><small>${m.type} · ${Math.round(m.width * 100)} cm cut · ${st.speed.toFixed(1)} m/s mowing · ${st.tank.toFixed(1)} L tank</small></div>${cur ? '<button class="btn" disabled>✔ Using</button>' : `<button class="btn" data-act="useMower" data-arg="${id}">Use this</button>`}</div>`;
-    }).join('') + `<button class="btn gold" data-act="openShop">🛒 Open the Mower Shop (B)</button>
-      <div class="card"><div class="ic">🔧</div><div class="t"><h4>Speed & fuel upgrades</h4><small>Sold at <b>Ray's Upgrade Stall</b>, next to the Pump & Go across the street (🔧 on the map).</small></div></div>`;
+    h += gHead('Your mowers', 'Pick which one you use') + '<div class="gMowers">' + MOWER_ORDER.filter(i => S.owned.includes(i)).map(i => {
+      const a = MOWERS[i], s = mowerStats(i), cur = S.mower === i;
+      return `<div class="gMower ${cur ? 'sel' : ''}"><img src="${mowerThumb(i)}" alt="${esc(a.name)}"><b>${a.icon} ${esc(a.name)}</b><small>${esc(a.type)} · ${Math.round(a.width * 100)} cm · ${s.speed.toFixed(1)} m/s · ${s.tank.toFixed(1)} L</small>${cur ? '<button class="btn" disabled>✔ Using</button>' : `<button class="btn primary" style="font-size:13px;padding:7px" data-act="useMower" data-arg="${i}">Use this</button>`}</div>`;
+    }).join('') + `</div><div class="gLinks"><button class="btn gold" data-act="openShop">🛒 Open the Mower Shop <kbd>B</kbd></button><div class="small muted">🔧 Speed & fuel upgrades are at Ray's Upgrade Stall, next to the Pump & Go.</div></div>`;
   } else if (t === 'tools') {
-    h += `<div class="card"><div class="ic">✂️</div><div class="t"><h4>String trimmer</h4><small>Finish edges around trees, fences, gnomes & beds. Press <kbd>T</kbd> on foot, hold <kbd>Space</kbd>.</small></div>${S.hasTrimmer ? '<button class="btn" disabled>✔ Owned</button>' : `<button class="btn gold" data-act="buyTool" data-arg="trimmer">${money(TRIMMER_PRICE)}</button>`}</div>
+    h += gHead('Tools', 'Handy gear for finishing jobs') + `<div class="card"><div class="ic">✂️</div><div class="t"><h4>String trimmer</h4><small>Finish edges around trees, fences, gnomes & beds. Press <kbd>T</kbd> on foot, hold <kbd>Space</kbd>.</small></div>${S.hasTrimmer ? '<button class="btn" disabled>✔ Owned</button>' : `<button class="btn gold" data-act="buyTool" data-arg="trimmer">${money(TRIMMER_PRICE)}</button>`}</div>
       <div class="card"><div class="ic">⛽</div><div class="t"><h4>5 L gas can</h4><small>Fill at a pump, then press <kbd>G</kbd> by your mower to top up anywhere.</small></div>${S.hasGasCan ? `<button class="btn" disabled>✔ ${S.gasCan.toFixed(1)} L</button>` : `<button class="btn gold" data-act="buyTool" data-arg="can">${money(GASCAN_PRICE)}</button>`}</div>`;
   } else if (t === 'paint') {
-    h += `<div class="lbl">Paint · ${esc(paintById(cfg.paint).name)}</div><div class="opts">${PAINTS.map(p => { const ok = owns('paint', p); return `<button class="btn swatch ${cfg.paint === p.id ? 'sel' : ''} ${ok ? '' : 'lock'}" style="background:${p.c}" data-act="paint" data-arg="${p.id}" title="${esc(p.name + (ok ? '' : p.pass ? ' — Season Pass' : p.quest ? ' — Quest reward' : ' — ' + money(p.price)))}" aria-label="${esc(p.name)}"></button>`; }).join('')}</div>
-      <div class="small muted">Faded swatches cost money or come from the Garage Pass. Hover for details.</div><div class="lbl">Finish</div>${itemRow('finish', FINISHES, cfg.finish, 'finish')}`;
+    const fixed = m.look === 'brand' || m.look === 'platinum';
+    const groups = [['Free', p => !p.price && !p.pass && !p.quest && !p.event], ['For sale', p => p.price], ['🎟️ Season Pass', p => p.pass], ['🎯 Quest rewards', p => p.quest], ['⚔️ Limited event', p => p.event]];
+    h += gHead('Paint', 'Now: ' + esc(paintById(cfg.paint).name)) + (fixed ? `<div class="gNote">The ${esc(m.name)} keeps its factory finish. Your paint shows on your other mowers.</div>` : '');
+    groups.forEach(([n, f]) => { h += `<div class="lbl">${n}</div><div class="pGrid">${PAINTS.filter(f).map(p => { const ok = owns('paint', p), on = cfg.paint === p.id, [sub, cls] = itemSub(p, ok, on); return `<button class="pTile ${on ? 'sel' : ''} ${ok ? '' : 'lock'}" data-act="paint" data-arg="${p.id}" title="${esc(p.name)}"><i style="background:${p.c}">${ok ? '' : '🔒'}</i><b>${esc(p.name)}</b>${p.price && !ok ? `<span class="gSub ${cls}">${sub}</span>` : ''}</button>`; }).join('')}</div>`; });
+    h += `<div class="lbl">Finish</div>${itemRow('finish', FINISHES, cfg.finish, 'finish')}`;
   } else if (t === 'parts') {
-    h += '<div class="lbl">Wheels</div>' + itemRow('wheels', WHEELS, cfg.wheels, 'wheels') + '<div class="lbl">Lights (they really light up at night)</div>' + itemRow('lights', LIGHTS, cfg.lights, 'lights');
+    h += gHead('Parts', 'Wheels, lights and horns') + '<div class="lbl">Wheels</div>' + itemRow('wheels', WHEELS, cfg.wheels, 'wheels') + '<div class="lbl">Lights · they really light up at night</div>' + itemRow('lights', LIGHTS, cfg.lights, 'lights');
     if (cfg.lights === 'glow') h += `<div class="opts">${GLOWS.map((g, i) => `<button class="btn swatch ${cfg.glow === i ? 'sel' : ''}" style="background:${g}" data-act="glow" data-arg="${i}" aria-label="glow ${i}"></button>`).join('')}</div>`;
-    h += '<div class="lbl">Horn (H)</div>' + itemRow('horn', HORNS, cfg.horn, 'horn');
+    h += '<div class="lbl">Horn · press H on your mower</div>' + itemRow('horn', HORNS, cfg.horn, 'horn');
   } else if (t === 'acc') {
     const slots = { side: 'Side', top: 'Top', rear: 'Rear', front: 'Front', side2: 'Audio', turbo: 'Exhaust' };
+    h += gHead('Extras', 'One accessory per spot on your mower');
     for (const sl in slots) {
       const items = ACCESSORIES.filter(a => a.slot === sl);
-      h += `<div class="lbl">${slots[sl]}</div><div class="opts"><button class="btn ${!cfg.acc[sl] ? 'sel' : ''}" data-act="accNone" data-arg="${sl}">None</button>${items.map(a => { const ok = owns('acc', a); return `<button class="btn ${cfg.acc[sl] === a.id ? 'sel' : ''}" data-act="acc" data-arg="${a.id}" style="${a.legendary ? 'border-color:var(--gold)' : ''}">${a.icon} ${ok ? a.name : a.pass ? '🎟️ ' + a.name + (a.legendary ? ' (Tier 50)' : '') : a.name + ' · ' + money(a.price)}</button>`; }).join('')}</div>`;
+      h += `<div class="lbl">${slots[sl]}</div><div class="gGrid">${gTile('accNone', sl, 'None', [!cfg.acc[sl] ? 'In use' : 'Remove', !cfg.acc[sl] ? 'use' : ''], { sel: !cfg.acc[sl] })}${items.map(a => { const ok = owns('acc', a), on = cfg.acc[sl] === a.id; return gTile('acc', a.id, a.name, itemSub(a, ok, on), { sel: on, locked: !ok, icon: a.icon, style: a.legendary ? 'border-color:var(--gold)' : '' }); }).join('')}</div>`;
     }
   } else if (t === 'stickers') {
-    h += `<div class="lbl">Decal editor · drag = move · wheel = scale · shift+wheel = rotate</div><canvas id="livery" width="512" height="256" tabindex="0" aria-label="Sticker canvas"></canvas>
+    h += gHead('Sticker editor', 'Drag = move · wheel = scale · shift+wheel = rotate') + `<canvas id="livery" width="512" height="256" tabindex="0" aria-label="Sticker canvas"></canvas>
       <div class="opts">${[['rotL', '⟲'], ['rotR', '⟳'], ['small', '－'], ['big', '＋'], ['flip', '⇆'], ['down', '▼ Back'], ['up', '▲ Front'], ['dup', '⧉ Copy'], ['del', '🗑'], ['clear', '✖ Clear']].map(([a, l]) => `<button class="btn" data-act="stk" data-arg="${a}">${l}</button>`).join('')}</div>
       <div class="small muted">Canvas focused: arrows move · Q/E rotate · +/− scale · [ ] layer · Delete</div>
       <div class="lbl">Library · ${STICKERS.filter(s => owns('sticker', s)).length}/${STICKERS.length} · ${cfg.stickers.length}/24 placed</div>
-      <div class="stkgrid">${STICKERS.map(s => { const ok = owns('sticker', s); return `<button class="btn ${ok ? '' : 'lock'}" data-act="addStk" data-arg="${s.id}" title="${esc(s.name + (ok ? '' : s.quest ? ' — Quest reward' : ' — Season Pass'))}"><img src="${stickerThumb(s.id)}" alt="${esc(s.name)}"></button>`; }).join('')}</div>`;
+      <div class="stkgrid">${STICKERS.map(s => { const ok = owns('sticker', s); return `<button class="btn ${ok ? '' : 'lock'}" data-act="addStk" data-arg="${s.id}" title="${esc(s.name + (ok ? '' : s.quest ? ' — Quest reward' : s.event ? ' — Limited event reward' : ' — Season Pass'))}"><img src="${stickerThumb(s.id)}" alt="${esc(s.name)}"></button>`; }).join('')}</div>`;
   } else if (t === 'garage' && Net.guestWorld) {
-    h += '<div class="story"><h4>VISITING</h4><p style="font-style:normal">This is the host\'s garage, so you can\'t redecorate it. Decorate your own garage in single player. Everything else here (mowers, paint, stickers…) is yours and comes with you.</p></div>';
+    h += gHead('Decor') + '<div class="gNote">This is the host\'s garage, so you can\'t redecorate it. Decorate your own garage in single player. Everything else here is yours and comes with you.</div>';
   } else if (t === 'garage') {
+    h += gHead('Decor', 'Make the garage yours');
     for (const slot in DECOR) {
       const D = DECOR[slot];
-      h += `<div class="lbl">${D.name}</div><div class="opts">${D.items.map(it => { const ok = decorOwns(slot, it), cur = S.decor[slot] === it.id;
-        const label = ok ? it.name : it.pass ? '🎟️ ' + it.name : it.story ? '📖 ' + it.name : `${it.name} · ${money(it.price)}`;
-        return `<button class="btn ${cur ? 'sel' : ''}" data-act="decor" data-arg="${slot}:${it.id}" ${it.c ? `style="border-left:8px solid ${it.c}"` : ''}>${label}</button>`; }).join('')}</div>`;
+      h += `<div class="lbl">${D.name}</div><div class="gGrid">${D.items.map(it => { const ok = decorOwns(slot, it), on = S.decor[slot] === it.id; return gTile('decor', `${slot}:${it.id}`, it.name, itemSub(it, ok, on), { sel: on, locked: !ok, dot: it.c }); }).join('')}</div>`;
     }
   } else if (t === 'me') {
-    h += '<div class="lbl">Cap</div>' + itemRow('cap', CAPS, S.player.cap, 'cap') + '<div class="lbl">Shirt</div>' + itemRow('shirt', SHIRTS, S.player.shirt, 'shirt');
+    h += gHead('Sam', 'Your cap and top') + '<div class="lbl">Cap</div>' + itemRow('cap', CAPS, S.player.cap, 'cap') + '<div class="lbl">Top</div>' + itemRow('shirt', SHIRTS, S.player.shirt, 'shirt');
   }
-  $('#scr-bench').innerHTML = h + '</div><div class="small muted" style="text-align:center">Drag on the left side to spin your mower</div></div>';
+  $('#scr-bench').innerHTML = h + '</div><div class="gFoot">Drag on the left of the screen to spin your mower</div></div>';
+  Bench.lastTab = t; const nb = $('.bbody'); if (nb) nb.scrollTop = sy;
   if (t === 'stickers') initStickerEditor();
 }
 function initStickerEditor() {
@@ -2931,7 +3033,7 @@ function stickerOp(op) {
 /* ---------- Title, pause, settings ---------- */
 function showTitle() {
   Game.state = 'title'; $('#hud').classList.add('hidden'); closeDialog(); $('#raceResult').style.display = 'none'; $('#lobbyPanel').style.display = 'none';
-  $('#titleBtns').innerHTML = `<button class="btn primary" data-act="play" data-autofocus>▶ Play</button><button class="btn" data-act="mp">👥 Play Online</button><button class="btn" data-act="timeTrial">🏁 Fastest Lawn Cut (time trial)</button><button class="btn" data-act="settings">⚙️ Settings</button><div class="small muted" style="text-align:center;margin-top:6px">3 save slots · best with keyboard + mouse · progress autosaves</div><div class="small mpConn" style="text-align:center;opacity:.8"></div>`;
+  $('#titleBtns').innerHTML = `<button class="btn primary" data-act="play" data-autofocus>▶ Play</button><button class="btn" data-act="mp">👥 Play Online</button><button class="btn" data-act="timeTrial">🏁 Fastest Lawn Cut (time trial)</button><button class="btn" data-act="settings">⚙️ Settings</button><div class="titleExtra"><button class="btn" data-act="openIdeas">💡 Recommendations</button><button class="btn" data-act="openLog">📜 Update Log${logUnseen() ? '<span class="newTag">NEW</span>' : ''}</button></div><div class="small muted" style="text-align:center;margin-top:6px">Version ${GAME_VERSION} · 3 save slots · best with keyboard + mouse · progress autosaves</div><div class="small mpConn" style="text-align:center;opacity:.8"></div>`;
   showScreen('title'); mpRefresh();
 }
 function newGame() { showSlots('play'); }
@@ -2946,7 +3048,8 @@ function pauseGame() {
     ${Net.on ? `<div class="small" style="color:var(--sky)">👥 Room <b>${Net.code}</b> · the game keeps running for your friend</div><div>${netPlayersHTML()}</div>` : ''}
     <button class="btn primary" data-act="resume" data-autofocus>▶ Resume</button><button class="btn" data-act="phonePause">📱 Phone</button><button class="btn" data-act="settings">⚙️ Settings</button>
     ${Race.on && !Net.on ? '<button class="btn" data-act="raceTown">🏳 Quit race</button>' : ''}${S.tut.state === 'active' && !Net.on ? '<button class="btn" data-act="tutSkip">⏭ Skip tutorial</button>' : ''}${Net.on ? '<button class="btn" data-act="mpLeave">🚪 Leave multiplayer</button>' : ''}
-    <button class="btn" data-act="saveQuit">💾 Save & quit to title</button><div class="small muted">Slot ${SLOT}</div></div>`;
+    <div class="titleExtra"><button class="btn" data-act="openIdeas">💡 Recommendations</button><button class="btn" data-act="openLog">📜 Update Log</button></div>
+    <button class="btn" data-act="saveQuit">💾 Save & quit to title</button><div class="small muted">Slot ${SLOT} · version ${GAME_VERSION}</div></div>`;
   showScreen('pause');
 }
 function renderSettings() {
@@ -2996,7 +3099,8 @@ const ACT = {
   useMower: a => { equipMower(a); refreshOpenUI(); },
   buyUp: a => { if (buyUpgrade(a)) refreshOpenUI(); },
   // main-screen buttons & menus
-  openQuests: () => openMenu('quests'), openJobs: () => openMenu('jobs'), openShop: () => openMenu('shop'), openPass: () => openMenu('pass'), closeMenu: () => closeMenu(),
+  openIdeas: () => { Ideas.sent = false; openMenu('ideas'); }, openLog: () => openMenu('log'), ideaType: a => { Ideas.type = a; renderMenu(); }, ideaSend: () => sendIdea(), ideaAgain: () => { Ideas.sent = false; renderMenu(); },
+  openQuests: () => openMenu('quests'), openJobs: () => openMenu('jobs'), openEvent: () => openMenu('event'), eventPick: a => pickSide(a), eventUse: () => { if (equipMower(S.event.mower)) closeMenu(); }, openShop: () => openMenu('shop'), openPass: () => openMenu('pass'), closeMenu: () => closeMenu(),
   questAccept: a => { acceptJob(a); renderMenu(); }, questRoute: a => { ACT.waypoint(a); closeMenu(); },
   questCancel: () => { if (Menu.confirm !== 'cancel') { Menu.confirm = 'cancel'; renderMenu(); return; } Menu.confirm = null; cancelJob(); renderMenu(); },
   shopBuy: a => { if (buyMower(a)) { Menu.just = a; } renderMenu(); },
@@ -3016,7 +3120,7 @@ const ACT = {
   acc: a => { const it = ACCESSORIES.find(x => x.id === a); if (!tryBuy('acc', it)) return; S.cfg.acc[it.slot] = a; rebuildMowerModel(); renderBench(); focusAct('acc', a); },
   accNone: a => { delete S.cfg.acc[a]; if (a === 'side2') Sfx.music(false); rebuildMowerModel(); renderBench(); },
   stk: a => stickerOp(a),
-  addStk: a => { const s = STICKERS.find(x => x.id === a); if (!owns('sticker', s)) { Sfx.error(); toast(s.quest ? '🎯 Quest sticker' : '🎟️ Season Pass sticker', s.quest ? 'Unlock it by completing Quests (Q).' : 'Unlock it in the Season Pass.', 'var(--gold)'); return; } if (S.cfg.stickers.length >= 24) { Sfx.error(); return; } S.cfg.stickers.push({ id: a, x: rand(0.3, 0.7), y: rand(0.35, 0.65), s: 0.45, r: 0, f: false }); Bench.sel = S.cfg.stickers.length - 1; if (Bench.redraw) Bench.redraw(); },
+  addStk: a => { const s = STICKERS.find(x => x.id === a); if (!owns('sticker', s)) { Sfx.error(); toast(s.event ? '⚔️ Limited event sticker' : s.quest ? '🎯 Quest sticker' : '🎟️ Season Pass sticker', s.event ? 'Earn it in the Event (press V).' : s.quest ? 'Unlock it by completing Quests (Q).' : 'Unlock it in the Season Pass.', 'var(--gold)'); return; } if (S.cfg.stickers.length >= 24) { Sfx.error(); return; } S.cfg.stickers.push({ id: a, x: rand(0.3, 0.7), y: rand(0.35, 0.65), s: 0.45, r: 0, f: false }); Bench.sel = S.cfg.stickers.length - 1; if (Bench.redraw) Bench.redraw(); },
   decor: a => {
     const [slot, id] = a.split(':'), it = DECOR[slot].items.find(x => x.id === id);
     if (!decorOwns(slot, it)) {
@@ -3031,13 +3135,15 @@ const ACT = {
   setOpt: a => { const [k, v] = a.split('|'); S.settings[k] = v === 'true' ? true : v === 'false' ? false : v; if (k === 'mowerCtl' && v === 'wasd') unlockMouse(); if (k === 'quality') { if (v === 'auto') autoQ = 'medium'; applyQuality(); } if (k === 'fps' && v === 'false') $('#fpsBox') && ($('#fpsBox').textContent = ''); renderSettings(); focusAct('setOpt', a); save(); }
 };
 document.addEventListener('click', e => { const b = e.target.closest('[data-act]'); if (!b || b.disabled || !ACT[b.dataset.act]) return; if (b.dataset.act !== 'horn') Sfx.click(); ACT[b.dataset.act](b.dataset.arg, b); });
-document.addEventListener('input', e => { const k = e.target.dataset && e.target.dataset.set; if (k) { S.settings[k] = parseFloat(e.target.value); Sfx.apply(); save(); } });
+document.addEventListener('input', e => {
+  const f = e.target.dataset && e.target.dataset.idea; if (f) { Ideas[f] = e.target.value; if (f === 'text' && $('#ideaCount')) $('#ideaCount').textContent = e.target.value.length + ' / 1000'; return; }
+  const k = e.target.dataset && e.target.dataset.set; if (k) { S.settings[k] = parseFloat(e.target.value); Sfx.apply(); save(); } });
 let hovT = 0; document.addEventListener('pointerover', e => { const b = e.target.closest && e.target.closest('.btn'); if (b && !b.disabled && performance.now() - hovT > 70) { hovT = performance.now(); Sfx.hover(); } });
 
 /* ---------- Keyboard & mouse ---------- */
 addEventListener('keydown', e => {
-  const code = e.code; Sfx.init();
-  if (['Tab', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(code) && Game.state !== 'title' && !(document.activeElement && document.activeElement.tagName === 'INPUT')) e.preventDefault();
+  const code = e.code, typing = !!document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName); Sfx.init();
+  if (['Tab', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(code) && Game.state !== 'title' && !typing) e.preventDefault();
   if (Game.dialog) {
     if (code === 'Escape') { closeDialog(); return; }
     if (/^Digit[1-9]$/.test(code)) { ACT.dlg(+code.slice(5) - 1); return; }
@@ -3050,7 +3156,7 @@ addEventListener('keydown', e => {
     const M = Game.mw;
     if (code === 'Escape') pauseGame();
     else if (code === 'Tab') openPhone();
-    else if (code === 'KeyQ') openMenu('quests'); else if (code === 'KeyJ') openMenu('jobs'); else if (code === 'KeyB') openMenu('shop'); else if (code === 'KeyP') openMenu('pass');
+    else if (code === 'KeyQ') openMenu('quests'); else if (code === 'KeyJ') openMenu('jobs'); else if (code === 'KeyV') openMenu('event'); else if (code === 'KeyB') openMenu('shop'); else if (code === 'KeyP') openMenu('pass');
     else if (code === 'Enter' && tutIsInfo()) tutNext();
     else if (code === 'KeyE' && !Game.pumping) { const it = Game.prompt && Game.prompt.e; if (it) it.act(); }
     else if (code === 'KeyG') { const it = Game.prompt && Game.prompt.g; if (it) it.act(); }
@@ -3062,7 +3168,8 @@ addEventListener('keydown', e => {
   }
   if (Game.state === 'menu' && !e.repeat) {
     if (code === 'Escape') { e.preventDefault(); if (Menu.cur !== 'tutw') closeMenu(); return; }
-    const m = { KeyJ: 'jobs', KeyQ: 'quests', KeyB: 'shop', KeyP: 'pass' }[code]; if (m && Menu.cur !== 'tutw' && Menu.cur !== 'stall') { openMenu(m); return; }
+    if (typing) return; // letters go into the text box, not the menu shortcuts
+    const m = { KeyJ: 'jobs', KeyQ: 'quests', KeyB: 'shop', KeyP: 'pass', KeyV: 'event' }[code]; if (m && !['tutw', 'stall', 'ideas', 'log'].includes(Menu.cur)) { openMenu(m); return; }
   }
   if (code === 'Escape') {
     e.preventDefault();
@@ -3075,6 +3182,7 @@ addEventListener('keydown', e => {
   if (code === 'Tab' && Game.state === 'phone') { closePhone(); return; }
   const ae = document.activeElement;
   if (code === 'Enter' && ae && ae.id === 'mpCode') { ACT.mpJoin(); return; }
+  if (ae && ae.tagName === 'TEXTAREA') return;
   if (ae && ae.tagName === 'INPUT' && (code === 'ArrowLeft' || code === 'ArrowRight')) return;
   const dirs = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
   if (dirs[code]) { navFocus(dirs[code]); return; }
@@ -3114,7 +3222,7 @@ function updateCamera(dt, snap) {
     camPos.set(p.x, 0.9 + sz * 0.55, p.z); camera.position.lerp(camPos, snap ? 1 : 1 - Math.exp(-6 * dt));
     camera.lookAt(G.park.x + (wide ? 0.55 * sz : 0), 0.35 * sz, G.park.z); M.h = (Town.garage.parkH) + Bench.spin + Game.t * 0.15; syncMowerModel(); return;
   }
-  if (Game.state === 'title') { const a = Game.t * 0.04; camera.position.set(-40 + Math.sin(a) * 34, 14, -10 + Math.cos(a) * 34); camera.lookAt(-40, 1, -20); return; }
+  if (Game.state === 'title' || (Game.state === 'menu' && Menu.from === 'title')) { const a = Game.t * 0.04; camera.position.set(-40 + Math.sin(a) * 34, 14, -10 + Math.cos(a) * 34); camera.lookAt(-40, 1, -20); return; }
   const k = Game.keys; if (k.KeyZ) { C2.yaw += dt * 2; C2.mouseT = performance.now() / 1000; } if (k.KeyX) { C2.yaw -= dt * 2; C2.mouseT = performance.now() / 1000; }
   let tx, ty, tz, dist;
   if (Game.cine && Game.state === 'play') { cineCamera(dt); return; }
@@ -3581,7 +3689,7 @@ function drawTag(s, text, col = '#7ed4ff') { const { c, t } = s.userData, x = c.
 function remoteHello(h) {
   Remote.h = h;
   if (!Remote.P) { Remote.P = buildPlayer(); scene.add(Remote.P.root); Remote.tag = nameTagSprite(); scene.add(Remote.tag); }
-  Remote.P.shirtMat.color.copy(C((SHIRTS.find(s => s.id === h.shirt) || SHIRTS[0]).c)); Remote.P.capMat.color.copy(C((CAPS.find(s => s.id === h.cap) || CAPS[0]).c));
+  applyShirt(Remote.P, h.shirt); Remote.P.capMat.color.copy(C((CAPS.find(s => s.id === h.cap) || CAPS[0]).c));
   drawTag(Remote.tag, h.name || 'Player 2');
   if (!Remote.mats) {
     const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256; const tex = new THREE.CanvasTexture(cv); tex.encoding = THREE.sRGBEncoding;
@@ -3819,8 +3927,8 @@ function updateInterior(dt) {
 const Menu = { cur: null, from: 'play', confirm: null, just: null };
 function openMenu(name) {
   if (Game.state === 'menu' && Menu.cur === name) { closeMenu(); return; }
-  if (!['play', 'menu', 'bench'].includes(Game.state)) return;
-  if (Race.on && name !== 'pass') { Sfx.error(); toast('Not during a race', 'Finish or quit the race first.', 'var(--gold)'); return; }
+  if (!['play', 'menu', 'bench', 'title', 'paused'].includes(Game.state)) return;
+  if (Race.on && !['pass', 'ideas', 'log'].includes(name)) { Sfx.error(); toast('Not during a race', 'Finish or quit the race first.', 'var(--gold)'); return; }
   if (Game.dialog) closeDialog();
   if (Game.state !== 'menu') Menu.from = Game.state; else if (Menu.cur === 'jobs') markJobsSeen();
   if (name === 'stall') hideAffordPop();
@@ -3832,17 +3940,147 @@ function closeMenu() {
   if (Menu.cur === 'jobs') markJobsSeen(); // jobs you've looked at stop being "new"
   Menu.cur = null; Menu.confirm = null; save();
   if (Menu.from === 'bench') { Game.state = 'bench'; renderBench(); showScreen('bench'); return; }
+  if (Menu.from === 'title') { showTitle(); return; }
+  if (Menu.from === 'paused') { Game.state = 'play'; pauseGame(); return; }
   Game.state = 'play'; showScreen(null); lockMouse();
 }
 function refreshOpenUI() { if (Game.state === 'menu') renderMenu(); else if (Game.state === 'bench') renderBench(); }
 function renderMenu() {
   const c = Menu.cur, el = $('#scr-menu'), sy = el.querySelector('.mbody') ? el.querySelector('.mbody').scrollTop : 0;
-  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
+  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
   const mb = el.querySelector('.mbody'); if (mb) mb.scrollTop = sy;
   if (c === 'pass') { const row = $('#passRow'), cur = row && row.querySelector('.cur'); if (cur) row.scrollLeft = cur.offsetLeft - 160; }
   tutUI(true);
 }
-const menuHead = (title, sub) => `<div class="dlgHead"><div><h2>${title}</h2>${sub ? `<div class="small muted" style="margin-top:2px">${sub}</div>` : ''}</div><div class="row"><span class="chip cash">${money(S.money)}</span><button class="btn" data-act="closeMenu" aria-label="Close">✕</button></div></div>`;
+const menuHead = (title, sub) => `<div class="dlgHead"><div><h2>${title}</h2>${sub ? `<div class="small muted" style="margin-top:2px">${sub}</div>` : ''}</div><div class="row">${Menu.from === 'title' ? '' : `<span class="chip cash">${money(S.money)}</span>`}<button class="btn" data-act="closeMenu" aria-label="Close">✕</button></div></div>`;
+
+/* ---------- 💡 Recommendations: players send ideas and bug reports to the ZD Studios feedback dashboard ----------
+   The key can only send feedback, never read it, so it's safe in client code. */
+const FEEDBACK = { url: 'https://feedback.zdstudios.network/api/feedback', key: 'fb-copper-nutmeg-iris-4360', source: 'mow-town' };
+const IDEA_TYPES = [['idea', '💡', 'Idea'], ['bug', '🐞', 'Bug'], ['balance', '⚖️', 'Balance'], ['other', '💬', 'Other']];
+const Ideas = { type: 'idea', topic: '', text: '', sending: false, sent: false, nextAt: 0 };
+function ideaStatus(msg, bad) { const el = $('#ideaStatus'); if (el) { el.textContent = msg; el.style.color = bad ? 'var(--bad)' : 'var(--sky)'; } if (bad) Sfx.error(); }
+function ideasHTML() {
+  const head = menuHead('💡 RECOMMENDATIONS', 'Got an idea, or found a bug? Tell us what to add or fix.');
+  if (Ideas.sent) return `<div class="mdlg panel" style="width:min(520px,94vw)">${head}<div class="mbody" style="text-align:center;gap:12px"><div style="font-size:46px">🎉</div><h3>Thanks! We got it.</h3><div class="small muted">Your recommendation was sent to the Mow Town team.</div><div class="row" style="justify-content:center"><button class="btn gold" data-act="ideaAgain">Send another</button><button class="btn" data-act="closeMenu" data-autofocus>Done</button></div></div></div>`;
+  return `<div class="mdlg panel" style="width:min(520px,94vw)">${head}<div class="mbody">
+    <div class="lbl">What kind is it?</div><div class="ideaT">${IDEA_TYPES.map(([id, ic, n]) => `<button class="btn ${Ideas.type === id ? 'sel' : ''}" data-act="ideaType" data-arg="${id}">${ic} ${n}</button>`).join('')}</div>
+    <div class="lbl">Title</div><input class="inp" id="ideaTopic" data-idea="topic" maxlength="80" placeholder="e.g. Add a golf course lawn" value="${esc(Ideas.topic)}" spellcheck="true" data-autofocus>
+    <div class="lbl">Tell us more <span class="ideaC" id="ideaCount">${Ideas.text.length} / 1000</span></div><textarea class="inp" id="ideaText" data-idea="text" maxlength="1000" placeholder="What would you like, or what went wrong?" spellcheck="true">${esc(Ideas.text)}</textarea>
+    <div class="small muted">Please don't include your real name, address or anything private.</div>
+    <button class="btn primary" style="font-size:15px" data-act="ideaSend" ${Ideas.sending ? 'disabled' : ''}>${Ideas.sending ? 'Sending…' : '📨 Send recommendation'}</button>
+    <div id="ideaStatus" class="small" style="min-height:18px;text-align:center"></div></div></div>`;
+}
+async function sendIdea() {
+  if (Ideas.sending) return;
+  const topic = Ideas.topic.trim(), text = Ideas.text.trim(), wait = Math.ceil((Ideas.nextAt - Date.now()) / 1000);
+  if (topic.length < 3) { ideaStatus('Give it a short title first.', true); return; }
+  if (text.length < 5) { ideaStatus('Add a little more detail so we know what you mean.', true); return; }
+  if (wait > 0) { ideaStatus(`Please wait ${wait} seconds before sending another.`, true); return; }
+  const kind = IDEA_TYPES.find(t => t[0] === Ideas.type)[2], ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 12000);
+  const ctx = `Mow Town v${GAME_VERSION}` + (S.started ? ` · day ${S.day} · ${MOWERS[S.mower].name}` : '');
+  Ideas.sending = true; renderMenu();
+  try {
+    const res = await fetch(FEEDBACK.url, { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json', 'X-API-Key': FEEDBACK.key }, body: JSON.stringify({ topic: `[${kind}] ${topic}`, description: `${text}\n\n(${ctx})`, source: FEEDBACK.source }) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    Object.assign(Ideas, { topic: '', text: '', sent: true, nextAt: Date.now() + 30000 }); Sfx.unlock();
+  } catch (e) { Ideas.failed = true; }
+  clearTimeout(timer); Ideas.sending = false;
+  if (Game.state === 'menu' && Menu.cur === 'ideas') { renderMenu(); if (Ideas.failed) ideaStatus('Couldn\'t send that. Your message is still here, so try again in a moment.', true); }
+  Ideas.failed = false;
+}
+
+/* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
+const UPDATES = [
+  { v: '1.9', date: 'Nov 2026', title: 'Garage & Recommendations', add: ['Rebuilt garage screen with tabs down the side and clear tiles', 'Every garage item now shows its price or how to unlock it', 'Your mowers appear as pictures in the garage', 'Recommendations button: send ideas and bug reports', 'This update log'] },
+  { v: '1.8', date: 'Nov 2026', title: 'Scott Bonnar vs Rover', add: ['14-day limited event: pick a side and keep that mower', 'Two limited mowers you can\'t buy with money', 'Limited sticker and brand colour from your first lawn', 'Mow 50 lawns for the "I ♥" top'] },
+  { v: '1.7', date: 'Nov 2026', title: 'Longer Streaks', add: ['Streaks last 5 seconds after you stop, 10 while driving', 'Four new streak levels up to King of the Lawn', 'Smaller front yards with stone edging', 'Fixed a house room sitting in the middle of Main Street'] },
+  { v: '1.6', date: 'Oct 2026', title: 'Helpers', add: ['Red boxes and arrows on things you can afford', 'New jobs marked with a NEW tag', '"You can afford an upgrade" pop-up', 'Settings app on your phone'] },
+  { v: '1.5', date: 'Oct 2026', title: 'Mow Town Online & Seasons', add: ['Online play on the new server with Quick Play, room codes and open rooms', 'Summer, Autumn, Winter and Spring, changing every 7 days', 'Quests that pay cash, stickers and paint colours', 'HoverDeck, Mud Monster and Z-Spin Platinum mowers', 'Water tower, porches, power lines, clouds, birds and mountains'] },
+  { v: '1.4', date: 'Oct 2026', title: 'The Big Overhaul', add: ['Job board with difficulty, requirements and rewards', 'Beginner tutorial for new players', 'Mower Shop with pictures and stats', 'Ray\'s Upgrade Stall for speed and fuel upgrades', 'Faster Season Pass and cheaper early mowers', 'Simpler phone'] },
+  { v: '1.3', date: 'Oct 2026', title: 'Multiplayer & Going Inside', add: ['2-player Co-op Town', 'Fastest Lawn Cut races and solo time trials', 'Walk inside houses and the Pump & Go store', '3 save slots'] },
+  { v: '1.2', date: 'Oct 2026', title: 'Feel-Good Mowing', add: ['Lawn progress bars and a finished-lawn celebration', 'Streaks, bonuses and close calls', 'Fixed grass sometimes not loading'] },
+  { v: '1.1', date: 'Oct 2026', title: 'Driver\'s Seat', add: ['You play as Sam, who drives the mower', 'Over-the-shoulder mower camera', 'Choose WASD or mouse mower controls'] },
+  { v: '1.0', date: 'Sep 2026', title: 'Welcome to Mow Town', add: ['A whole town of lawns, with front and back yards', 'Your own house and garage to customise', 'Gas station, fuel and driving to jobs', 'Story chapters and a 50-tier Season Pass'] }
+];
+const GAME_VERSION = UPDATES[0].v, LOG_KEY = 'mowtown_log_seen';
+const logUnseen = () => { try { return localStorage.getItem(LOG_KEY) !== GAME_VERSION; } catch (e) { return false; } };
+function logHTML() {
+  try { localStorage.setItem(LOG_KEY, GAME_VERSION); } catch (e) { }
+  return `<div class="mdlg panel" style="width:min(600px,94vw)">${menuHead('📜 UPDATE LOG', `You're on version ${GAME_VERSION}`)}<div class="mbody">${UPDATES.map((u, i) => `<div class="logV ${i ? '' : 'now'}"><span class="lv">VERSION ${u.v}</span><span class="ld">${u.date}</span>${i ? '' : ' <span class="tag ok">LATEST</span>'}<h4>${esc(u.title)}</h4><ul>${u.add.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+}
+
+/* ---------- ⚔️ LIMITED EVENT: pick one side, mow 50 lawns with that mower, wear the top ----------
+   The countdown ends at one fixed moment for everybody (move EVENT.end to run it again).
+   It uses the multiplayer server's clock when connected, so changing your computer's date doesn't help. */
+const EVENT = {
+  name: BRAND.scott.name + ' vs ' + BRAND.rover.name, goal: 50,
+  end: Date.UTC(2026, 10, 19, 9, 0, 0), // 19 Nov 2026, 5 PM Perth time: 14 days from launch (month 10 = November)
+  awards: [ // what each lawn milestone gives; every award is handed over once only
+    { at: 1, sticker: true, paint: true },
+    { at: 10, cash: 100 },
+    { at: 25, cash: 250 },
+    { at: 50, top: true }
+  ]
+};
+const eventNow = () => Net.mp && Net.mp.connected ? Net.mp.serverTime() : Date.now();
+const eventOver = () => eventNow() >= EVENT.end;
+function fmtLeft(ms) {
+  if (ms <= 0) return 'ENDED';
+  const t = Math.floor(ms / 1000), d = Math.floor(t / 86400), p = n => String(n).padStart(2, '0');
+  return (d ? d + 'd ' : '') + p(Math.floor(t / 3600) % 24) + ':' + p(Math.floor(t / 60) % 60) + ':' + p(t % 60);
+}
+function eventTick() { // ticks the countdown everywhere it's shown, every second
+  const left = EVENT.end - eventNow(), txt = fmtLeft(left);
+  $$('.evTimer').forEach(el => { if (el.textContent !== txt) el.textContent = txt; });
+  $('#btnEvent').style.display = left <= 0 && !S.event.side ? 'none' : ''; // nothing to come back to if you never joined
+  if (left <= 0 && !Game.evEnded) { Game.evEnded = true; if (Game.state === 'menu' && (Menu.cur === 'event' || Menu.cur === 'shop')) renderMenu(); }
+}
+setInterval(eventTick, 1000);
+const awardText = (a, B) => [a.sticker && `<span class="evSw" style="background:#fff"></span>"I ♥ ${esc(B.name)}" sticker`, a.paint && `<span class="evSw" style="background:${B.col}"></span>Limited ${esc(B.colName)} paint`, a.cash && `💵 ${money(a.cash)}`, a.top && `👕 MAX AWARD: "I ♥ ${esc(B.name)}" top`].filter(Boolean).join(' · ');
+function pickSide(side) {
+  if (S.event.side || eventOver() || !BRAND[side]) return;
+  if (Menu.confirm !== side) { Menu.confirm = side; renderMenu(); return; } // second click makes it final
+  const id = Object.keys(MOWERS).find(k => MOWERS[k].brand === side), B = BRAND[side];
+  Menu.confirm = null; S.event.side = side; S.event.mower = id;
+  if (!S.owned.includes(id)) S.owned.push(id); S.fuel[id] = mowerStats(id).tank;
+  equipMower(id); Sfx.complete(); banner(`TEAM ${esc(B.name.toUpperCase())}<small>${esc(MOWERS[id].name)} is yours · mow ${EVENT.goal} lawns with it!</small>`); save(); renderMenu();
+}
+function eventLawn() { // called when you finish a lawn (not your co-op partner, not race lawns)
+  const E = S.event; if (!E.side || eventOver() || !Game.mw || Game.mw.id !== E.mower || E.lawns >= EVENT.goal) return;
+  E.lawns++; const B = BRAND[E.side];
+  EVENT.awards.forEach((a, i) => {
+    if (i < E.awarded || E.lawns < a.at) return; E.awarded = i + 1; const id = 'ev_' + E.side;
+    if (a.sticker && !S.own.sticker.includes(id)) S.own.sticker.push(id);
+    if (a.paint && !S.own.paint.includes(id)) S.own.paint.push(id);
+    if (a.top && !S.own.shirt.includes(id)) S.own.shirt.push(id);
+    if (a.cash) addMoney(a.cash);
+    Sfx.fanfare(); setTimeout(() => toast(a.top ? `👕 MAX AWARD! "I ♥ ${esc(B.name)}" top` : `⚔️ Event award — ${a.at} lawn${a.at > 1 ? 's' : ''}!`, a.cash ? money(a.cash) : 'Use it on the garage computer', 'var(--gold)'), 1200);
+  });
+  toast(`⚔️ ${E.lawns} / ${EVENT.goal} lawns`, `Team ${esc(B.name)}`, 'var(--gold)'); save();
+}
+function eventHTML() {
+  const E = S.event, over = eventOver();
+  let h = `<div class="mdlg panel" style="width:min(760px,96vw)">${menuHead('⚔️ ' + esc(EVENT.name.toUpperCase()), 'Limited event · pick one side · you can\'t change it')}<div class="mbody">
+    <div class="evTime">${over ? 'EVENT ENDED' : '⏳ <span class="evTimer">' + fmtLeft(EVENT.end - eventNow()) + '</span>'}</div>`;
+  if (!E.side) {
+    if (over) return h + '<div class="small muted" style="text-align:center">This event has finished, and its mowers and rewards are gone.</div></div></div>';
+    h += '<div class="evPick">' + ['scott', 'rover'].map(k => {
+      const B = BRAND[k], id = Object.keys(MOWERS).find(i => MOWERS[i].brand === k), m = MOWERS[id], conf = Menu.confirm === k;
+      return `<div class="evSide" style="--sc:${B.col}"><img src="${mowerThumb(id)}" alt="${esc(m.name)}"><h3>${m.icon} ${esc(B.name)}</h3><div class="small muted">${esc(m.desc)}</div>
+        <ul><li>🚜 ${esc(m.name)} — yours free, never for sale</li><li>${awardText(EVENT.awards[0], B)}</li><li>${awardText(EVENT.awards[3], B)} (${EVENT.goal} lawns)</li></ul>
+        <button class="btn ${conf ? 'primary' : 'gold'}" style="${conf ? 'font-size:14px;padding:10px' : ''}" data-act="eventPick" data-arg="${k}">${conf ? `⚠ Yes, I pick ${esc(B.name)} forever` : `Choose ${esc(B.name)}`}</button></div>`;
+    }).join('') + '</div><div class="small muted" style="text-align:center">You only get one. The other side\'s mower, colour, sticker and top stay locked on this save.</div>';
+  } else {
+    const B = BRAND[E.side], m = MOWERS[E.mower], using = Game.mw && Game.mw.id === E.mower, pct = E.lawns / EVENT.goal * 100;
+    h += `<div class="evMine" style="--sc:${B.col}"><img src="${mowerThumb(E.mower)}" alt="${esc(m.name)}"><div class="col" style="gap:7px"><h3 style="font-size:18px">Team ${esc(B.name)}</h3><div class="small">${esc(m.name)}</div>
+      <div class="row small" style="gap:8px"><div class="pbar" style="flex:1;height:13px"><i style="width:${pct}%;background:${B.col}"></i></div><b>${E.lawns} / ${EVENT.goal}</b></div>
+      <div class="small muted">${using ? 'Every lawn you finish with this mower counts.' : '<span style="color:var(--bad)">Only lawns finished with this mower count.</span>'}</div>
+      ${using ? '' : '<button class="btn gold" data-act="eventUse">Use my ' + esc(B.name) + ' mower</button>'}</div></div><div class="lbl">Awards</div>`;
+    h += EVENT.awards.map(a => { const got = E.lawns >= a.at; return `<div class="evAward ${got ? 'got' : ''} ${a.top ? 'max' : ''}"><span class="n">${a.at} lawn${a.at > 1 ? 's' : ''}</span><span class="r">${awardText(a, B)}</span><span>${got ? '✔' : '🔒'}</span></div>`; }).join('');
+  }
+  return h + '</div></div>';
+}
 
 /* ---------- "You can afford an upgrade!" pop-up ---------- */
 const Help = { popped: new Set(), slot: null, popT: null, t: 0 };
@@ -3927,7 +4165,7 @@ function jobsHTML() {
 }
 
 /* ---------- Mower Shop ---------- */
-function mowerLock(id) { const r = MOWERS[id].req; return r && r.jobs && S.stats.jobs < r.jobs ? `Finish ${r.jobs} jobs to unlock (${S.stats.jobs}/${r.jobs})` : null; }
+function mowerLock(id) { if (MOWERS[id].limited && !S.owned.includes(id)) return 'Limited event mower — it can\'t be bought with money'; const r = MOWERS[id].req; return r && r.jobs && S.stats.jobs < r.jobs ? `Finish ${r.jobs} jobs to unlock (${S.stats.jobs}/${r.jobs})` : null; }
 function buyMower(id) {
   const m = MOWERS[id]; if (!m) return false;
   if (S.owned.includes(id)) { toast('You already own the ' + m.name, 'Press "Use" to drive it.', 'var(--sky)'); return false; }
@@ -3981,12 +4219,14 @@ function shopHTML() {
   const tut = MOWER_ORDER.find(id => !S.owned.includes(id) && !mowerLock(id)); // the cheapest one you can work towards
   const bar = (label, v, max, txt) => `<span>${label}</span><div class="pbar"><i style="width:${(clamp(Math.sqrt(v / max), 0.05, 1) * 100).toFixed(0)}%"></i></div><span>${txt}</span>`;
   let h = `<div class="mdlg panel" style="width:min(940px,96vw)">${menuHead('🛒 MOWER SHOP', 'Delivered instantly · Ray\'s speed & fuel upgrades apply to every mower')}<div class="mbody"><div class="mgrid">`;
-  MOWER_ORDER.forEach(id => {
-    const m = MOWERS[id], st = mowerStats(id), own = S.owned.includes(id), eq = S.mower === id, lock = mowerLock(id), afford = S.money >= m.price;
-    const hot = S.settings.hlAfford && !own && !lock && afford, cls = (eq ? 'eq' : own ? 'own' : lock ? 'lock' : afford ? '' : 'cant') + (hot ? ' redHL' : '');
-    const rib = eq ? ['✔ IN USE', 'var(--acc)'] : own ? ['OWNED', 'var(--cash)'] : lock ? ['🔒 LOCKED', 'var(--mut)'] : afford ? ['✔ AFFORDABLE', 'var(--gold)'] : ['NEED ' + money(m.price - S.money), 'var(--bad)'];
+  MOWER_ORDER.slice().sort((a, b) => (MOWERS[b].limited ? 1 : 0) - (MOWERS[a].limited ? 1 : 0)).forEach(id => { // limited mowers first
+    if (MOWERS[id].limited && !S.owned.includes(id) && eventOver()) return; // gone once the event ends
+    const m = MOWERS[id], st = mowerStats(id), own = S.owned.includes(id), eq = S.mower === id, lock = mowerLock(id), afford = S.money >= m.price, lim = m.limited && !own;
+    const hot = S.settings.hlAfford && !own && !lock && afford, cls = (eq ? 'eq' : own ? 'own' : lim ? 'limited' : lock ? 'lock' : afford ? '' : 'cant') + (hot ? ' redHL' : '');
+    const rib = eq ? ['✔ IN USE', 'var(--acc)'] : own ? ['OWNED', 'var(--cash)'] : lim ? ['⚔️ LIMITED · NOT FOR SALE', 'var(--gold)'] : lock ? ['🔒 LOCKED', 'var(--mut)'] : afford ? ['✔ AFFORDABLE', 'var(--gold)'] : ['NEED ' + money(m.price - S.money), 'var(--bad)'];
     const btn = eq ? '<button class="btn" disabled>✔ In use</button>'
       : own ? `<button class="btn primary" style="font-size:14px;padding:8px" data-act="shopUse" data-arg="${id}">${Menu.just === id ? '🚚 Use it now!' : 'Use this mower'}</button>`
+      : lim ? (S.event.side ? `<button class="btn" disabled>You picked ${esc(BRAND[S.event.side].name)}</button>` : '<button class="btn gold" data-act="openEvent">⚔️ Choose it in the Event</button>')
       : `<button class="btn ${!lock && afford ? 'gold' : ''}" data-act="shopBuy" data-arg="${id}" ${id === tut ? 'data-tut="1"' : ''}>${lock ? '🔒 ' : 'Buy · '}${money(m.price)}</button>`;
     h += `<div class="mcard ${cls}"><img src="${mowerThumb(id)}" alt="${esc(m.name)}"><span class="ribbon" style="color:${rib[1]}">${rib[0]}</span><h4>${m.icon} ${m.name}</h4><div class="ty">${m.type} · ${m.push ? 'you push it' : 'ride-on'}</div>
       <div class="st">${bar('Mowing', m.width * st.speed, 20, Math.round(m.width * st.speed * 60) + ' m²/m')}${bar('Cut width', m.width, 2.6, Math.round(m.width * 100) + ' cm')}${bar('Speed', st.speed, 8, st.speed.toFixed(1) + ' m/s')}${bar('Fuel tank', st.tank, 50, st.tank.toFixed(1) + ' L')}${bar('Handling', m.turn, 3.2, m.zero ? 'spins!' : m.turn.toFixed(1))}</div>
@@ -4124,7 +4364,7 @@ function updateTutorial(dt) {
 }
 function tutUI(force) {
   const card = $('#tutCard'), arrow = $('#tutArrow');
-  const show = tutActive() && ['play', 'menu', 'paused', 'phone', 'bench'].includes(Game.state) && !(Game.state === 'menu' && Menu.cur === 'tutw') && !Race.on;
+  const show = tutActive() && ['play', 'menu', 'paused', 'phone', 'bench'].includes(Game.state) && !(Game.state === 'menu' && (Menu.cur === 'tutw' || Menu.from === 'title')) && !Race.on;
   $('#scr-menu').classList.toggle('tutOn', show && Game.state === 'menu' && innerWidth >= 720); // menus slide right so the tutorial card never covers them
   if (!show) { card.style.display = 'none'; arrow.style.display = 'none'; if (Tut.hlEl) { Tut.hlEl.classList.remove('tutHL'); Tut.hlEl = null; } Tut.shown = false; return; }
   Tut.shown = true;
