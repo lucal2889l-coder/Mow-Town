@@ -215,7 +215,7 @@ kbd{font-family:var(--font);font-size:11px;background:rgba(255,255,255,.14);bord
 /* menus: quests, shop, upgrade stall, season pass */
 #scr-menu{background:rgba(0,0,0,.42)}
 .mdlg{width:min(700px,94vw);max-height:92vh;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
-.mbody{overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding-right:4px;scrollbar-width:thin;scrollbar-color:#4a6a52 transparent}
+.mbody{overflow-y:auto;display:flex;flex-direction:column;gap:11px;padding:6px 8px 6px 6px;scrollbar-width:thin;scrollbar-color:#4a6a52 transparent}
 .qcard{background:var(--panel2);border:2px solid var(--line);border-radius:14px;padding:11px 13px;display:flex;gap:12px;align-items:center}
 .qcard.act{border-color:var(--gold);box-shadow:0 0 16px rgba(255,207,74,.25)}
 .qcard .ic{font-size:30px;width:40px;text-align:center}
@@ -249,6 +249,22 @@ kbd{font-family:var(--font);font-size:11px;background:rgba(255,255,255,.14);bord
 #tutCard .tneed{margin-top:6px;font-size:12px;font-weight:800;color:var(--bad)}
 #tutCard .tbtns{display:flex;gap:6px;margin-top:10px;justify-content:space-between}
 #tutCard .tbtns .btn{padding:6px 11px;font-size:12px}
+/* "you can do this now" helpers: red box + red arrow (toggle in phone → Settings) */
+.redHL{outline:3px solid #ff3b3b!important;outline-offset:2px;animation:redPulse .9s ease-in-out infinite alternate!important;position:relative}
+@keyframes redPulse{from{box-shadow:0 0 4px 0 rgba(255,59,59,.45)}to{box-shadow:0 0 20px 4px rgba(255,59,59,.85)}}
+.redArrow{display:inline-block;flex:none;width:30px;height:22px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 22'%3E%3Cpath d='M1 7h16V1l12 10-12 10v-6H1z' fill='%23ff3b3b' stroke='%23fff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;animation:raBob .55s ease-in-out infinite alternate;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+@keyframes raBob{to{transform:translateX(6px)}}
+.hbtn.redHL::after{content:'';position:absolute;left:50%;top:100%;margin:5px 0 0 -11px;width:22px;height:28px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 30'%3E%3Cpath d='M11 1l10 12h-6v16H7V13H1z' fill='%23ff3b3b' stroke='%23fff' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;animation:raUp .55s ease-in-out infinite alternate;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));pointer-events:none}
+@keyframes raUp{to{transform:translateY(6px)}}
+.mcard .hotRow{display:flex;gap:6px;align-items:center}.mcard .hotRow .btn{flex:1}
+#affordPop{position:absolute;left:50%;bottom:132px;transform:translateX(-50%);width:min(440px,92vw);padding:12px 14px;display:none;pointer-events:auto;border:2px solid #ff3b3b;box-shadow:0 0 26px rgba(255,59,59,.45),var(--sh);animation:popIn .35s cubic-bezier(.2,1.5,.4,1)}
+#affordPop .ah{display:flex;align-items:center;gap:10px}#affordPop .ai{font-size:30px}#affordPop h4{font-size:16px;color:#ff8a7a}
+#affordPop .ab{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}#affordPop .ab .btn{padding:7px 12px;font-size:13px}
+.tgl{display:flex;align-items:center;gap:10px;background:var(--panel2);border-radius:12px;padding:9px 12px;font-weight:800;font-size:13px;text-align:left;width:100%}
+.tgl .tl{flex:1}.tgl small{display:block;color:var(--mut);font-weight:600;font-size:11px}
+.sw{flex:none;width:44px;height:24px;border-radius:12px;background:#4a524c;position:relative;transition:background .15s}.sw::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:var(--acc-d)}.sw.on::after{left:23px}
+.tgl .val{flex:none;font-size:12px;color:var(--acc);background:rgba(0,0,0,.25);border-radius:8px;padding:3px 8px}
 #scr-menu.tutOn{padding-left:312px;padding-right:10px}
 #scr-menu.tutOn .mdlg{width:min(940px,calc(100vw - 330px))!important}
 #tutArrow{position:absolute;display:none;z-index:31;pointer-events:none;font-size:34px;filter:drop-shadow(0 2px 3px #000);animation:tutBob .7s ease-in-out infinite alternate}
@@ -294,6 +310,7 @@ kbd{font-family:var(--font);font-size:11px;background:rgba(255,255,255,.14);bord
     <div id="raceResult"></div>
     <div id="combo"><div id="comboMult">x1</div><div id="comboCount">0 STREAK</div><div class="cbar"><i id="comboFill"></i></div><div class="cbar next"><i id="comboNext"></i></div></div>
     <div id="receipt" class="panel"></div>
+    <div id="affordPop" class="panel"></div>
     <div id="crosshair"></div>
   </div>
   <div id="ftLayer"></div>
@@ -564,8 +581,9 @@ function defaultSave() {
     jobs: { day: 0, list: [] }, active: null,
     clientDone: {}, clientStars: {},
     stats: { jobs: 0, lawns: 0, earned: 0, refuels: 0, fiveStars: 0, area: 0, gnomes: 0, litres: 0, distance: 0, tips: 0 },
-    quests: { claimed: {}, seen: {} },
-    settings: { master: 0.8, sfx: 0.9, engine: 0.55, amb: 0.5, music: 0.5, quality: 'auto', shake: 1, fps: false, sens: 1, tips: true, mowerCtl: 'wasd' }
+    quests: { claimed: {}, seen: {} }, jobsSeen: {},
+    settings: { master: 0.8, sfx: 0.9, engine: 0.55, amb: 0.5, music: 0.5, quality: 'auto', shake: 1, fps: false, sens: 1, tips: true, mowerCtl: 'wasd',
+      hlAfford: true, hlJobs: true, popUpg: true, popQuest: true, weather: true, muted: false } // helper toggles live in phone → Settings
   };
 }
 function deepMerge(base, o) {
@@ -625,7 +643,7 @@ function unpackYards(o) {
   if (!o) return false;
   for (const Y of Yards.list) {
     const s = o[Y.id]; if (!s) continue; let bin; try { bin = atob(s); } catch (e) { continue; }
-    const n = Math.min(bin.length, Y.nx * Y.nz);
+    const n = Y.nx * Y.nz; if (bin.length !== n) continue; // saved before this lawn changed size: it just starts fresh
     for (let i = 0; i < n; i++) { const v = bin.charCodeAt(i); Y.data[i * 4] = ((v >> 4) * 17); Y.data[i * 4 + 1] = (v & 15) * 17; }
     Y.recount(); Y.mile = undefined; Y.tex.needsUpdate = true;
   }
@@ -676,7 +694,7 @@ const Sfx = (() => {
     A.n.connect(A.lp); A.lp.connect(A.g); A.g.connect(ambB);
     apply();
   }
-  function apply() { if (!ctx) return; const s = S.settings; master.gain.value = s.master; sfx.gain.value = s.sfx; engB.gain.value = s.engine; ambB.gain.value = s.amb; musB.gain.value = s.music * 0.6; }
+  function apply() { if (!ctx) return; const s = S.settings; master.gain.value = s.muted ? 0 : s.master; sfx.gain.value = s.sfx; engB.gain.value = s.engine; ambB.gain.value = s.amb; musB.gain.value = s.music * 0.6; }
   function tone(f, dur, type = 'sine', vol = 0.25, delay = 0, slide = 0, bus) {
     if (!ctx) return; const t = ctx.currentTime + delay, o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t);
     if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, f * slide), t + dur);
@@ -1196,6 +1214,7 @@ function buildTown() {
 }
 
 /* ---------- Houses ---------- */
+const FRONT_YARD = { u0: -9.5, v0: 3 }; // the lawn starts here; the strip by the sidewalk and side is plain verge
 function buildHouse(L, rng) {
   const half = L.half, home = L.id === 'home', cl = CLIENTS[L.client];
   const body = obm('body' + L.body, () => std(L.body, 0.9)), roofM = obm('roof' + L.roof, () => std(L.roof, 0.85));
@@ -1227,7 +1246,7 @@ function buildHouse(L, rng) {
   [[-half + 0.35, 36.85, half - 0.35, 37.0], [-half + 0.35, 21.0, -half + 0.5, 37], [half - 0.5, 21.0, half - 0.35, 37], [-half + 0.35, 20.95, -9, 21.1], [4, 20.95, 10.5, 21.1]]
     .forEach(([a, b, c, d]) => boxAt(lrect(L, a, b, c, d), 0, fh, M.fence, true));
   // yards
-  const front = new Yard(L.id + '_front', L.id, 'Front yard', lrect(L, -half + 1, 0.4, 3.9, 10.15), rng);
+  const front = new Yard(L.id + '_front', L.id, 'Front yard', lrect(L, FRONT_YARD.u0, FRONT_YARD.v0, 3.9, 10.15), rng);
   front.exclRect(lrect(L, -3.25, -1, -1.75, 12));
   const back = new Yard(L.id + '_back', L.id, 'Back yard', lrect(L, -half + 0.9, 21.35, half - 0.9, 36.6), rng);
   back.exclRect(lrect(L, -6.7, 20, 1.7, 24.7));
@@ -2112,12 +2131,13 @@ function perfectStripe(Y) {
 }
 /* ---------- COMBO STREAK ----------
    Keep cutting fresh grass without stopping or crashing → streak climbs, every 20 = next tier
-   (x1.5 … x5). Stop for a moment and it BANKS into cash (paid on the job receipt).
+   (x1.5 … x6, top tier at 240). Stop for 5 seconds and it BANKS into cash (paid on the job receipt);
+   the timer drains at half speed while you're driving, so turning a row or moving to the next yard is safe.
    Crash / gnome / flowers / dog = streak LOST. Close calls past obstacles feed the streak. */
-const COMBO_WINDOW = 1.7, COMBO_TIER = 20, COMBO_MAX = 8;
-const TIER_NAMES = ['', 'NICE!', 'GREAT!', 'ON FIRE!', 'SUPER!', 'UNSTOPPABLE!', 'INSANE!', 'MOW GOD!', 'LAWN LEGEND!'];
-const TIER_COLS = ['#ffffff', '#b6f56a', '#b6f56a', '#ffcf4a', '#ffcf4a', '#ff8a2a', '#ff5a3a', '#ff4ad8', '#7ed4ff'];
-const comboMult = t => 1 + t * 0.5;
+const COMBO_WINDOW = 5, COMBO_TIER = 20, COMBO_MAX = 12;
+const TIER_NAMES = ['', 'NICE!', 'GREAT!', 'ON FIRE!', 'SUPER!', 'UNSTOPPABLE!', 'INSANE!', 'MOW GOD!', 'LAWN LEGEND!', 'TURF TITAN!', 'GRASS GOD!', 'BLADE MASTER!', 'KING OF THE LAWN!'];
+const TIER_COLS = ['#ffffff', '#b6f56a', '#b6f56a', '#ffcf4a', '#ffcf4a', '#ff8a2a', '#ff5a3a', '#ff4ad8', '#7ed4ff', '#7ed4ff', '#c89bff', '#c89bff', '#ffffff'];
+const comboMult = t => t <= 8 ? 1 + t * 0.5 : 5 + (t - 8) * 0.25; // the top tiers climb slower so bonuses don't outgrow the job pay
 function comboState() { return Game.combo || (Game.combo = { pts: 0, n: 0, tier: 0, timer: 0, cells: 0, paid: 0 }); }
 function updateCombo(dt) {
   const C = comboState(), M = Game.mw, j = activeJob();
@@ -2128,7 +2148,7 @@ function updateCombo(dt) {
     C.pts += cells / step; C.timer = COMBO_WINDOW; C.cells += cells; C.paid += paid * comboMult(C.tier);
     const n = Math.floor(C.pts);
     if (n > C.n) { C.n = n; const tier = Math.min(COMBO_MAX, Math.floor(n / COMBO_TIER)); if (tier > C.tier) { C.tier = tier; comboTierUp(tier); } }
-  } else if (C.n > 0) { C.timer -= dt; if (C.timer <= 0) bankCombo(); }
+  } else if (C.n > 0) { C.timer -= dt * (Game.mode !== 'foot' && Math.abs(M.fv) > 0.4 ? 0.5 : 1); if (C.timer <= 0) bankCombo(); }
   // sparks off the deck when you're on fire
   if (C.tier >= 3 && cells > 0 && Game.mode !== 'foot' && Math.random() < 0.5) FX.spark.spawn(M.x + rand(-0.5, 0.5), M.y + 0.3, M.z + rand(-0.5, 0.5), rand(-1, 1), rand(1, 2.5), rand(-1, 1), 0.5, rand(0.5, 1), C.tier >= 5 ? COL.flame : COL.gold2, 0);
 }
@@ -2138,7 +2158,7 @@ function addCombo(pts, why, color) {
   if (why) { const src = Game.mode === 'foot' ? Game.pl : Game.mw; floatText(why, src.x, (src.y || 0) + 2.1, src.z, color || '#7ed4ff', 24); }
 }
 function comboTierUp(t) {
-  Sfx.comboUp(t); trauma = Math.max(trauma, 0.08 + t * 0.02);
+  Sfx.comboUp(Math.min(t, 8)); trauma = Math.max(trauma, 0.08 + Math.min(t, 8) * 0.02);
   const src = Game.mode === 'foot' ? Game.pl : Game.mw; floatText('x' + comboMult(t) + ' ' + TIER_NAMES[t], src.x, (src.y || 0) + 2.5, src.z, TIER_COLS[t], 26 + t * 2);
   const el = $('#comboMult'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
 }
@@ -2182,7 +2202,7 @@ function checkCloseCalls() {
 function updateComboHud() {
   const C = comboState(), el = $('#combo'), on = C.n >= 5;
   el.classList.toggle('on', on);
-  const glow = $('#comboGlow'); glow.style.opacity = C.tier >= 3 ? (0.25 + (C.tier - 3) * 0.12) * (0.75 + 0.25 * Math.sin(Game.t * 8)) : 0; glow.style.setProperty('--gc', TIER_COLS[C.tier]);
+  const glow = $('#comboGlow'); glow.style.opacity = C.tier >= 3 ? (0.25 + (Math.min(C.tier, 8) - 3) * 0.12) * (0.75 + 0.25 * Math.sin(Game.t * 8)) : 0; glow.style.setProperty('--gc', TIER_COLS[C.tier]);
   if (!on) return;
   setHTML('comboMult', 'x' + comboMult(C.tier)); setHTML('comboCount', C.n + ' STREAK' + (C.tier ? ' · ' + TIER_NAMES[C.tier] : ''));
   el.style.color = TIER_COLS[C.tier]; $('#comboFill').style.width = (C.timer / COMBO_WINDOW * 100) + '%';
@@ -2342,6 +2362,7 @@ function postJobs() {
     list.push({ id: 'j' + S.day + '_' + c.L.id, lot: c.L.id, client: c.L.client, yards: ys, pay: jobPay(c.L.id, ys), day: S.day });
   }
   S.jobs = { day: S.day, list };
+  const seen = {}; list.forEach(j => { if (S.jobsSeen[j.id]) seen[j.id] = 1; }); S.jobsSeen = seen; // forget old days
 }
 // Job requirements & difficulty (shown on the Jobs screen, enforced when accepting)
 function jobReq(j) {
@@ -2669,6 +2690,12 @@ function updateHud(dt) {
   badge('bdgJobs', S.active ? '' : S.jobs.list.length || ''); badge('bdgQuests', questsReady() || '');
   badge('bdgShop', MOWER_ORDER.filter(id => !S.owned.includes(id) && !mowerLock(id) && S.money >= MOWERS[id].price).length || '');
   badge('bdgPass', 'T' + passTier());
+  // red box + red arrow on the HUD buttons when there's something you can do right now
+  const st = S.settings;
+  $('#btnShop').classList.toggle('redHL', !!st.hlAfford && MOWER_ORDER.some(id => !S.owned.includes(id) && !mowerLock(id) && S.money >= MOWERS[id].price));
+  $('#btnJobs').classList.toggle('redHL', !!st.hlJobs && !S.active && S.jobs.list.some(j => !S.jobsSeen[j.id] && jobReq(j).ok));
+  $('#btnQuests').classList.toggle('redHL', !!st.hlAfford && questsReady() > 0);
+  checkAffordPopup();
   const j = activeJob(), jp = $('#jobPanel'), bc = $('#boostChip');
   bc.style.display = Game.boostT > 0 ? 'inline-flex' : 'none'; if (Game.boostT > 0) setHTML('boostChip', `⚡ Boost ${Math.ceil(Game.boostT)}s`);
   if (Race.on) jp.style.display = 'none';
@@ -2780,12 +2807,14 @@ function openPhone(app = 'home') { if (Game.state !== 'play') return; unlockMous
 function closePhone() { Game.state = 'play'; showScreen(null); lockMouse(); }
 // The phone only does three things now: call Mom, the town map, and your stats
 function renderPhone() {
-  const a = ['home', 'map', 'stats'].includes(Phone.app) ? Phone.app : (Phone.app = 'home'), titles = { home: '', map: '🗺️ Town Map', stats: '📊 Stats' };
+  const a = ['home', 'map', 'stats', 'settings'].includes(Phone.app) ? Phone.app : (Phone.app = 'home'), titles = { home: '', map: '🗺️ Town Map', stats: '📊 Stats', settings: '⚙️ Settings' };
   let body = '';
   if (a === 'home') {
-    const apps = [['mom', '📞', 'Call Mom', '#7a2a5a'], ['map', '🗺️', 'Map', '#2a5a8a'], ['stats', '📊', 'Stats', '#4a4a6a']];
+    const apps = [['mom', '📞', 'Call Mom', '#7a2a5a'], ['map', '🗺️', 'Map', '#2a5a8a'], ['stats', '📊', 'Stats', '#4a4a6a'], ['settings', '⚙️', 'Settings', '#3a5a3a']];
     body = `<div class="apps">${apps.map(([id, ic, n, c]) => `<button class="app btn" data-act="app" data-arg="${id}"><i style="background:${c}">${ic}</i>${n}</button>`).join('')}</div>
       <div class="small muted" style="text-align:center">📞 Mom brings gas wherever you are ($15).</div>`;
+  } else if (a === 'settings') {
+    body = phoneSettingsHTML();
   } else if (a === 'map') {
     body = `<canvas id="mapCanvas" width="372" height="172"></canvas><div class="small muted">Click the map to set a waypoint. 🏠 home · ⛽ gas · 🔧 upgrade stall · 🏁 speedway · 🌳 Maple Park · ⚽ sports field · gold outlines = jobs.</div><button class="btn" data-act="clearWp">Clear waypoint</button>`;
   } else if (a === 'stats') {
@@ -2925,6 +2954,7 @@ function renderSettings() {
   const opt = (k, label, vals) => `<div class="setRow"><label>${label}</label><div class="opts">${vals.map(([v, n]) => `<button class="btn ${String(st[k]) === String(v) ? 'sel' : ''}" data-act="setOpt" data-arg="${k}|${v}">${n}</button>`).join('')}</div></div>`;
   $('#scr-settings').innerHTML = `<div class="dlg panel scroll"><div class="dlgHead"><h2>⚙️ SETTINGS</h2><button class="btn" data-act="settingsBack" data-autofocus>✕ Back</button></div>
     <div class="lbl">Audio</div>${sl('master', 'Master volume')}${sl('sfx', 'Effects')}${sl('engine', 'Engine')}${sl('amb', 'Ambience')}${sl('music', 'Boombox radio')}
+    <div class="lbl">Helpers</div>${opt('hlAfford', 'Red box on things you can afford', [[true, 'On'], [false, 'Off']])}${opt('hlJobs', 'Red box on new jobs', [[true, 'On'], [false, 'Off']])}${opt('popUpg', 'Upgrade pop-up', [[true, 'On'], [false, 'Off']])}${opt('popQuest', 'Quest pop-ups', [[true, 'On'], [false, 'Off']])}${opt('weather', 'Weather effects', [[true, 'On'], [false, 'Off']])}
     <div class="lbl">Graphics</div>${opt('quality', 'Quality', [['auto', 'Auto'], ['low', 'Low'], ['medium', 'Medium'], ['high', 'High']])}
     <div class="small muted">Low = fewer grass blades, no shadows, 1× resolution — best for school laptops. Running: ${qName()}.</div>
     <div class="lbl">Lawn mower</div>${opt('mowerCtl', 'Lawn mower controls', [['wasd', 'WASD (no mouse)'], ['mouse', 'Mouse turns + W to go']])}<div class="small muted">Only affects driving/pushing a mower — walking stays the same. WASD: W/S forward/back, A/D turn, mouse does nothing. Mouse: click to capture the mouse, move it to turn, hold W to go.</div>${sl('shake', 'Camera shake', 1.5)}${sl('sens', 'Mouse sensitivity', 2)}${opt('fps', 'Show FPS', [[true, 'On'], [false, 'Off']])}
@@ -2957,7 +2987,7 @@ const ACT = {
   mpJoinRoom: a => mpStart('join', a), mpRooms: () => { Net.roomsT = false; mpLoadRooms(); }, mpRetry: () => { netInit(); netConnect(); },
   raceTown: () => { if (Game.state === 'paused') { Game.state = 'play'; showScreen(null); } endRace(); },
   dlg: a => { const o = Game.dialog && Game.dialog.opts[+a]; if (o && !o.disabled) o.act(); },
-  app: a => { if (a === 'close') return closePhone(); if (a === 'settings') { Game.settingsFrom = 'phone'; renderSettings(); showScreen('settings'); return; } if (a === 'mom') { callMom(); renderPhone(); return; } Phone.app = a; renderPhone(); },
+  app: a => { if (a === 'close') return closePhone(); if (a === 'mom') { callMom(); renderPhone(); return; } Phone.app = a; renderPhone(); },
   acceptJob: a => { acceptJob(a); renderPhone(); }, cancelJob: () => { cancelJob(); renderPhone(); },
   waypoint: a => { const L = Town.lotsById[a]; Game.waypoint = { x: L.door.x, z: L.door.z, label: L.client ? CLIENTS[L.client].short : a }; toast('📍 Waypoint set', Game.waypoint.label); },
   clearWp: () => { Game.waypoint = null; drawPhoneMap(); },
@@ -2972,6 +3002,8 @@ const ACT = {
   shopBuy: a => { if (buyMower(a)) { Menu.just = a; } renderMenu(); },
   shopUse: a => { if (equipMower(a)) closeMenu(); else renderMenu(); },
   questClaim: a => { claimQuest(a); renderMenu(); },
+  affordShow: () => { hideAffordPop(); if (Town.stall) { Game.waypoint = { x: Town.stall.x, z: Town.stall.z, label: 'Upgrade Stall' }; toast('📍 Follow the gold beam', 'Ray\'s Upgrade Stall — press E at the counter', 'var(--gold)'); } },
+  affordClose: () => hideAffordPop(), phoneSet: a => phoneSet(a),
   stallBuy: a => { if (Menu.confirm !== a) { Menu.confirm = a; renderMenu(); focusAct('stallBuy', a); return; } Menu.confirm = null; buyUpgrade(a); renderMenu(); focusAct('stallBuy', a); },
   tutStart: () => tutStart(), tutSkip: () => tutSkip(), tutNext: () => tutNext(),
   buyTool: a => { const p = a === 'trimmer' ? TRIMMER_PRICE : GASCAN_PRICE; if (a === 'trimmer' ? S.hasTrimmer : S.hasGasCan) return; if (S.money < p) { Sfx.error(); toast('Not enough money', money(p), 'var(--bad)'); return; } S.money -= p; if (a === 'trimmer') S.hasTrimmer = true; else { S.hasGasCan = true; S.gasCan = 0; } Sfx.cash(); toast('🧰 Bought ' + (a === 'trimmer' ? 'a string trimmer' : 'a gas can'), a === 'trimmer' ? 'Press T on foot to use it.' : 'Fill it at the Pump & Go.'); renderBench(); },
@@ -3744,7 +3776,9 @@ function buildInteriors() {
   Interior.store = { g: s, clerk, spawn: { x: 0, z: STORE.D / 2 - 0.9 }, clerkPos: { x: 2.6, z: -STORE.D / 2 + 3.3 }, exit: { x: 0, z: STORE.D / 2 - 0.4 } };
   roomColliders(STORE_O, STORE.W, STORE.D, [[0.85, -STORE.D / 2 + 2.05, 4.35, -STORE.D / 2 + 2.95, 1.1], [1.3, -STORE.D / 2, 3.9, -STORE.D / 2 + 0.5, 2], [-4.6, -1.45, -3.8, 2.65, 1.7], [-2.6, -1.45, -1.8, 2.65, 1.7], [-0.6, -1.45, 0.2, 2.65, 1.7], [-STORE.W / 2, -STORE.D / 2 + 0.75, -STORE.W / 2 + 0.9, -STORE.D / 2 + 4.05, 2.2]]);
   Interior.light = new THREE.PointLight(0xfff2dd, 0, 16, 1.6); scene.add(Interior.light);
+  showRoom(Interior.house, false); showRoom(Interior.store, false); // rooms only exist while you're inside them
 }
+function showRoom(R, on) { const n = R.npc || R.clerk; R.g.visible = on; n.P.root.visible = on; n.tag.visible = on; }
 function enterBuilding(kind, L) {
   if (Game.mode !== 'foot' || Interior.busy || Interior.cur) return; Interior.busy = true; Sfx.door();
   fadeOut(() => {
@@ -3760,7 +3794,7 @@ function enterBuilding(kind, L) {
       Interior.items = [{ kind: 'exit', x: o.x + R.exit.x, z: o.z + R.exit.z, r: 1.4 }, { kind: 'npc', name, lot: L, x: o.x + R.npcPos.x, z: o.z + R.npcPos.z + 0.9, r: 1.9 }];
       if (L.id === 'home') Interior.items.push({ kind: 'bed', x: o.x + R.bedPos.x - 0.9, z: o.z + R.bedPos.z, r: 1.6 });
     }
-    Interior.cur = { kind, L, back, o, R };
+    Interior.cur = { kind, L, back, o, R }; showRoom(R, true);
     Object.assign(Game.pl, { x: o.x + R.spawn.x, z: o.z + R.spawn.z, h: Math.PI, vx: 0, vz: 0 }); Game.cam.yaw = Math.PI; Game.cam.pitch = 0.32; Game.trimOn = false;
     Interior.light.position.set(o.x, 2.7, o.z); Interior.light.intensity = 1.6;
     toast(kind === 'store' ? '🏪 Pump & Go' : CLIENTS[L.client].own ? '🏠 Home' : '🏡 ' + esc(CLIENTS[L.client].name) + '\'s house', 'Talk with E · the door takes you back outside', 'var(--sky)');
@@ -3768,7 +3802,7 @@ function enterBuilding(kind, L) {
 }
 function leaveInteriorNow() {
   const b = Interior.cur.back; Object.assign(Game.pl, { x: b.x - Math.sin(b.h) * 0.6, z: b.z - Math.cos(b.h) * 0.6, h: b.h + Math.PI, vx: 0, vz: 0 }); Game.cam.yaw = Game.pl.h;
-  Interior.cur = null; Interior.items = []; Interior.light.intensity = 0;
+  showRoom(Interior.cur.R, false); Interior.cur = null; Interior.items = []; Interior.light.intensity = 0;
 }
 function exitBuilding() { if (!Interior.cur || Interior.busy) return; Interior.busy = true; Sfx.door(); fadeOut(() => { Interior.busy = false; if (Interior.cur) leaveInteriorNow(); }); }
 function updateInterior(dt) {
@@ -3788,11 +3822,14 @@ function openMenu(name) {
   if (!['play', 'menu', 'bench'].includes(Game.state)) return;
   if (Race.on && name !== 'pass') { Sfx.error(); toast('Not during a race', 'Finish or quit the race first.', 'var(--gold)'); return; }
   if (Game.dialog) closeDialog();
-  if (Game.state !== 'menu') Menu.from = Game.state;
+  if (Game.state !== 'menu') Menu.from = Game.state; else if (Menu.cur === 'jobs') markJobsSeen();
+  if (name === 'stall') hideAffordPop();
   unlockMouse(); Game.state = 'menu'; Menu.cur = name; Menu.confirm = null; Menu.just = null; Game.keys = {};
   renderMenu(); showScreen('menu'); Sfx.phone(); tutEvent(name);
 }
+function markJobsSeen() { S.jobs.list.forEach(j => S.jobsSeen[j.id] = 1); }
 function closeMenu() {
+  if (Menu.cur === 'jobs') markJobsSeen(); // jobs you've looked at stop being "new"
   Menu.cur = null; Menu.confirm = null; save();
   if (Menu.from === 'bench') { Game.state = 'bench'; renderBench(); showScreen('bench'); return; }
   Game.state = 'play'; showScreen(null); lockMouse();
@@ -3806,6 +3843,59 @@ function renderMenu() {
   tutUI(true);
 }
 const menuHead = (title, sub) => `<div class="dlgHead"><div><h2>${title}</h2>${sub ? `<div class="small muted" style="margin-top:2px">${sub}</div>` : ''}</div><div class="row"><span class="chip cash">${money(S.money)}</span><button class="btn" data-act="closeMenu" aria-label="Close">✕</button></div></div>`;
+
+/* ---------- "You can afford an upgrade!" pop-up ---------- */
+const Help = { popped: new Set(), slot: null, popT: null, t: 0 };
+function checkAffordPopup() {
+  if (Help.slot !== SLOT) { Help.slot = SLOT; Help.popped = new Set(); }
+  if (!S.started || !S.settings.popUpg || S.tut.state === 'active' || Race.on || Game.state !== 'play' || Game.cine) return;
+  if ((Help.t -= 0.1) > 0) return; Help.t = 0.5;
+  const can = UPGRADES.filter(u => S.upgrades[u.id] < UPG_MAX && S.money >= upgCost(u, S.upgrades[u.id]));
+  const fresh = can.filter(u => !Help.popped.has(u.id + ':' + S.upgrades[u.id])); // each level pops once
+  if (!fresh.length) return;
+  fresh.forEach(u => Help.popped.add(u.id + ':' + S.upgrades[u.id]));
+  showAffordPop(fresh.sort((a, b) => (b.key ? 1 : 0) - (a.key ? 1 : 0))[0], can.length);
+}
+function showAffordPop(u, n) {
+  const l = S.upgrades[u.id], el = $('#affordPop');
+  el.innerHTML = `<div class="ah"><span class="redArrow"></span><div class="ai">${u.icon}</div><div style="flex:1"><h4>You can afford an upgrade!</h4>
+    <div class="small"><b>${u.name}</b> level ${l + 1} costs <b class="cash">${money(upgCost(u, l))}</b> — you have ${money(S.money)}.${n > 1 ? ` (${n} upgrades affordable)` : ''}</div>
+    <div class="small muted">Buy it at Ray's Upgrade Stall, next to the Pump & Go (🔧 on the map).</div></div></div>
+    <div class="ab"><button class="btn gold" data-act="affordShow">📍 Show me the way</button><button class="btn" data-act="affordClose">✕ Later</button></div>`;
+  el.style.display = 'block'; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; Sfx.unlock();
+  clearTimeout(Help.popT); Help.popT = setTimeout(() => el.style.display = 'none', 9000);
+}
+function hideAffordPop() { $('#affordPop').style.display = 'none'; clearTimeout(Help.popT); }
+
+/* ---------- Phone → Settings: quick on/off switches ---------- */
+const PHONE_SETTINGS = [
+  { k: 'hlAfford', icon: '🟥', name: 'Red box on things you can afford', sub: 'Mowers, upgrades & quest rewards get a red outline + arrow' },
+  { k: 'hlJobs',   icon: '🆕', name: 'Red box on new jobs',              sub: 'New jobs and the Jobs button get a red outline + arrow' },
+  { k: 'popUpg',   icon: '⚡', name: '"You can afford an upgrade" pop-up', sub: 'Pops up when you have enough for an upgrade at Ray\'s stall' },
+  { k: 'popQuest', icon: '🎯', name: 'Quest-complete pop-ups',           sub: 'A message when a quest reward is ready to claim' },
+  { k: 'weather',  icon: '🍂', name: 'Weather effects',                  sub: 'Falling leaves, snow and petals (turn off for more FPS)' },
+  { k: 'shake',    icon: '📳', name: 'Camera shake',                     sub: 'Bumps & crashes shake the screen', on: s => s.shake > 0 },
+  { k: 'muted',    icon: '🔇', name: 'Mute all sound',                   sub: 'Engine, music and effects' },
+  { k: 'fps',      icon: '📊', name: 'Show FPS',                         sub: 'Frame counter in the corner' },
+  { k: 'mowerCtl', icon: '🕹️', name: 'Mower controls',                   sub: 'WASD = keys only · Mouse = mouse steers, W to go', val: s => s.mowerCtl === 'mouse' ? 'Mouse' : 'WASD' },
+  { k: 'quality',  icon: '🖥️', name: 'Graphics quality',                 sub: 'Low is smoothest on school laptops', val: s => ({ auto: 'Auto', low: 'Low', medium: 'Medium', high: 'High' })[s.quality] }
+];
+function phoneSettingsHTML() {
+  const s = S.settings;
+  return PHONE_SETTINGS.map(o => `<button class="tgl" data-act="phoneSet" data-arg="${o.k}"><span style="font-size:20px">${o.icon}</span><span class="tl">${o.name}<small>${o.sub}</small></span>${o.val ? `<span class="val">${o.val(s)}</span>` : `<span class="sw ${(o.on ? o.on(s) : !!s[o.k]) ? 'on' : ''}"></span>`}</button>`).join('')
+    + '<div class="small muted" style="text-align:center">More (volume, sensitivity) in Pause → Settings.</div>';
+}
+function phoneSet(k) {
+  const s = S.settings;
+  if (k === 'shake') s.shake = s.shake > 0 ? 0 : 1;
+  else if (k === 'mowerCtl') { s.mowerCtl = s.mowerCtl === 'mouse' ? 'wasd' : 'mouse'; if (s.mowerCtl === 'wasd') unlockMouse(); }
+  else if (k === 'quality') { const q = ['auto', 'low', 'medium', 'high']; s.quality = q[(q.indexOf(s.quality) + 1) % q.length]; if (s.quality === 'auto') autoQ = 'medium'; applyQuality(); }
+  else s[k] = !s[k];
+  if (k === 'muted') Sfx.apply();
+  if (k === 'fps' && !s.fps && $('#fpsBox')) $('#fpsBox').textContent = '';
+  if (k === 'popUpg' && !s.popUpg) hideAffordPop();
+  Sfx.click(); save(); renderPhone();
+}
 
 /* ---------- Jobs (the job board) ---------- */
 const jobIcon = j => j.client === 'home' ? '🏠' : CLIENTS[j.client].big ? '🏟️' : '🏡';
@@ -3824,12 +3914,12 @@ function jobsHTML() {
   if (!list.length) h += '<div class="small muted">No more jobs today. Lawns grow overnight — sleep in your bed at home for new work.</div>';
   list.forEach(j => {
     const cl = CLIENTS[j.client], L = Town.lotsById[j.lot], d = Math.round(Math.hypot(me.x - L.door.x, me.z - L.door.z)), dif = jobDifficulty(j), req = jobReq(j);
-    const why = S.active ? 'Finish or cancel your current job first' : !req.ok ? req.text : '';
-    h += `<div class="qcard"><div class="ic">${jobIcon(j)}</div><div class="t"><h4>${esc(cl.name)}${j.tut ? ' <span class="tag ok">TUTORIAL</span>' : ''}</h4>
+    const why = S.active ? 'Finish or cancel your current job first' : !req.ok ? req.text : '', isNew = !S.jobsSeen[j.id], hot = S.settings.hlJobs && isNew && !why;
+    h += `<div class="qcard ${hot ? 'redHL' : ''}"><div class="ic">${jobIcon(j)}</div><div class="t"><h4>${esc(cl.name)}${isNew ? ' <span class="tag no">🆕 NEW</span>' : ''}${j.tut ? ' <span class="tag ok">TUTORIAL</span>' : ''}</h4>
       <small>${j.yards.map(id => Yards.byId[id].part).join(' + ')} · ${jobArea(j)} m² · ${Yards.byId[j.yards[0]].grassType} · ${d} m away</small>
       <span class="tag ${dif.cls}">${'●'.repeat(dif.stars)} ${dif.label}</span><span class="tag ${req.ok ? 'ok' : 'no'}">${req.ok ? '✔' : '✖'} ${req.text}</span><span class="tag">🎟️ ~${jobXP(j)} XP</span>${S.clientStars[j.client] ? `<span class="tag">last time ${'★'.repeat(S.clientStars[j.client])}</span>` : ''}
       ${why ? `<small style="color:var(--bad)">${why}</small>` : ''}</div>
-      <div class="side"><b class="cash" style="font-size:17px">${money(j.pay)}</b><small class="muted">+ tip up to 40%</small><button class="btn ${why ? '' : 'primary'}" style="font-size:14px;padding:8px 14px" data-act="questAccept" data-arg="${j.id}" ${j.tut ? 'data-tut="1"' : ''} ${why ? 'disabled' : ''}>${guest ? 'Ask host' : '✔ Accept'}</button><button class="btn" data-act="questRoute" data-arg="${j.lot}" aria-label="Route">📍 Route</button></div></div>`;
+      <div class="side"><b class="cash" style="font-size:17px">${money(j.pay)}</b><small class="muted">+ tip up to 40%</small><div class="row" style="gap:4px">${hot ? '<span class="redArrow"></span>' : ''}<button class="btn ${why ? '' : 'primary'}" style="font-size:14px;padding:8px 14px" data-act="questAccept" data-arg="${j.id}" ${j.tut ? 'data-tut="1"' : ''} ${why ? 'disabled' : ''}>${guest ? 'Ask host' : '✔ Accept'}</button></div><button class="btn" data-act="questRoute" data-arg="${j.lot}" aria-label="Route">📍 Route</button></div></div>`;
   });
   const ch = STORY[S.story.step];
   if (ch) h += `<div class="lbl">Story goal (optional)</div><div class="story"><h4>CHAPTER ${S.story.step + 1} · ${esc(ch.title).toUpperCase()}</h4><p>${esc(ch.text)}</p><div class="small"><b>Goal:</b> ${esc(ch.goal)} · reward ${money(ch.reward)} + 25 Pass XP</div></div>`;
@@ -3893,14 +3983,14 @@ function shopHTML() {
   let h = `<div class="mdlg panel" style="width:min(940px,96vw)">${menuHead('🛒 MOWER SHOP', 'Delivered instantly · Ray\'s speed & fuel upgrades apply to every mower')}<div class="mbody"><div class="mgrid">`;
   MOWER_ORDER.forEach(id => {
     const m = MOWERS[id], st = mowerStats(id), own = S.owned.includes(id), eq = S.mower === id, lock = mowerLock(id), afford = S.money >= m.price;
-    const cls = eq ? 'eq' : own ? 'own' : lock ? 'lock' : afford ? '' : 'cant';
+    const hot = S.settings.hlAfford && !own && !lock && afford, cls = (eq ? 'eq' : own ? 'own' : lock ? 'lock' : afford ? '' : 'cant') + (hot ? ' redHL' : '');
     const rib = eq ? ['✔ IN USE', 'var(--acc)'] : own ? ['OWNED', 'var(--cash)'] : lock ? ['🔒 LOCKED', 'var(--mut)'] : afford ? ['✔ AFFORDABLE', 'var(--gold)'] : ['NEED ' + money(m.price - S.money), 'var(--bad)'];
     const btn = eq ? '<button class="btn" disabled>✔ In use</button>'
       : own ? `<button class="btn primary" style="font-size:14px;padding:8px" data-act="shopUse" data-arg="${id}">${Menu.just === id ? '🚚 Use it now!' : 'Use this mower'}</button>`
       : `<button class="btn ${!lock && afford ? 'gold' : ''}" data-act="shopBuy" data-arg="${id}" ${id === tut ? 'data-tut="1"' : ''}>${lock ? '🔒 ' : 'Buy · '}${money(m.price)}</button>`;
     h += `<div class="mcard ${cls}"><img src="${mowerThumb(id)}" alt="${esc(m.name)}"><span class="ribbon" style="color:${rib[1]}">${rib[0]}</span><h4>${m.icon} ${m.name}</h4><div class="ty">${m.type} · ${m.push ? 'you push it' : 'ride-on'}</div>
       <div class="st">${bar('Mowing', m.width * st.speed, 20, Math.round(m.width * st.speed * 60) + ' m²/m')}${bar('Cut width', m.width, 2.6, Math.round(m.width * 100) + ' cm')}${bar('Speed', st.speed, 8, st.speed.toFixed(1) + ' m/s')}${bar('Fuel tank', st.tank, 50, st.tank.toFixed(1) + ' L')}${bar('Handling', m.turn, 3.2, m.zero ? 'spins!' : m.turn.toFixed(1))}</div>
-      <small class="muted" style="font-size:11px;min-height:28px">${lock ? '🔒 ' + lock : esc(m.desc)}</small>${btn}</div>`;
+      <small class="muted" style="font-size:11px;min-height:28px">${lock ? '🔒 ' + lock : esc(m.desc)}</small>${hot ? `<div class="hotRow"><span class="redArrow"></span>${btn}</div>` : btn}</div>`;
   });
   return h + '</div><div class="small muted">Mowing = how many m² a minute it can cut. The first six mowers are close in price — the pro machines unlock as you finish more jobs.</div></div></div>';
 }
@@ -3925,9 +4015,10 @@ function stallHTML() {
       : u.id === 'tank' ? `Fuel tank <b>${a.tank.toFixed(2)} L</b> → <b>${b.tank.toFixed(2)} L</b> · ~${mowMinutes(id, a.tank)} → ~${mowMinutes(id, b.tank)} min of mowing`
       : u.id === 'blades' ? `Tip bonus <b>+${(l * 2.5).toFixed(1)}%</b> → <b>+${((l + 1) * 2.5).toFixed(1)}%</b>`
       : `Steering <b>${a.turn.toFixed(2)}</b> → <b>${b.turn.toFixed(2)}</b> · grip +${(l * 8)}% → +${((l + 1) * 8)}%`;
-    h += `<div class="ucard ${u.key ? 'key' : ''}"><div class="ic">${u.icon}</div><div class="t"><h4>${u.name} · level ${l}/${UPG_MAX}</h4><div class="pips">${Array.from({ length: UPG_MAX }, (_, i) => `<i class="${i < l ? 'on' : ''}"></i>`).join('')}</div>
+    const hot = S.settings.hlAfford && !max && afford;
+    h += `<div class="ucard ${u.key ? 'key' : ''} ${hot ? 'redHL' : ''}"><div class="ic">${u.icon}</div><div class="t"><h4>${u.name} · level ${l}/${UPG_MAX}</h4><div class="pips">${Array.from({ length: UPG_MAX }, (_, i) => `<i class="${i < l ? 'on' : ''}"></i>`).join('')}</div>
       <div class="small muted">${u.desc}</div><div class="cmp">${max ? '✔ Fully upgraded' : cmp}</div>${!max && !afford ? `<div class="small" style="color:var(--bad)">Need ${money(c - S.money)} more</div>` : ''}</div>
-      ${max ? '<button class="btn" disabled>MAX</button>' : `<button class="btn ${conf ? 'primary' : afford ? 'gold' : ''}" style="${conf ? 'font-size:14px;padding:9px 12px' : ''}" data-act="stallBuy" data-arg="${u.id}">${conf ? `✔ Confirm ${money(c)}` : `Upgrade · ${money(c)}`}</button>`}</div>`;
+      ${hot ? '<span class="redArrow"></span>' : ''}${max ? '<button class="btn" disabled>MAX</button>' : `<button class="btn ${conf ? 'primary' : afford ? 'gold' : ''}" style="${conf ? 'font-size:14px;padding:9px 12px' : ''}" data-act="stallBuy" data-arg="${u.id}">${conf ? `✔ Confirm ${money(c)}` : `Upgrade · ${money(c)}`}</button>`}</div>`;
   });
   return h + '<div class="small muted">Click <b>Upgrade</b>, then <b>Confirm</b>. Each level costs more than the last. Upgrades are saved with your game.</div></div></div>';
 }
@@ -4046,7 +4137,7 @@ function tutUI(force) {
   const sel = typeof st.hl === 'function' ? st.hl() : st.hl, el = sel ? [...document.querySelectorAll(sel)].find(e => e.offsetParent !== null) : null;
   if (el !== Tut.hlEl) { if (Tut.hlEl) Tut.hlEl.classList.remove('tutHL'); if (el) el.classList.add('tutHL'); Tut.hlEl = el; }
   const hudOn = !$('#hud').classList.contains('hidden'), tl = $('#hudTL').getBoundingClientRect(), inHud = el && el.closest('#hudBtns');
-  card.style.display = 'block'; card.style.top = Math.max(16, hudOn && Game.state !== 'bench' ? tl.bottom + (inHud ? 52 : 12) : 16) + 'px';
+  card.style.display = 'block'; card.style.top = Math.max(16, hudOn && Game.state !== 'bench' ? tl.bottom + (inHud || document.querySelector('#hudBtns .redHL') ? 52 : 12) : 16) + 'px';
   if (el) {
     const r = el.getBoundingClientRect(); arrow.style.display = 'block';
     if (inHud) { arrow.textContent = '👆'; arrow.style.left = (r.left + r.width / 2 - 17) + 'px'; arrow.style.top = (r.bottom + 2) + 'px'; }
@@ -4098,7 +4189,7 @@ function seasonChanged() {
 // falling leaves (autumn), snow (winter) and blossom petals (spring) around the camera
 const Weather = { kind: null, p: null, acc: 0 };
 function updateWeather(dt) {
-  const k = Weather.kind; if (!k || Interior.cur || Q().density < 10) { if (Weather.p) Weather.p.update(dt); return; }
+  const k = S.settings.weather ? Weather.kind : null; if (!k || Interior.cur || Q().density < 10) { if (Weather.p) Weather.p.update(dt); return; }
   if (!Weather.p) Weather.p = new Particles(520, new THREE.PlaneGeometry(1, 0.7), new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide }), { gravity: 0.22, drag: 0.6 });
   const rate = k === 'snow' ? 70 : k === 'leaves' ? 22 : 14, cols = k === 'snow' ? ['#ffffff', '#eef4ff'] : k === 'leaves' ? ['#d8641e', '#e8a02a', '#b0321e', '#c8801e'] : ['#ffc4dc', '#f2a6c8', '#ffffff'];
   Weather.acc += dt * rate;
@@ -4141,7 +4232,7 @@ function questRewardTags(rw) {
 }
 function questProgress() { // toast once when a quest becomes claimable
   if (!S.started) return;
-  for (const q of QUESTS) if (questDone(q) && !S.quests.claimed[q.id] && !S.quests.seen[q.id]) { S.quests.seen[q.id] = 1; Sfx.unlock(); toast(`🎯 Quest complete: ${q.name}`, 'Press Q to claim your reward!', 'var(--gold)'); }
+  for (const q of QUESTS) if (questDone(q) && !S.quests.claimed[q.id] && !S.quests.seen[q.id]) { S.quests.seen[q.id] = 1; if (!S.settings.popQuest) continue; Sfx.unlock(); toast(`🎯 Quest complete: ${q.name}`, 'Press Q to claim your reward!', 'var(--gold)'); }
 }
 function claimQuest(id) {
   const q = QUESTS.find(x => x.id === id); if (!q || S.quests.claimed[id]) return false;
@@ -4175,6 +4266,10 @@ function instanced(geo, mat, items, place, shadow = true) { // one draw call for
 }
 function dressTown() {
   const houses = LOTS.filter(L => L.kind === 'house'), white = std('#ffffff', 0.7); white.userData.shared = true;
+  // stone edging around the (smaller) front lawns, with a gap for the path
+  const { u0: fu, v0: fv } = FRONT_YARD, edge = [];
+  houses.forEach(L => { edge.push({ L, u: (fu - 3.25) / 2, v: fv - 0.09, w: -3.25 - fu, d: 0.18 }, { L, u: (-1.75 + 3.9) / 2, v: fv - 0.09, w: 5.65, d: 0.18 }, { L, u: fu - 0.09, v: (fv + 10.15) / 2, w: 0.18, d: 10.15 - fv }); });
+  instanced(new THREE.BoxGeometry(1, 0.08, 1), M.concrete, edge, (d, e) => { const p = lw(e.L, e.u, e.v); d.position.set(p.x, 0.04, p.z); d.scale.set(e.w, 1, e.d); }, false);
   // porches: a little roof on two posts over every front door
   const posts = [], roofs = [];
   houses.forEach(L => { [-3.55, -1.45].forEach(u => { const p = lw(L, u, 10.4); posts.push(p); addCol({ type: 'circle', x: p.x, z: p.z, r: 0.08 }); }); roofs.push(L); });
