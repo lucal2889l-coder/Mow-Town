@@ -433,7 +433,7 @@ const MOWERS = {
   platinum:{ id: 'platinum',model: 'zero',  look: 'platinum', name: 'Z-Spin Platinum 66', type: 'Luxury zero-turn', icon: '💎', price: 2600, speed: 6.0,  transport: 8.6, width: 1.68, tank: 18,  burn: 0.95, turn: 3.3, accel: 6,   radius: 0.86, push: false, zero: true, cam: [6.7, 4.3], req: { jobs: 17 }, desc: 'Factory platinum finish, 66" deck. Sounds like money.' },
   titan:   { id: 'titan',   model: 'titan', name: 'Fairway 5-Gang Reel', type: 'Commercial reel mower', icon: '🏟️', price: 3400, speed: 5.2,  transport: 7.5, width: 2.6,  tank: 25,  burn: 1.2,  turn: 1.7, accel: 3.5, radius: 1.05, push: false, cam: [8.8, 6.0], req: { jobs: 20 }, desc: 'Five reel units. Built for parks & sports fields.' },
   // ⚔️ limited event mowers: never for sale, you get the one you pick. Same mowing rate, different strengths.
-  scott:   { id: 'scott',   model: 'sp',    look: 'brand', limited: true, brand: 'scott', bigOK: true, name: BRAND.scott.name + ' Classic 30"', type: 'Limited reel mower', icon: '🟢', price: 0, speed: 2.9, transport: 3.2, width: 0.76, tank: 2.6, burn: 0.16, turn: 3.0, accel: 4.4, radius: 0.46, push: true,  cam: [3.6, 2.6], desc: 'Green-keeper\'s reel mower: nimble, thrifty on fuel and allowed on big jobs.' },
+  scott:   { id: 'scott',   model: 'ride',  look: 'brand', limited: true, brand: 'scott', name: BRAND.scott.name + ' Classic 30"', type: 'Limited ride-on', icon: '🟢', price: 0, speed: 2.9, transport: 3.2, width: 0.76, tank: 2.6, burn: 0.16, turn: 3.0, accel: 4.4, radius: 0.6, push: false, cam: [5.6, 3.6], desc: 'Green-keeper\'s ride-on: nimble and thrifty on fuel.' },
   rover:   { id: 'rover',   model: 'ride',  look: 'brand', limited: true, brand: 'rover', name: BRAND.rover.name + ' Mini Rider 30"', type: 'Limited ride-on', icon: '🔴', price: 0, speed: 2.9, transport: 5.2, width: 0.76, tank: 4.9, burn: 0.38, turn: 2.0, accel: 3.6, radius: 0.6, push: false, cam: [5.6, 3.6], desc: 'Compact ride-on: sit down, big tank and fast between lawns.' }
 };
 const MOWER_ORDER = ['push', 'lite', 'sp', 'wide', 'ride', 'tractor', 'zero', 'hover', 'zeropro', 'monster', 'platinum', 'titan', 'scott', 'rover'];
@@ -2452,7 +2452,7 @@ function postJobs() {
 // Job requirements & difficulty (shown on the Jobs screen, enforced when accepting)
 function jobReq(j) {
   const cl = CLIENTS[j.client];
-  if (cl.big) { const ok = S.owned.some(id => !MOWERS[id].push || MOWERS[id].bigOK); return { ok, text: 'Needs a ride-on mower (Shop)' }; }
+  if (cl.big) { const ok = S.owned.some(id => !MOWERS[id].push); return { ok, text: 'Needs a ride-on mower (Shop)' }; }
   return { ok: true, text: 'Any mower' };
 }
 function jobArea(j) { return Math.round(j.yards.reduce((s, id) => s + Yards.byId[id].total / 16, 0)); }
@@ -3992,6 +3992,7 @@ async function sendIdea() {
 
 /* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
 const UPDATES = [
+  { v: '1.10', date: 'Nov 2026', title: 'Scott Bonnar Ride-On', add: ['The Scott Bonnar Classic 30" is now a ride-on mower, with the same stats'] },
   { v: '1.9', date: 'Nov 2026', title: 'Garage & Recommendations', add: ['Rebuilt garage screen with tabs down the side and clear tiles', 'Every garage item now shows its price or how to unlock it', 'Your mowers appear as pictures in the garage', 'Recommendations button: send ideas and bug reports', 'This update log'] },
   { v: '1.8', date: 'Nov 2026', title: 'Scott Bonnar vs Rover', add: ['14-day limited event: pick a side and keep that mower', 'Two limited mowers you can\'t buy with money', 'Limited sticker and brand colour from your first lawn', 'Mow 50 lawns for the "I ♥" top'] },
   { v: '1.7', date: 'Nov 2026', title: 'Longer Streaks', add: ['Streaks last 5 seconds after you stop, 10 while driving', 'Four new streak levels up to King of the Lawn', 'Smaller front yards with stone edging', 'Fixed a house room sitting in the middle of Main Street'] },
