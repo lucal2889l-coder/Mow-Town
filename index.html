@@ -296,6 +296,12 @@ textarea.inp{resize:none;min-height:112px;line-height:1.4;display:block}.inp{use
 .evSide h3{font-size:18px;color:#fff}.evSide ul{list-style:none;font-size:12px;font-weight:700;display:flex;flex-direction:column;gap:3px}
 .evSw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid rgba(255,255,255,.5)}
 .evMine{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:12px;align-items:center;background:var(--panel2);border:3px solid var(--sc);border-radius:14px;padding:10px}
+.evWin{text-align:center;font-family:var(--display);font-size:17px;padding:9px;border-radius:12px;background:var(--sc);color:#fff}
+.evScore{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px}
+.evTeam{background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:9px 11px;display:flex;flex-direction:column;gap:4px}.evTeam .pbar{height:12px}
+.evTop{display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:700}.evTop div{display:flex;justify-content:space-between;background:var(--panel2);border-radius:8px;padding:5px 10px}
+.gAdm{width:62px;height:62px;flex:none;display:flex;align-items:center;justify-content:center;font-size:32px;border-radius:12px;background:rgba(0,0,0,.28)}
+#scr-menu .bpanel{margin:0;height:min(680px,calc(100vh - 20px))}
 .evAward{display:flex;align-items:center;gap:10px;background:var(--panel2);border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px}
 .evAward.got{border-color:var(--acc)}.evAward.max{border-color:var(--gold)}.evAward .n{font-family:var(--display);width:70px;color:var(--gold)}.evAward .r{flex:1}
 /* "you can do this now" helpers: red box + red arrow (toggle in phone → Settings) */
@@ -389,7 +395,9 @@ textarea.inp{resize:none;min-height:112px;line-height:1.4;display:block}.inp{use
 <script id="mpsdk" async src="https://mp.zdstudios.network/sdk.js"></script>
 <script>
 'use strict';
+(() => { // the whole game lives inside this function, so its money, saves and functions can't be reached from the browser console
 if (typeof THREE === 'undefined') { document.getElementById('loading').textContent = 'Could not load Three.js — check your internet connection and reload.'; throw new Error('THREE missing'); }
+{ const gl = document.createElement('canvas'); if (!(gl.getContext('webgl2') || gl.getContext('webgl'))) { document.getElementById('loading').textContent = 'Mow Town needs 3D graphics (WebGL). Try reloading, updating your browser or turning on hardware acceleration.'; throw new Error('WebGL unavailable'); } }
 
 /* =====================================================================
    0. UTILITIES
@@ -636,7 +644,7 @@ const PASS = [
 const SAVE_KEY = 'mowtown_save_v1', YARD_KEY = 'mowtown_yards_v1';
 function defaultSave() {
   return {
-    v: 2, started: false, money: 25, day: 1, clock: 8 * 60,
+    v: 3, started: false, money: 25, day: 1, clock: 8 * 60,
     tut: { state: 'new', step: 0, f: {}, bonus: 0 }, // tutorial: new → active → done | skipped
     owned: ['push'], mower: 'push', fuel: { push: 0.7 }, gasCan: 0, hasGasCan: false, hasTrimmer: false,
     upgrades: { engine: 0, blades: 0, tank: 0, tires: 0 },
@@ -651,7 +659,7 @@ function defaultSave() {
     clientDone: {}, clientStars: {},
     stats: { jobs: 0, lawns: 0, earned: 0, refuels: 0, fiveStars: 0, area: 0, gnomes: 0, litres: 0, distance: 0, tips: 0 },
     quests: { claimed: {}, seen: {} }, jobsSeen: {},
-    event: { side: null, mower: null, lawns: 0, awarded: 0 }, // ⚔️ one pick per save, can't be changed
+    event: { side: null, mower: null, lawns: 0, awarded: 0, teamLawns: 0, sentLawns: 0, sentPick: false, winSeen: false }, // ⚔️ one pick per save, can't be changed
     settings: { master: 0.8, sfx: 0.9, engine: 0.55, amb: 0.5, music: 0.5, quality: 'auto', shake: 1, fps: false, sens: 1, tips: true, mowerCtl: 'wasd',
       hlAfford: true, hlJobs: true, popUpg: true, popQuest: true, weather: true, muted: false } // helper toggles live in phone → Settings
   };
@@ -679,15 +687,21 @@ const GS = (() => { try { return Object.assign(defaultSave().settings, JSON.pars
 function readSlot(n) {
   try {
     const raw = localStorage.getItem(slotKey(n)); if (!raw) return null; const o = JSON.parse(raw), s = deepMerge(defaultSave(), o); s.settings = GS;
+    const sig = localStorage.getItem(sigKey(n)); // a save edited by hand (or a missing signature on a new save) is marked as modified
+    if (sig !== String(hashStr(SAVE_SALT + raw)) && (sig !== null || (o.v || 0) >= 3)) s.flags.modded = s.flags.modded || 'edited';
+    s.v = 3;
     if (!o.tut) s.tut.state = 'done';
-    if (!o.stats || o.stats.lawns == null) s.stats.lawns = s.stats.jobs; // older saves: estimate finished lawns                                   // saves from before the tutorial existed never get it forced on them
+    if (!o.stats || o.stats.lawns == null) s.stats.lawns = s.stats.jobs; // older saves: estimate finished lawns
+    if (o.event && o.event.teamLawns == null) s.event.teamLawns = s.event.lawns; // lawns mowed before the team scoreboard still count                                   // saves from before the tutorial existed never get it forced on them
     s.owned = s.owned.filter((id, i, a) => MOWERS[id] && a.indexOf(id) === i); if (!s.owned.includes('push')) s.owned.unshift('push'); // fix duplicate/unknown mowers
     if (!MOWERS[s.mower] || !s.owned.includes(s.mower)) s.mower = 'push';
     for (const k in s.upgrades) s.upgrades[k] = clamp(Math.floor(s.upgrades[k] || 0), 0, UPG_MAX);
     return s;
   } catch (e) { return null; }
 }
-function deleteSlot(n) { try { localStorage.removeItem(slotKey(n)); localStorage.removeItem(yardKey(n)); } catch (e) { } }
+function deleteSlot(n) { try { localStorage.removeItem(slotKey(n)); localStorage.removeItem(yardKey(n)); localStorage.removeItem(sigKey(n)); } catch (e) { } }
+// Each save is signed, so a save edited outside the game is spotted. It still plays; it just can't add to shared team scores.
+const SAVE_SALT = 'mt-save-v3|lawn', sigKey = n => 'mowtown_sig' + n;
 let S = defaultSave(); S.settings = GS;
 function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(GS)); } catch (e) { } }
 function save() {
@@ -695,7 +709,7 @@ function save() {
   if (!S.started) return;
   // co-op guest: your own town's day/jobs are kept — the host's world is never written into your save
   const out = Net.guestWorld ? Object.assign({}, S, Net.guestWorld) : S;
-  try { localStorage.setItem(slotKey(SLOT), JSON.stringify(out)); } catch (e) { }
+  try { const raw = JSON.stringify(out); localStorage.setItem(slotKey(SLOT), raw); localStorage.setItem(sigKey(SLOT), String(hashStr(SAVE_SALT + raw))); } catch (e) { }
 }
 // Yard cut-maps: each cell packed into one byte (4 bits height + 4 bits stripe shade) and base64'd
 function packYards(only) {
@@ -2845,6 +2859,7 @@ function drawMinimap(dt) {
 
 /* ---------- Dialogs ---------- */
 function showDialog(who, text, opts) {
+  const nm = esc(pName()); who = who.replace(/\bSam\b/g, nm); text = text.replace(/\bSam\b/g, nm); // characters call you by your name
   Game.dialog = { opts }; unlockMouse(); const d = $('#dialog');
   d.innerHTML = `<div class="who">${who}</div><div class="say">${text}</div><div class="opts">${opts.map((o, i) => `<button class="btn ${i === 0 ? 'primary' : ''}" style="${i === 0 ? 'font-size:15px;padding:9px 14px' : ''}" data-act="dlg" data-arg="${i}" ${o.disabled ? 'disabled' : ''}>${i + 1}. ${o.label}</button>`).join('')}</div>`;
   d.style.display = 'block'; Sfx.phone(); focusFirst(d);
@@ -2912,7 +2927,7 @@ function renderPhone() {
       <div class="lbl">Clients</div>${Object.keys(CLIENTS).filter(k => !CLIENTS[k].race).map(k => `<div class="row small" style="justify-content:space-between"><span>${esc(CLIENTS[k].name)}</span><span>${S.clientDone[k] || 0} jobs ${S.clientStars[k] ? '· ' + '★'.repeat(S.clientStars[k]) : ''}</span></div>`).join('')}`;
   }
   $('#scr-phone').innerHTML = `<div class="phone"><div class="phTop"><span>${fmtClock(S.clock)}</span><span>Day ${S.day}</span><span class="cash">${money(S.money)}</span></div>
-    ${a === 'home' ? '<div class="phHead"><h3>📱 SamPhone</h3><button class="btn" data-act="app" data-arg="close">✕</button></div>' : `<div class="phHead"><button class="btn" data-act="app" data-arg="home">‹ Back</button><h3>${titles[a]}</h3></div>`}
+    ${a === 'home' ? `<div class="phHead"><h3>📱 ${esc(pName())}'s Phone</h3><button class="btn" data-act="app" data-arg="close">✕</button></div>` : `<div class="phHead"><button class="btn" data-act="app" data-arg="home">‹ Back</button><h3>${titles[a]}</h3></div>`}
     <div class="phBody">${body}</div></div>`;
   if (a === 'map') drawPhoneMap();
 }
@@ -2951,7 +2966,7 @@ const gHead = (title, hint) => `<div class="gTitle"><h3>${title}</h3>${hint ? `<
 function renderBench() {
   const t = Bench.tab, cfg = S.cfg, id = Game.mw ? Game.mw.id : S.mower, m = MOWERS[id], st = mowerStats(id), keep = $('.bbody'), sy = keep && Bench.lastTab === t ? keep.scrollTop : 0;
   const tabs = [['shop', '🚜', 'Mowers'], ['tools', '🧰', 'Tools'], ['paint', '🎨', 'Paint'], ['parts', '🔩', 'Parts'], ['acc', '🧢', 'Extras'], ['stickers', '🏷️', 'Stickers'], ['garage', '🏠', 'Decor'], ['me', '👕', 'Me']];
-  let h = `<div class="bpanel panel"><div class="gHead"><img src="${mowerThumb(id)}" alt="${esc(m.name)}"><div class="gWho"><div class="lbl">Sam's Garage</div><h2>${esc(m.name)}</h2>
+  let h = `<div class="bpanel panel"><div class="gHead"><img src="${mowerThumb(id)}" alt="${esc(m.name)}"><div class="gWho"><div class="lbl">${esc(pName())}'s Garage</div><h2>${esc(m.name)}</h2>
       <div class="gStats"><span>⚡ ${st.speed.toFixed(1)} m/s</span><span>✂️ ${Math.round(m.width * 100)} cm</span><span>⛽ ${S.fuel[id].toFixed(1)} / ${st.tank.toFixed(1)} L</span></div></div>
       <div class="gTop"><button class="btn" data-act="closeBench" aria-label="Close">✕</button><span class="chip cash">${money(S.money)}</span></div></div>
     <div class="gRail">${tabs.map(([k, ic, n]) => `<button class="gTab ${t === k || (t === 'upgrades' && k === 'shop') ? 'sel' : ''}" data-act="btab" data-arg="${k}"><i>${ic}</i>${n}</button>`).join('')}</div><div class="bbody scroll">`;
@@ -2995,7 +3010,7 @@ function renderBench() {
       h += `<div class="lbl">${D.name}</div><div class="gGrid">${D.items.map(it => { const ok = decorOwns(slot, it), on = S.decor[slot] === it.id; return gTile('decor', `${slot}:${it.id}`, it.name, itemSub(it, ok, on), { sel: on, locked: !ok, dot: it.c }); }).join('')}</div>`;
     }
   } else if (t === 'me') {
-    h += gHead('Sam', 'Your cap and top') + '<div class="lbl">Cap</div>' + itemRow('cap', CAPS, S.player.cap, 'cap') + '<div class="lbl">Top</div>' + itemRow('shirt', SHIRTS, S.player.shirt, 'shirt');
+    h += gHead(esc(pName()), 'Your cap and top') + '<div class="lbl">Cap</div>' + itemRow('cap', CAPS, S.player.cap, 'cap') + '<div class="lbl">Top</div>' + itemRow('shirt', SHIRTS, S.player.shirt, 'shirt');
   }
   $('#scr-bench').innerHTML = h + '</div><div class="gFoot">Drag on the left of the screen to spin your mower</div></div>';
   Bench.lastTab = t; const nb = $('.bbody'); if (nb) nb.scrollTop = sy;
@@ -3044,7 +3059,7 @@ function startPlay() {
 }
 function pauseGame() {
   if (Game.state !== 'play') return; unlockMouse(); Game.state = 'paused'; Game.keys = {};
-  $('#scr-pause').innerHTML = `<div class="dlg panel" style="width:min(360px,92vw);text-align:center"><h2>PAUSED</h2><div class="muted small">Day ${S.day} · ${fmtClock(S.clock)}</div>
+  $('#scr-pause').innerHTML = `<div class="dlg panel" style="width:min(360px,92vw);text-align:center"><h2>PAUSED</h2><div class="muted small">${esc(pName())} · Day ${S.day} · ${fmtClock(S.clock)}</div>
     ${Net.on ? `<div class="small" style="color:var(--sky)">👥 Room <b>${Net.code}</b> · the game keeps running for your friend</div><div>${netPlayersHTML()}</div>` : ''}
     <button class="btn primary" data-act="resume" data-autofocus>▶ Resume</button><button class="btn" data-act="phonePause">📱 Phone</button><button class="btn" data-act="settings">⚙️ Settings</button>
     ${Race.on && !Net.on ? '<button class="btn" data-act="raceTown">🏳 Quit race</button>' : ''}${S.tut.state === 'active' && !Net.on ? '<button class="btn" data-act="tutSkip">⏭ Skip tutorial</button>' : ''}${Net.on ? '<button class="btn" data-act="mpLeave">🚪 Leave multiplayer</button>' : ''}
@@ -3056,13 +3071,14 @@ function renderSettings() {
   const st = S.settings, sl = (k, label, max = 1) => `<div class="setRow"><label>${label}</label><input type="range" min="0" max="${max}" step="0.05" value="${st[k]}" data-set="${k}" aria-label="${label}"></div>`;
   const opt = (k, label, vals) => `<div class="setRow"><label>${label}</label><div class="opts">${vals.map(([v, n]) => `<button class="btn ${String(st[k]) === String(v) ? 'sel' : ''}" data-act="setOpt" data-arg="${k}|${v}">${n}</button>`).join('')}</div></div>`;
   $('#scr-settings').innerHTML = `<div class="dlg panel scroll"><div class="dlgHead"><h2>⚙️ SETTINGS</h2><button class="btn" data-act="settingsBack" data-autofocus>✕ Back</button></div>
+    <div class="lbl">You</div><div class="setRow"><label>👋 Your name: <b>${esc(pName())}</b></label><button class="btn" data-act="openName">✏️ Change</button></div>
     <div class="lbl">Audio</div>${sl('master', 'Master volume')}${sl('sfx', 'Effects')}${sl('engine', 'Engine')}${sl('amb', 'Ambience')}${sl('music', 'Boombox radio')}
     <div class="lbl">Helpers</div>${opt('hlAfford', 'Red box on things you can afford', [[true, 'On'], [false, 'Off']])}${opt('hlJobs', 'Red box on new jobs', [[true, 'On'], [false, 'Off']])}${opt('popUpg', 'Upgrade pop-up', [[true, 'On'], [false, 'Off']])}${opt('popQuest', 'Quest pop-ups', [[true, 'On'], [false, 'Off']])}${opt('weather', 'Weather effects', [[true, 'On'], [false, 'Off']])}
     <div class="lbl">Graphics</div>${opt('quality', 'Quality', [['auto', 'Auto'], ['low', 'Low'], ['medium', 'Medium'], ['high', 'High']])}
     <div class="small muted">Low = fewer grass blades, no shadows, 1× resolution — best for school laptops. Running: ${qName()}.</div>
     <div class="lbl">Lawn mower</div>${opt('mowerCtl', 'Lawn mower controls', [['wasd', 'WASD (no mouse)'], ['mouse', 'Mouse turns + W to go']])}<div class="small muted">Only affects driving/pushing a mower — walking stays the same. WASD: W/S forward/back, A/D turn, mouse does nothing. Mouse: click to capture the mouse, move it to turn, hold W to go.</div>${sl('shake', 'Camera shake', 1.5)}${sl('sens', 'Mouse sensitivity', 2)}${opt('fps', 'Show FPS', [[true, 'On'], [false, 'Off']])}
     <div class="lbl">Controls</div><div class="setRow"><label>Keyboard</label><div class="small muted" style="text-align:right;line-height:1.7">
-      <kbd>WASD</kbd> walk / drive · <kbd>Shift</kbd> run · <kbd>E</kbd> interact / get on-off · <kbd>Space</kbd> blades / trim<br><kbd>T</kbd> trimmer · <kbd>G</kbd> gas can · <kbd>F</kbd> highlight uncut · <kbd>H</kbd> horn · <kbd>M</kbd> radio<br><kbd>J</kbd> jobs · <kbd>Q</kbd> quests · <kbd>B</kbd> shop · <kbd>P</kbd> season pass · <kbd>Tab</kbd> phone · <kbd>Esc</kbd> pause · mouse drag or <kbd>Z</kbd>/<kbd>X</kbd> camera · wheel zoom</div></div></div>`;
+      <kbd>WASD</kbd> walk / drive · <kbd>Shift</kbd> run · <kbd>E</kbd> interact / get on-off · <kbd>Space</kbd> blades / trim<br><kbd>T</kbd> trimmer · <kbd>G</kbd> gas can · <kbd>F</kbd> highlight uncut · <kbd>H</kbd> horn · <kbd>M</kbd> radio<br><kbd>J</kbd> jobs · <kbd>Q</kbd> quests · <kbd>B</kbd> shop · <kbd>P</kbd> season pass · <kbd>Tab</kbd> phone · <kbd>Esc</kbd> pause · mouse drag or <kbd>Z</kbd>/<kbd>X</kbd> camera · wheel zoom</div></div>${adminFieldHTML()}</div>`;
 }
 
 /* ---------- Actions (event delegation) ---------- */
@@ -3099,6 +3115,13 @@ const ACT = {
   useMower: a => { equipMower(a); refreshOpenUI(); },
   buyUp: a => { if (buyUpgrade(a)) refreshOpenUI(); },
   // main-screen buttons & menus
+  openName: () => openMenu('name'), nameSave: () => nameSave(), adminEnter: () => adminEnter(), adminTab: a => { Admin.tab = a; renderMenu(); $('#scr-menu .bbody').scrollTop = 0; focusAct('adminTab', a); },
+  adminMoney: a => adminMoney(a), adminMoneyAny: () => adminMoney($('#adminAmt').value),
+  adminMower: a => { adminGiveMower(a); Sfx.complete(); toast('🚜 Added the ' + MOWERS[a].name, 'Press Use to drive it.'); save(); renderMenu(); },
+  adminMowerAll: () => { MOWER_ORDER.forEach(adminGiveMower); Sfx.complete(); toast('🚜 Added every mower', ''); save(); renderMenu(); },
+  adminMowerUse: a => { equipMower(a); renderMenu(); },
+  adminAcc: a => { adminFit(a); Sfx.unlock(); renderMenu(); },
+  adminAccAll: () => { S.flags.modded = 'admin'; ACCESSORIES.forEach(a => { if (!S.own.acc.includes(a.id)) S.own.acc.push(a.id); }); Sfx.complete(); toast('🧢 Added every accessory', 'Fit them here or in the garage.'); save(); renderMenu(); },
   openIdeas: () => { Ideas.sent = false; openMenu('ideas'); }, openLog: () => openMenu('log'), ideaType: a => { Ideas.type = a; renderMenu(); }, ideaSend: () => sendIdea(), ideaAgain: () => { Ideas.sent = false; renderMenu(); },
   openQuests: () => openMenu('quests'), openJobs: () => openMenu('jobs'), openEvent: () => openMenu('event'), eventPick: a => pickSide(a), eventUse: () => { if (equipMower(S.event.mower)) closeMenu(); }, openShop: () => openMenu('shop'), openPass: () => openMenu('pass'), closeMenu: () => closeMenu(),
   questAccept: a => { acceptJob(a); renderMenu(); }, questRoute: a => { ACT.waypoint(a); closeMenu(); },
@@ -3168,8 +3191,8 @@ addEventListener('keydown', e => {
   }
   if (Game.state === 'menu' && !e.repeat) {
     if (code === 'Escape') { e.preventDefault(); if (Menu.cur !== 'tutw') closeMenu(); return; }
-    if (typing) return; // letters go into the text box, not the menu shortcuts
-    const m = { KeyJ: 'jobs', KeyQ: 'quests', KeyB: 'shop', KeyP: 'pass', KeyV: 'event' }[code]; if (m && !['tutw', 'stall', 'ideas', 'log'].includes(Menu.cur)) { openMenu(m); return; }
+    if (typing) { const id = document.activeElement.id; if (code === 'Enter' && id === 'nameInp') nameSave(); else if (code === 'Enter' && id === 'adminAmt') ACT.adminMoneyAny(); return; } // letters go into the text box, not the menu shortcuts
+    const m = { KeyJ: 'jobs', KeyQ: 'quests', KeyB: 'shop', KeyP: 'pass', KeyV: 'event' }[code]; if (m && !['tutw', 'stall', 'ideas', 'log', 'name', 'admin'].includes(Menu.cur)) { openMenu(m); return; }
   }
   if (code === 'Escape') {
     e.preventDefault();
@@ -3182,6 +3205,7 @@ addEventListener('keydown', e => {
   if (code === 'Tab' && Game.state === 'phone') { closePhone(); return; }
   const ae = document.activeElement;
   if (code === 'Enter' && ae && ae.id === 'mpCode') { ACT.mpJoin(); return; }
+  if (code === 'Enter' && ae && ae.id === 'adminPw') { adminEnter(); return; }
   if (ae && ae.tagName === 'TEXTAREA') return;
   if (ae && ae.tagName === 'INPUT' && (code === 'ArrowLeft' || code === 'ArrowRight')) return;
   const dirs = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
@@ -3374,8 +3398,23 @@ function frame(now) {
 // Online multiplayer config — one place. The game key is a public client key, so it's fine in client code.
 const MP_CFG = { url: 'https://mp.zdstudios.network', key: 'pk_D-NfzZESjTeMvtl1rbedNhU9', game: 'Mow Town' };
 const MP_KEY = 'mowtown_mp';
-const MPPrefs = (() => { const d = { name: 'Player', slot: 1 }; try { Object.assign(d, JSON.parse(localStorage.getItem(MP_KEY) || '{}')); } catch (e) { } delete d.url; return d; })();
+const MPPrefs = (() => { const d = { name: 'Player', slot: 1 }; try { Object.assign(d, JSON.parse(localStorage.getItem(MP_KEY) || '{}')); } catch (e) { } delete d.url; if (d.named === undefined) d.named = !!d.name && d.name !== 'Player'; return d; })();
 function saveMPPrefs() { try { localStorage.setItem(MP_KEY, JSON.stringify(MPPrefs)); } catch (e) { } }
+/* ---------- Name system: one name per device, shown in the game, online and on the scoreboard ---------- */
+const pName = () => MPPrefs.named ? MPPrefs.name : 'Sam';
+const NAME_BAD = ['fuck', 'shit', 'bitch', 'cunt', 'nigg', 'asshole', 'whore', 'slut', 'nazi', 'hitler'];
+function cleanName(v) {
+  const n = String(v || '').replace(/\s+/g, ' ').trim();
+  if (n.length < 2) return { err: 'Use at least 2 characters.' }; if (n.length > 16) return { err: 'Use 16 characters or fewer.' };
+  if (!/^[\p{L}\p{N} _'.-]+$/u.test(n)) return { err: 'Use letters, numbers and spaces.' };
+  if (NAME_BAD.some(b => n.toLowerCase().replace(/[^a-z]/g, '').includes(b))) return { err: 'Please pick a different name.' };
+  return { name: n };
+}
+function applyName(n) {
+  MPPrefs.name = n; MPPrefs.named = true; MPPrefs.askedName = true; saveMPPrefs(); Net.myName = n;
+  if (Net.mp && Net.mp.connected) Net.mp.setName(n).catch(() => { });
+  netHello(true);
+}
 const r2 = v => Math.round(v * 100) / 100;
 const mapPos = () => Interior.cur ? Interior.cur.back : (Game.mode === 'foot' || !Game.mw ? Game.pl : Game.mw);
 const fmtRace = t => Math.floor(t / 60) + ':' + (t % 60).toFixed(1).padStart(4, '0');
@@ -3394,6 +3433,7 @@ function enterSlot(n) { // loads a save slot into the world; returns true if it'
   if (S.active && !activeJob()) S.active = null;                       // a saved job that no longer exists can't block new ones
   if (activeJob()) Game.run = { damage: 0, align: 0, total: 0, knocked: 0, dogHit: false };
   claimPassTiers(false);                                                 // older saves: catch up on the faster Season Pass
+  eventSync();                                                           // send any team lawns from an earlier offline session
   save(); saveYards(); return fresh;
 }
 function showSlots(mode) { Game.slotMode = mode; renderSlots(); showScreen('slots'); }
@@ -3439,7 +3479,10 @@ const netErrText = e => ({ room_not_found: 'No room with that code.', room_full:
 function netInit() {
   if (Net.mp) return;
   if (typeof Multiplayer === 'undefined') { Net.status = 'error'; Net.err = 'Couldn\'t load the multiplayer service. Check your internet connection.'; mpRefresh(); return; }
-  const mp = Net.mp = new Multiplayer({ url: MP_CFG.url, key: MP_CFG.key, name: MPPrefs.name });
+  // 'device' keeps the same player between visits, so scoreboard names don't duplicate. Add ?mptab to the address to test two players in two tabs.
+  const mp = Net.mp = new Multiplayer({ url: MP_CFG.url, key: MP_CFG.key, name: pName(), identity: location.search.includes('mptab') ? 'tab' : 'device' });
+  mp.on('connected', () => { eventRefresh(true); eventSync(); });
+  mp.on('reconnected', () => eventSync());
   mp.onMessage('g', (d, from) => { if (!Net.on || !d || from === mp.playerId) return; if (d.t === 'chunk') netChunk(d, from); else netMessage(d, from); });
   mp.on('playerJoined', p => { if (Net.on && p.id !== mp.playerId) netPeerJoined(p); });
   mp.on('playerLeft', p => { if (Net.on && p.id !== mp.playerId) netPeerLeft(p); });
@@ -3465,17 +3508,18 @@ function netConnect() {
 }
 const myLook = () => ({ cap: S.player.cap, shirt: S.player.shirt, mower: Game.mw ? Game.mw.id : S.mower, cfg: S.cfg });
 function mpStatus(msg, bad) { const el = $('#mpStatus'); if (el) { el.textContent = msg; el.style.color = bad ? 'var(--bad)' : 'var(--sky)'; } if (bad) Sfx.error(); }
-function readMPInputs() { const n = $('#mpName'); if (n) MPPrefs.name = (n.value.replace(/[<>]/g, '').trim() || 'Player').slice(0, 16); saveMPPrefs(); }
+function readMPInputs() { const n = $('#mpName'); saveMPPrefs(); if (!n || n.value.trim() === pName()) return ''; const r = cleanName(n.value); if (r.err) return r.err; applyName(r.name); return ''; }
 async function mpStart(kind, code) { // kind: 'coop' | 'race' (create) · 'quick-coop' | 'quick-race' · 'join'
   if (Net.joining || Net.on) return;
-  readMPInputs(); netInit(); if (!Net.mp) { mpStatus(Net.err, true); return; }
+  const nameErr = readMPInputs(); if (nameErr) { mpStatus(nameErr, true); return; }
+  netInit(); if (!Net.mp) { mpStatus(Net.err, true); return; }
   if (kind === 'join') { code = (code || '').trim().toUpperCase(); if (!/^[A-Z0-9]{4,10}$/.test(code)) { mpStatus('Type the room code your friend gave you.', true); return; } }
   Net.joining = true; mpStatus('Connecting to the Mow Town server…');
   try {
     if (!(await netConnect())) throw new Error(Net.err);
-    if (Net.mp.name !== MPPrefs.name) await Net.mp.setName(MPPrefs.name).catch(() => { });
+    if (Net.mp.name !== pName()) await Net.mp.setName(pName()).catch(() => { });
     const mode = kind.endsWith('race') ? 'race' : 'coop', look = myLook();
-    const opts = { maxPlayers: 2, tag: 'mowtown-' + mode, meta: { game: MP_CFG.game, mode, host: MPPrefs.name }, playerData: { look } };
+    const opts = { maxPlayers: 2, tag: 'mowtown-' + mode, meta: { game: MP_CFG.game, mode, host: pName() }, playerData: { look } };
     mpStatus(kind === 'join' ? 'Joining room ' + code + '…' : kind.startsWith('quick') ? 'Finding a game…' : 'Creating a room…');
     if (kind === 'join') await Net.mp.join(code, { mustExist: true, playerData: { look } });
     else if (kind.startsWith('quick')) await Net.mp.quickJoin('mowtown-' + mode, opts);
@@ -3671,7 +3715,7 @@ function renderMP() {
   const slots = [1, 2, 3].map(n => { const s = readSlot(n); return `<button class="btn ${MPPrefs.slot === n ? 'sel' : ''}" data-act="mpSlot" data-arg="${n}">Slot ${n}: ${s && s.started ? MOWERS[s.mower].icon + ' ' + MOWERS[s.mower].name + ' · ' + money(s.money) : 'New save'}</button>`; }).join('');
   $('#scr-mp').innerHTML = `<div class="dlg panel scroll" style="width:min(600px,95vw)"><div class="dlgHead"><h2>👥 MOW TOWN ONLINE</h2><button class="btn" data-act="mpBack">✕ Back</button></div>
     <div class="row" style="justify-content:space-between"><span class="small mpConn"></span><button class="btn" id="mpRetry" data-act="mpRetry" style="display:none;padding:6px 10px;font-size:12px">↻ Retry</button></div>
-    <div class="lbl">Your name</div><input class="inp" id="mpName" maxlength="16" value="${esc(MPPrefs.name)}">
+    <div class="lbl">Your name</div><input class="inp" id="mpName" maxlength="16" value="${esc(pName())}">
     <div class="lbl">Bring your mower from</div><div class="opts">${slots}</div>
     <div class="small muted">Your mower, paint, stickers, upgrades & money come from this save — and anything you earn goes back into it.</div>
     <div class="lbl">Quick play</div><div class="opts"><button class="btn primary" style="font-size:15px" data-act="mpHost" data-arg="quick-coop">⚡ Quick Co-op</button><button class="btn gold" data-act="mpHost" data-arg="quick-race">⚡ Quick Race</button></div>
@@ -3927,32 +3971,94 @@ function updateInterior(dt) {
 const Menu = { cur: null, from: 'play', confirm: null, just: null };
 function openMenu(name) {
   if (Game.state === 'menu' && Menu.cur === name) { closeMenu(); return; }
-  if (!['play', 'menu', 'bench', 'title', 'paused'].includes(Game.state)) return;
-  if (Race.on && !['pass', 'ideas', 'log'].includes(name)) { Sfx.error(); toast('Not during a race', 'Finish or quit the race first.', 'var(--gold)'); return; }
+  if (!['play', 'menu', 'bench', 'title', 'paused', 'phone'].includes(Game.state)) return;
+  if (Race.on && !['pass', 'ideas', 'log', 'name'].includes(name)) { Sfx.error(); toast('Not during a race', 'Finish or quit the race first.', 'var(--gold)'); return; }
   if (Game.dialog) closeDialog();
   if (Game.state !== 'menu') Menu.from = Game.state; else if (Menu.cur === 'jobs') markJobsSeen();
   if (name === 'stall') hideAffordPop();
   unlockMouse(); Game.state = 'menu'; Menu.cur = name; Menu.confirm = null; Menu.just = null; Game.keys = {};
-  renderMenu(); showScreen('menu'); Sfx.phone(); tutEvent(name);
+  renderMenu(); showScreen('menu'); Sfx.phone(); tutEvent(name); if (name === 'event') eventRefresh(true);
 }
 function markJobsSeen() { S.jobs.list.forEach(j => S.jobsSeen[j.id] = 1); }
 function closeMenu() {
   if (Menu.cur === 'jobs') markJobsSeen(); // jobs you've looked at stop being "new"
+  const wasName = Menu.cur === 'name'; if (wasName) { MPPrefs.askedName = true; saveMPPrefs(); }
   Menu.cur = null; Menu.confirm = null; save();
+  if (Menu.from === 'phone') { Game.state = 'play'; openPhone('settings'); return; }
   if (Menu.from === 'bench') { Game.state = 'bench'; renderBench(); showScreen('bench'); return; }
   if (Menu.from === 'title') { showTitle(); return; }
   if (Menu.from === 'paused') { Game.state = 'play'; pauseGame(); return; }
   Game.state = 'play'; showScreen(null); lockMouse();
+  if (wasName && S.tut.state === 'new') tutOnEnter(); // the first-time name screen leads into the tutorial
 }
 function refreshOpenUI() { if (Game.state === 'menu') renderMenu(); else if (Game.state === 'bench') renderBench(); }
 function renderMenu() {
-  const c = Menu.cur, el = $('#scr-menu'), sy = el.querySelector('.mbody') ? el.querySelector('.mbody').scrollTop : 0;
-  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
-  const mb = el.querySelector('.mbody'); if (mb) mb.scrollTop = sy;
+  const c = Menu.cur, el = $('#scr-menu'), box = el.querySelector('.mbody, .bbody'), sy = box ? box.scrollTop : 0;
+  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'admin' ? adminHTML() : c === 'name' ? nameHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
+  const mb = el.querySelector('.mbody, .bbody'); if (mb) mb.scrollTop = sy;
   if (c === 'pass') { const row = $('#passRow'), cur = row && row.querySelector('.cur'); if (cur) row.scrollLeft = cur.offsetLeft - 160; }
   tutUI(true);
 }
 const menuHead = (title, sub) => `<div class="dlgHead"><div><h2>${title}</h2>${sub ? `<div class="small muted" style="margin-top:2px">${sub}</div>` : ''}</div><div class="row">${Menu.from === 'title' ? '' : `<span class="chip cash">${money(S.money)}</span>`}<button class="btn" data-act="closeMenu" aria-label="Close">✕</button></div></div>`;
+
+/* ---------- Your name ---------- */
+function nameHTML() {
+  const first = !MPPrefs.askedName;
+  return `<div class="mdlg panel" style="width:min(440px,94vw)">${menuHead('👋 YOUR NAME', first ? 'What should everyone call you?' : 'This is the name other players see')}<div class="mbody">
+    <input class="inp" id="nameInp" maxlength="16" value="${MPPrefs.named ? esc(MPPrefs.name) : ''}" placeholder="Type a name" autocomplete="off" spellcheck="false" data-autofocus>
+    <div class="small muted">2 to 16 letters or numbers. Don't use your full real name, because it can show on the public scoreboard.</div>
+    <button class="btn primary" style="font-size:15px" data-act="nameSave">✔ Save name</button>${first ? '<button class="btn" data-act="closeMenu">Stay as Sam for now</button>' : ''}
+    <div id="nameMsg" class="small" style="min-height:18px;text-align:center;color:var(--bad)"></div></div></div>`;
+}
+function nameSave() {
+  const r = cleanName($('#nameInp').value);
+  if (r.err) { $('#nameMsg').textContent = r.err; Sfx.error(); return; }
+  applyName(r.name); toast('👋 Hi, ' + esc(r.name) + '!', 'You can change your name in Settings.', 'var(--sky)'); Sfx.unlock(); closeMenu();
+}
+
+/* ---------- 🛠️ Admin panel: reached from the very end of Settings with the password.
+   Everything here only changes the save on this device. It can't touch other players or the team scoreboard. ---------- */
+const ADMIN_HASH = 1126222251, ADMIN_MONEY = [100, 1000, 10000, 100000, 1000000];
+const Admin = { tab: 'money', tries: 0, lockUntil: 0 };
+const adminFieldHTML = () => `<div class="lbl">Admin</div><div class="setRow"><label>🔒 Admin password</label><input class="inp" id="adminPw" type="password" maxlength="12" autocomplete="off" style="width:120px"><button class="btn" data-act="adminEnter">Enter</button></div><div id="adminMsg" class="small" style="min-height:18px;color:var(--bad)"></div>`;
+function adminEnter() {
+  const inp = $('.screen.on #adminPw'), msg = $('.screen.on #adminMsg'); if (!inp) return;
+  const say = t => { msg.textContent = t; Sfx.error(); };
+  if (Date.now() < Admin.lockUntil) return say('Too many tries. Wait a moment.');
+  const ok = hashStr('mowtown-admin:' + inp.value) === ADMIN_HASH; inp.value = '';
+  if (!ok) { if (++Admin.tries >= 5) { Admin.tries = 0; Admin.lockUntil = Date.now() + 30000; } return say('Wrong password.'); }
+  Admin.tries = 0; if (!S.started) return say('Load a save first, then come back here.');
+  openMenu('admin');
+}
+function adminHTML() {
+  const t = Admin.tab, tabs = [['money', '💵', 'Money'], ['mowers', '🚜', 'Mowers'], ['acc', '🧢', 'Extras']];
+  let h = `<div class="bpanel panel"><div class="gHead"><div class="gAdm">🛠️</div><div class="gWho"><div class="lbl">Admin panel</div><h2>${esc(pName())}</h2><div class="gStats"><span>Save slot ${SLOT}</span><span>Only changes this save</span></div></div>
+    <div class="gTop"><button class="btn" data-act="closeMenu" aria-label="Close">✕</button><span class="chip cash">${money(S.money)}</span></div></div>
+    <div class="gRail">${tabs.map(([k, ic, n]) => `<button class="gTab ${t === k ? 'sel' : ''}" data-act="adminTab" data-arg="${k}"><i>${ic}</i>${n}</button>`).join('')}</div><div class="bbody scroll">`;
+  if (t === 'money') {
+    h += '<div class="gNote">Using any of these marks this save as changed, so it stops adding to the Scott Bonnar vs Rover team score.</div>' + gHead('Add money', 'You have ' + money(S.money)) + `<div class="gGrid">${ADMIN_MONEY.map(v => gTile('adminMoney', v, '+' + money(v), ['Add now', 'price'], { icon: '💵' })).join('')}</div>
+      <div class="lbl">Any amount</div><div class="row"><input class="inp" id="adminAmt" type="number" min="1" max="1000000000" step="1" placeholder="Amount"><button class="btn gold" data-act="adminMoneyAny">Add</button></div>`;
+  } else if (t === 'mowers') {
+    h += gHead('Add a mower', `${S.owned.length} of ${MOWER_ORDER.length} owned`) + `<button class="btn gold" data-act="adminMowerAll">➕ Add every mower</button><div class="gMowers">` + MOWER_ORDER.map(id => {
+      const a = MOWERS[id], own = S.owned.includes(id), cur = Game.mw && Game.mw.id === id;
+      return `<div class="gMower ${cur ? 'sel' : ''}"><img src="${mowerThumb(id)}" alt="${esc(a.name)}"><b>${a.icon} ${esc(a.name)}</b><small>${esc(a.type)}${a.limited ? ' · limited' : ''}</small>${cur ? '<button class="btn" disabled>✔ Using</button>' : own ? `<button class="btn primary" style="font-size:13px;padding:7px" data-act="adminMowerUse" data-arg="${id}">Use this</button>` : `<button class="btn gold" data-act="adminMower" data-arg="${id}">➕ Add</button>`}</div>`;
+    }).join('') + '</div>';
+  } else {
+    const slots = { side: 'Side', top: 'Top', rear: 'Rear', front: 'Front', side2: 'Audio', turbo: 'Exhaust' }, have = ACCESSORIES.filter(a => S.own.acc.includes(a.id)).length;
+    h += gHead('Add an accessory', `${have} of ${ACCESSORIES.length} added · click one to add and fit it`) + '<button class="btn gold" data-act="adminAccAll">➕ Add every accessory</button>';
+    for (const sl in slots) h += `<div class="lbl">${slots[sl]}</div><div class="gGrid">${ACCESSORIES.filter(a => a.slot === sl).map(a => { const on = S.cfg.acc[sl] === a.id, own = S.own.acc.includes(a.id); return gTile('adminAcc', a.id, a.name, on ? ['In use', 'use'] : own ? ['Added · click to fit', ''] : ['Add free', 'price'], { sel: on, icon: a.icon, style: a.legendary ? 'border-color:var(--gold)' : '' }); }).join('')}</div>`;
+  }
+  return h + '</div><div class="gFoot">Changes save straight away</div></div>';
+}
+function adminMoney(v) {
+  v = Math.floor(+v); if (!(v > 0)) { Sfx.error(); toast('Enter an amount above $0', '', 'var(--bad)'); return; }
+  S.flags.modded = 'admin'; S.money = Math.min(1e12, S.money + Math.min(v, 1e9)); Sfx.cash(); toast('💵 Added ' + money(v), 'You now have ' + money(S.money), 'var(--cash)'); save(); renderMenu();
+}
+function adminGiveMower(id) { if (!MOWERS[id] || S.owned.includes(id)) return; S.flags.modded = 'admin'; S.owned.push(id); S.fuel[id] = mowerStats(id).tank; }
+function adminFit(id) { // refits the mower with Sam safely off it
+  const a = ACCESSORIES.find(x => x.id === id); if (!a) return; if (!S.own.acc.includes(id)) { S.flags.modded = 'admin'; S.own.acc.push(id); }
+  if (Game.mode !== 'foot') exitMower(); S.cfg.acc[a.slot] = id; rebuildMowerModel(); save();
+}
 
 /* ---------- 💡 Recommendations: players send ideas and bug reports to the ZD Studios feedback dashboard ----------
    The key can only send feedback, never read it, so it's safe in client code. */
@@ -3992,6 +4098,8 @@ async function sendIdea() {
 
 /* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
 const UPDATES = [
+  { v: '1.12', date: 'Nov 2026', title: 'Fair Play', add: ['Team scores are now checked by the server, so nobody can fake lawns or vote twice', 'Lawns count at a realistic speed, with a daily limit per player', 'Saves changed outside normal play no longer count toward team scores'] },
+  { v: '1.11', date: 'Nov 2026', title: 'Team Scoreboard & Names', add: ['Live Scott Bonnar vs Rover scoreboard: players on each team and lawns cut', 'First team to 250 lawns wins', 'Top mowers list on the event page', 'Choose your own name, and characters call you by it'] },
   { v: '1.10', date: 'Nov 2026', title: 'Scott Bonnar Ride-On', add: ['The Scott Bonnar Classic 30" is now a ride-on mower, with the same stats'] },
   { v: '1.9', date: 'Nov 2026', title: 'Garage & Recommendations', add: ['Rebuilt garage screen with tabs down the side and clear tiles', 'Every garage item now shows its price or how to unlock it', 'Your mowers appear as pictures in the garage', 'Recommendations button: send ideas and bug reports', 'This update log'] },
   { v: '1.8', date: 'Nov 2026', title: 'Scott Bonnar vs Rover', add: ['14-day limited event: pick a side and keep that mower', 'Two limited mowers you can\'t buy with money', 'Limited sticker and brand colour from your first lawn', 'Mow 50 lawns for the "I ♥" top'] },
@@ -4016,6 +4124,7 @@ function logHTML() {
    It uses the multiplayer server's clock when connected, so changing your computer's date doesn't help. */
 const EVENT = {
   name: BRAND.scott.name + ' vs ' + BRAND.rover.name, goal: 50,
+  target: 250, key: 'ev1_', // first team to 250 lawns wins; totals are stored on the multiplayer server under this prefix
   end: Date.UTC(2026, 10, 19, 9, 0, 0), // 19 Nov 2026, 5 PM Perth time: 14 days from launch (month 10 = November)
   awards: [ // what each lawn milestone gives; every award is handed over once only
     { at: 1, sticker: true, paint: true },
@@ -4036,8 +4145,78 @@ function eventTick() { // ticks the countdown everywhere it's shown, every secon
   $$('.evTimer').forEach(el => { if (el.textContent !== txt) el.textContent = txt; });
   $('#btnEvent').style.display = left <= 0 && !S.event.side ? 'none' : ''; // nothing to come back to if you never joined
   if (left <= 0 && !Game.evEnded) { Game.evEnded = true; if (Game.state === 'menu' && (Menu.cur === 'event' || Menu.cur === 'shop')) renderMenu(); }
+  if (Game.state === 'menu' && Menu.cur === 'event') eventRefresh();                       // live totals while the page is open
+  if (S.started && S.event.side && ++EvStats.tick % 30 === 0) eventSync();                  // retry anything that couldn't be sent yet
 }
 setInterval(eventTick, 1000);
+/* Team totals live on the multiplayer server as game-wide counters, so every player sees the same score.
+   Lawns mowed offline wait in the save and are sent on the next connection. */
+const EvStats = { picks: { scott: 0, rover: 0 }, lawns: { scott: 0, rover: 0 }, winner: null, top: [], loaded: false, lastT: 0, busy: false, syncing: false, tick: 0 };
+const evKey = k => EVENT.key + k, EV_SIDES = ['scott', 'rover'], EV_GAME = { scope: 'game' };
+async function eventRefresh(force) {
+  const mp = Net.mp; if (!mp || !mp.connected || EvStats.busy || (!force && Date.now() - EvStats.lastT < 12000)) return;
+  EvStats.busy = true; EvStats.lastT = Date.now(); const was = JSON.stringify([EvStats.picks, EvStats.lawns, EvStats.winner, EvStats.top]);
+  try {
+    const g = await mp.storage.getMany([...EV_SIDES.map(k => evKey('picks_' + k)), ...EV_SIDES.map(k => evKey('lawns_' + k)), evKey('winner')], EV_GAME);
+    EV_SIDES.forEach(k => { EvStats.picks[k] = g[evKey('picks_' + k)] || 0; EvStats.lawns[k] = g[evKey('lawns_' + k)] || 0; });
+    EvStats.winner = g[evKey('winner')] || null; EvStats.loaded = true;
+    if (!EvStats.winner) { const lead = EV_SIDES.filter(k => EvStats.lawns[k] >= EVENT.target).sort((a, b) => EvStats.lawns[b] - EvStats.lawns[a])[0]; if (lead) await claimWin(lead); } // the winner's connection dropped before it could be recorded
+    EvStats.top = await mp.leaderboard.top(evKey('top'), { limit: 5 }).catch(() => mp.leaderboard.top(evKey('lawns'), { limit: 5 })).then(t => t.entries || [], () => []); // server board first; no board until the first lawn is sent
+  } catch (e) { }
+  EvStats.busy = false;
+  const w = EvStats.winner; if (w && S.started && S.event.side && !S.event.winSeen) { S.event.winSeen = true; toast(`🏆 Team ${esc(BRAND[w.side].name)} wins!`, `First to ${EVENT.target} lawns`, 'var(--gold)'); save(); }
+  if (JSON.stringify([EvStats.picks, EvStats.lawns, EvStats.winner, EvStats.top]) !== was && Game.state === 'menu' && Menu.cur === 'event') renderMenu();
+}
+async function claimWin(side) { // the counter makes this safe: only the first caller gets 1, so the winner is set once
+  const mp = Net.mp; if ((await mp.storage.incr(evKey('winlock'), 1, EV_GAME)) !== 1) return;
+  EvStats.winner = { side, at: eventNow() }; await mp.storage.set(evKey('winner'), EvStats.winner, EV_GAME);
+}
+// Votes and lawns go to the server script (server-script.js), which decides what counts and replies.
+// Until that script is installed, the game falls back to writing the totals itself (eventSyncDirect).
+async function evServer(type, data) {
+  const mp = Net.mp;
+  if (!mp.room) await mp.create({ private: true, maxPlayers: 1, tag: 'mowtown-solo', meta: { game: MP_CFG.game, mode: 'solo' } }); // the script only hears players who are in a room
+  const id = Math.random().toString(36).slice(2, 10);
+  return new Promise((resolve, reject) => {
+    let off = null; const done = (f, v) => { clearTimeout(t); if (off) off(); f(v); };
+    const t = setTimeout(() => done(reject, Object.assign(new Error('timeout'), { code: 'timeout' })), 8000);
+    off = mp.onMessage('ev_ack', (d, from) => { if (from === 'server' && d && d.id === id) done(resolve, d); });
+    mp.sendReliable(type, Object.assign({ id }, data), 'server').catch(e => done(reject, e));
+  });
+}
+async function eventSync() {
+  const E = S.event, mp = Net.mp; if (!mp || !mp.connected || !S.started || !E.side || EvStats.syncing || S.flags.modded) return; // edited saves still play, but don't count for the team
+  EvStats.syncing = true;
+  try {
+    if (EvStats.direct) await eventSyncDirect();
+    else {
+      if (!E.sentPick) { const r = await evServer('ev_pick', { side: E.side }); if (r.ok || r.drop) { E.sentPick = true; save(); } }
+      for (let i = 0; i < 5 && E.teamLawns > E.sentLawns; i++) {
+        const n = Math.min(6, E.teamLawns - E.sentLawns), r = await evServer('ev_lawn', { side: E.side, n });
+        if (r.ok) E.sentLawns += r.n; else if (r.drop) E.sentLawns += n; else break; // "too fast" or the daily limit: try again later
+        save();
+      }
+    }
+  } catch (e) { if (e && e.code === 'no_server_script') EvStats.direct = true; } // script not installed yet
+  EvStats.syncing = false; eventRefresh(true);
+}
+async function eventSyncDirect() {
+  const E = S.event, mp = Net.mp;
+  try {
+    if (!E.sentPick) { // one vote per device, even with several save slots
+      const dev = 'mowtown_' + EVENT.key + 'pick'; let voted = false; try { voted = !!localStorage.getItem(dev); } catch (e) { }
+      if (!voted) { await mp.storage.incr(evKey('picks_' + E.side), 1, EV_GAME); try { localStorage.setItem(dev, E.side); } catch (e) { } }
+      E.sentPick = true; save();
+    }
+    const n = E.teamLawns - E.sentLawns;
+    if (n > 0) {
+      E.sentLawns = E.teamLawns; save(); // marked first, so a dropped connection can't count the same lawns twice
+      let total = 0; try { total = await mp.storage.incr(evKey('lawns_' + E.side), n, EV_GAME); } catch (e) { E.sentLawns -= n; save(); throw e; }
+      await mp.leaderboard.submit(evKey('lawns'), n, { mode: 'sum' }).catch(() => { });
+      if (total >= EVENT.target && !EvStats.winner) await claimWin(E.side);
+    }
+  } catch (e) { }
+}
 const awardText = (a, B) => [a.sticker && `<span class="evSw" style="background:#fff"></span>"I ♥ ${esc(B.name)}" sticker`, a.paint && `<span class="evSw" style="background:${B.col}"></span>Limited ${esc(B.colName)} paint`, a.cash && `💵 ${money(a.cash)}`, a.top && `👕 MAX AWARD: "I ♥ ${esc(B.name)}" top`].filter(Boolean).join(' · ');
 function pickSide(side) {
   if (S.event.side || eventOver() || !BRAND[side]) return;
@@ -4045,10 +4224,12 @@ function pickSide(side) {
   const id = Object.keys(MOWERS).find(k => MOWERS[k].brand === side), B = BRAND[side];
   Menu.confirm = null; S.event.side = side; S.event.mower = id;
   if (!S.owned.includes(id)) S.owned.push(id); S.fuel[id] = mowerStats(id).tank;
-  equipMower(id); Sfx.complete(); banner(`TEAM ${esc(B.name.toUpperCase())}<small>${esc(MOWERS[id].name)} is yours · mow ${EVENT.goal} lawns with it!</small>`); save(); renderMenu();
+  equipMower(id); Sfx.complete(); banner(`TEAM ${esc(B.name.toUpperCase())}<small>${esc(MOWERS[id].name)} is yours · mow ${EVENT.goal} lawns with it!</small>`); save(); renderMenu(); eventSync();
 }
 function eventLawn() { // called when you finish a lawn (not your co-op partner, not race lawns)
-  const E = S.event; if (!E.side || eventOver() || !Game.mw || Game.mw.id !== E.mower || E.lawns >= EVENT.goal) return;
+  const E = S.event; if (!E.side || eventOver() || !Game.mw || Game.mw.id !== E.mower) return;
+  E.teamLawns++; eventSync(); // every lawn helps the team, even after your own 50
+  if (E.lawns >= EVENT.goal) { save(); return; }
   E.lawns++; const B = BRAND[E.side];
   EVENT.awards.forEach((a, i) => {
     if (i < E.awarded || E.lawns < a.at) return; E.awarded = i + 1; const id = 'ev_' + E.side;
@@ -4060,10 +4241,17 @@ function eventLawn() { // called when you finish a lawn (not your co-op partner,
   });
   toast(`⚔️ ${E.lawns} / ${EVENT.goal} lawns`, `Team ${esc(B.name)}`, 'var(--gold)'); save();
 }
+function evBoardHTML() { // the live team scoreboard
+  const w = EvStats.winner;
+  if (!EvStats.loaded) return `<div class="small muted" style="text-align:center">${Net.mp && Net.mp.connected ? 'Loading the team scores…' : 'Team scores will appear when you\'re online.'}</div>`;
+  return `${w ? `<div class="evWin" style="--sc:${BRAND[w.side].col}">🏆 TEAM ${esc(BRAND[w.side].name.toUpperCase())} WINS! First to ${EVENT.target} lawns</div>` : `<div class="small" style="text-align:center;font-weight:800">First team to ${EVENT.target} lawns wins</div>`}
+    <div class="evScore">${EV_SIDES.map(k => { const B = BRAND[k], l = EvStats.lawns[k], p = EvStats.picks[k]; return `<div class="evTeam"><b>${esc(B.name)}</b><span class="small muted">${p} ${p === 1 ? 'player' : 'players'}</span><div class="pbar"><i style="width:${Math.min(100, l / EVENT.target * 100)}%;background:${B.col}"></i></div><span class="small"><b>${l}</b> / ${EVENT.target} lawns</span></div>`; }).join('')}</div>
+    ${EvStats.top.length ? `<div class="lbl">Top mowers</div><div class="evTop">${EvStats.top.map(t => `<div><span>${t.rank}. ${esc(t.name || 'Player')}${Net.mp && t.id === Net.mp.playerId ? ' (you)' : ''}</span><b>${t.score} lawns</b></div>`).join('')}</div>` : ''}`;
+}
 function eventHTML() {
   const E = S.event, over = eventOver();
   let h = `<div class="mdlg panel" style="width:min(760px,96vw)">${menuHead('⚔️ ' + esc(EVENT.name.toUpperCase()), 'Limited event · pick one side · you can\'t change it')}<div class="mbody">
-    <div class="evTime">${over ? 'EVENT ENDED' : '⏳ <span class="evTimer">' + fmtLeft(EVENT.end - eventNow()) + '</span>'}</div>`;
+    <div class="evTime">${over ? 'EVENT ENDED' : '⏳ <span class="evTimer">' + fmtLeft(EVENT.end - eventNow()) + '</span>'}</div>${evBoardHTML()}`;
   if (!E.side) {
     if (over) return h + '<div class="small muted" style="text-align:center">This event has finished, and its mowers and rewards are gone.</div></div></div>';
     h += '<div class="evPick">' + ['scott', 'rover'].map(k => {
@@ -4076,6 +4264,7 @@ function eventHTML() {
     const B = BRAND[E.side], m = MOWERS[E.mower], using = Game.mw && Game.mw.id === E.mower, pct = E.lawns / EVENT.goal * 100;
     h += `<div class="evMine" style="--sc:${B.col}"><img src="${mowerThumb(E.mower)}" alt="${esc(m.name)}"><div class="col" style="gap:7px"><h3 style="font-size:18px">Team ${esc(B.name)}</h3><div class="small">${esc(m.name)}</div>
       <div class="row small" style="gap:8px"><div class="pbar" style="flex:1;height:13px"><i style="width:${pct}%;background:${B.col}"></i></div><b>${E.lawns} / ${EVENT.goal}</b></div>
+      <div class="small muted">You've given your team ${E.teamLawns} ${E.teamLawns === 1 ? 'lawn' : 'lawns'}.</div>${S.flags.modded ? '<div class="small" style="color:var(--bad)">This save was changed outside normal play, so it can\'t add to the team score.</div>' : ''}
       <div class="small muted">${using ? 'Every lawn you finish with this mower counts.' : '<span style="color:var(--bad)">Only lawns finished with this mower count.</span>'}</div>
       ${using ? '' : '<button class="btn gold" data-act="eventUse">Use my ' + esc(B.name) + ' mower</button>'}</div></div><div class="lbl">Awards</div>`;
     h += EVENT.awards.map(a => { const got = E.lawns >= a.at; return `<div class="evAward ${got ? 'got' : ''} ${a.top ? 'max' : ''}"><span class="n">${a.at} lawn${a.at > 1 ? 's' : ''}</span><span class="r">${awardText(a, B)}</span><span>${got ? '✔' : '🔒'}</span></div>`; }).join('');
@@ -4108,6 +4297,7 @@ function hideAffordPop() { $('#affordPop').style.display = 'none'; clearTimeout(
 
 /* ---------- Phone → Settings: quick on/off switches ---------- */
 const PHONE_SETTINGS = [
+  { k: 'name',     icon: '👋', name: 'Your name',                        sub: 'The name other players see', val: () => esc(pName()) },
   { k: 'hlAfford', icon: '🟥', name: 'Red box on things you can afford', sub: 'Mowers, upgrades & quest rewards get a red outline + arrow' },
   { k: 'hlJobs',   icon: '🆕', name: 'Red box on new jobs',              sub: 'New jobs and the Jobs button get a red outline + arrow' },
   { k: 'popUpg',   icon: '⚡', name: '"You can afford an upgrade" pop-up', sub: 'Pops up when you have enough for an upgrade at Ray\'s stall' },
@@ -4122,9 +4312,10 @@ const PHONE_SETTINGS = [
 function phoneSettingsHTML() {
   const s = S.settings;
   return PHONE_SETTINGS.map(o => `<button class="tgl" data-act="phoneSet" data-arg="${o.k}"><span style="font-size:20px">${o.icon}</span><span class="tl">${o.name}<small>${o.sub}</small></span>${o.val ? `<span class="val">${o.val(s)}</span>` : `<span class="sw ${(o.on ? o.on(s) : !!s[o.k]) ? 'on' : ''}"></span>`}</button>`).join('')
-    + '<div class="small muted" style="text-align:center">More (volume, sensitivity) in Pause → Settings.</div>';
+    + '<div class="small muted" style="text-align:center">More (volume, sensitivity) in Pause → Settings.</div>' + adminFieldHTML();
 }
 function phoneSet(k) {
+  if (k === 'name') { openMenu('name'); return; }
   const s = S.settings;
   if (k === 'shake') s.shake = s.shake > 0 ? 0 : 1;
   else if (k === 'mowerCtl') { s.mowerCtl = s.mowerCtl === 'mouse' ? 'wasd' : 'mouse'; if (s.mowerCtl === 'wasd') unlockMouse(); }
@@ -4267,7 +4458,7 @@ function stallHTML() {
 /* ---------- Season Pass ---------- */
 function passHTML() {
   const t = passTier(), into = S.pass.xp - PASS_CUM[t], need = t < 50 ? passCost(t) : 1;
-  let h = `<div class="mdlg panel" style="width:min(860px,96vw)">${menuHead('🎟️ SEASON PASS', 'Season 1 · Summer of Sam · rewards unlock automatically')}<div class="mbody">
+  let h = `<div class="mdlg panel" style="width:min(860px,96vw)">${menuHead('🎟️ SEASON PASS', `Season 1 · Summer of ${esc(pName())} · rewards unlock automatically`)}<div class="mbody">
     <div class="story"><h4>TIER ${t} / 50</h4><p style="font-style:normal;font-size:15px"><b>${t < 50 ? `${into} / ${need} XP to tier ${t + 1}` : 'SEASON COMPLETE! 🏆'}</b></p><div class="pbar" style="height:14px"><i style="width:${t < 50 ? into / need * 100 : 100}%;background:linear-gradient(90deg,#c8941a,#ffcf4a)"></i></div>
     <p style="font-style:normal;font-size:12px;margin-top:7px" class="muted">Earn XP by playing normally: every job (~30 XP + 1.1× its pay + 8 per ★), story goals (+25) and races. Early tiers need only 40 XP — about one small job each.</p></div>`;
   if (t < 50) h += `<div class="lbl">Up next</div><div class="pass">${PASS.slice(t, t + 6).map((r, i) => `<div class="tier ${i === 0 ? 'cur' : ''} ${t + i === 49 ? 'legend' : ''}"><div class="tn">TIER ${t + i + 1}</div><div class="ti">${rewardIcon(r)}</div><div>${esc(rewardLabel(r))}</div><div class="tn">${PASS_CUM[t + i + 1] - S.pass.xp} XP to go</div></div>`).join('')}</div>`;
@@ -4327,6 +4518,7 @@ const TUT = [
 ];
 function tutOnEnter() { // a single-player slot just started
   if (Net.on) return;
+  if (!MPPrefs.askedName && !MPPrefs.named) { setTimeout(() => { if (Game.state === 'play' && !MPPrefs.askedName) openMenu('name'); }, 500); return; }
   if (S.tut.state === 'new') setTimeout(() => { if (Game.state === 'play' && S.tut.state === 'new' && !Net.on) openMenu('tutw'); }, 600);
   else if (S.tut.state === 'active') { tutEnterStep(); toast('📘 Tutorial resumed', `Step ${S.tut.step + 1} of ${TUT.length} — you can skip it any time.`, 'var(--sky)'); }
 }
@@ -4369,7 +4561,7 @@ function tutUI(force) {
   $('#scr-menu').classList.toggle('tutOn', show && Game.state === 'menu' && innerWidth >= 720); // menus slide right so the tutorial card never covers them
   if (!show) { card.style.display = 'none'; arrow.style.display = 'none'; if (Tut.hlEl) { Tut.hlEl.classList.remove('tutHL'); Tut.hlEl = null; } Tut.shown = false; return; }
   Tut.shown = true;
-  const i = S.tut.step, st = TUT[i], done = !st.info && st.done(), txt = typeof st.text === 'function' ? st.text() : st.text, need = st.need ? st.need() : '';
+  const i = S.tut.step, st = TUT[i], done = !st.info && st.done(), txt = (typeof st.text === 'function' ? st.text() : st.text).replace(/\bSam\b/g, esc(pName())), need = st.need ? st.need() : '';
   const html = `<div class="tstep">TUTORIAL · STEP ${i + 1} OF ${TUT.length}</div><div class="pbar" style="height:5px;margin-top:5px"><i style="width:${(i + (done ? 1 : 0)) / TUT.length * 100}%;background:var(--sky)"></i></div>
     <h3>${st.title.replace(/^\d+ · /, '')}</h3><div class="ttxt">${txt}</div>${st.goal ? `<div class="tgoal ${done ? 'done' : ''}">${done ? '✔' : '☐'} ${st.goal}</div>` : ''}${need ? `<div class="tneed">${need}</div>` : ''}
     <div class="tbtns"><button class="btn" data-act="tutSkip">Skip tutorial</button>${st.info ? `<button class="btn primary" data-act="tutNext">${st.nextLabel || 'Next ▶'} <kbd>Enter</kbd></button>` : ''}</div>`;
@@ -4619,7 +4811,9 @@ function boot() {
   if (typeof Multiplayer !== 'undefined') netInit();
   else { const sdk = $('#mpsdk'); sdk.addEventListener('load', netInit); sdk.addEventListener('error', () => { Net.status = 'error'; Net.err = 'Couldn\'t reach the multiplayer server.'; mpRefresh(); }); }
 }
+if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__mt = code => eval(code); // testing handle: only when the game runs from your own computer, never on the live site
 boot();
+})();
 </script>
 </body>
 </html>
