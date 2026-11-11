@@ -229,6 +229,25 @@ textarea.inp{resize:none;min-height:112px;line-height:1.4;display:block}.inp{use
 .slotCard.sel{border-color:var(--acc)}
 .inp{background:#0c140f;border:2px solid rgba(255,255,255,.15);border-radius:10px;padding:9px 12px;color:var(--txt);font:inherit;font-weight:700;font-size:14px;outline:none;width:100%}
 .inp:focus{border-color:var(--acc)}
+/* accounts, leaderboards, admin players */
+#scr-signin{flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15),rgba(0,0,0,.65));overflow-y:auto;padding:16px}
+#acctBox{position:absolute;top:14px;right:14px;width:290px;padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+#acctBox:empty{display:none}
+@media (max-width:820px){#acctBox{position:static;width:min(310px,92vw)}#scr-title{overflow-y:auto;justify-content:flex-start;padding:16px 0}}
+.btn.sm{padding:6px 9px;font-size:12px}
+.codeTxt{flex:1;font-family:Consolas,"Courier New",monospace;font-weight:900;font-size:17px;letter-spacing:2px;color:var(--gold);text-align:center;background:#0c140f;border-radius:8px;padding:6px 4px;user-select:text;-webkit-user-select:text}
+.codeBig{font-family:Consolas,"Courier New",monospace;font-weight:900;font-size:clamp(26px,7vw,38px);letter-spacing:4px;color:var(--gold);text-align:center;background:#0c140f;border:2px dashed rgba(255,207,74,.55);border-radius:14px;padding:14px 8px;user-select:text;-webkit-user-select:text}
+.codeInp{font-family:Consolas,"Courier New",monospace;font-size:20px;letter-spacing:3px;text-align:center;text-transform:uppercase}
+.lbRow{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:8px 12px;border-radius:11px;background:var(--panel2);border:2px solid transparent;font-weight:800}
+.lbRow b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lbRow .tag{margin:0 0 0 4px}
+.lbRow.me{border-color:var(--acc);background:#2f4a2a}
+.lbN{font-family:var(--display);text-align:center;font-size:15px}.lbV{font-family:var(--display);color:var(--cash)}
+.pRow{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:8px 11px;border-radius:11px;background:var(--panel2);border:2px solid var(--line);width:100%}
+.pRow:hover{border-color:rgba(155,232,74,.5)}.pRow small{display:block;color:var(--mut);font-weight:700;font-size:11px}.pRow:focus-visible{outline:2px solid var(--acc)}
+.onDot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#55615a}.onDot.on{background:#4ade80;box-shadow:0 0 6px #4ade80}
+.statGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.statGrid div{background:var(--panel2);border-radius:10px;padding:7px 9px;font-size:11px;font-weight:800;color:var(--mut)}.statGrid b{display:block;color:var(--txt);font-size:15px}
+.admForm{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}.admForm label{display:flex;flex-direction:column;gap:3px}
 .code{font-family:var(--display);font-size:34px;letter-spacing:8px;color:var(--gold)}
 #mpChip{display:none;font-size:13px}
 #boostChip{display:none;font-size:13px;color:var(--gold)}
@@ -377,7 +396,9 @@ textarea.inp{resize:none;min-height:112px;line-height:1.4;display:block}.inp{use
     <div class="logo">MOW TOWN</div>
     <div class="tagline">A SUMMER LAWN STORY</div>
     <div class="titleBtns" id="titleBtns"></div>
+    <div class="panel" id="acctBox"></div>
   </div>
+  <div class="screen" id="scr-signin"></div>
   <div class="screen center" id="scr-slots"></div>
   <div class="screen center" id="scr-mp"></div>
   <div class="screen" id="scr-phone"></div>
@@ -673,13 +694,21 @@ function deepMerge(base, o) {
 }
 /* ---------- Save slots (3) + settings shared by every slot ---------- */
 let SLOT = 1;
-const SLOTS = 3, slotKey = n => 'mowtown_slot' + n, yardKey = n => 'mowtown_yards_slot' + n, SETTINGS_KEY = 'mowtown_settings';
+const SLOTS = 3, SETTINGS_KEY = 'mowtown_settings', ACCT_KEY = 'mowtown_account';
+const ls = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); return true; } catch (e) { return false; } };
+// 👤 The signed-in account (null = playing offline as a guest). Each account keeps its own saves on this computer,
+// so two players sharing a laptop never mix up their progress, and the guest saves are never deleted.
+let Acct = (() => { try { const a = JSON.parse(localStorage.getItem(ACCT_KEY) || 'null'); return a && a.pid && a.code && a.name ? a : null; } catch (e) { return null; } })();
+const nsOf = a => a ? 'mowtown_a' + String(a.pid).replace(/[^A-Za-z0-9]/g, '').slice(-16) + '_' : 'mowtown_';
+let NS = nsOf(Acct);
+const slotKey = n => NS + 'slot' + n, yardKey = n => NS + 'yards_slot' + n, GUEST_NS = 'mowtown_';
 const GS = (() => { try { return Object.assign(defaultSave().settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); } catch (e) { return defaultSave().settings; } })();
-(function migrateLegacySave() { // the old single save becomes Slot 1
+(function migrateLegacySave() { // the old single save becomes the guest's Slot 1
   try {
     const old = localStorage.getItem(SAVE_KEY);
-    if (old && !localStorage.getItem(slotKey(1))) {
-      localStorage.setItem(slotKey(1), old); const y = localStorage.getItem(YARD_KEY); if (y) localStorage.setItem(yardKey(1), y);
+    if (old && !localStorage.getItem(GUEST_NS + 'slot1')) {
+      localStorage.setItem(GUEST_NS + 'slot1', old); const y = localStorage.getItem(YARD_KEY); if (y) localStorage.setItem(GUEST_NS + 'yards_slot1', y);
       const o = JSON.parse(old); if (o.settings) Object.assign(GS, o.settings);
     }
   } catch (e) { }
@@ -699,17 +728,23 @@ function readSlot(n) {
     return s;
   } catch (e) { return null; }
 }
-function deleteSlot(n) { try { localStorage.removeItem(slotKey(n)); localStorage.removeItem(yardKey(n)); localStorage.removeItem(sigKey(n)); } catch (e) { } }
+function deleteSlot(n) {
+  try { localStorage.removeItem(slotKey(n)); localStorage.removeItem(yardKey(n)); localStorage.removeItem(sigKey(n)); } catch (e) { }
+  if (Acct) { lsSet(NS + 'del' + n, String(Date.now())); Cloud.dirty.add(n); } // remembered, so the account's backup is deleted too
+}
 // Each save is signed, so a save edited outside the game is spotted. It still plays; it just can't add to shared team scores.
-const SAVE_SALT = 'mt-save-v3|lawn', sigKey = n => 'mowtown_sig' + n;
+const SAVE_SALT = 'mt-save-v3|lawn', sigKey = n => NS + 'sig' + n;
+function writeSlotRaw(n, raw) { lsSet(slotKey(n), raw); lsSet(sigKey(n), String(hashStr(SAVE_SALT + raw))); lsSet(NS + 'del' + n, null); if (Acct) Cloud.dirty.add(n); }
+const savedAtOf = raw => { try { return JSON.parse(raw).savedAt || 1; } catch (e) { return 1; } };
 let S = defaultSave(); S.settings = GS;
 function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(GS)); } catch (e) { } }
 function save() {
   saveSettings();
   if (!S.started) return;
+  S.savedAt = Date.now(); // the newest copy wins when this save is also in your account
   // co-op guest: your own town's day/jobs are kept — the host's world is never written into your save
   const out = Net.guestWorld ? Object.assign({}, S, Net.guestWorld) : S;
-  try { const raw = JSON.stringify(out); localStorage.setItem(slotKey(SLOT), raw); localStorage.setItem(sigKey(SLOT), String(hashStr(SAVE_SALT + raw))); } catch (e) { }
+  try { writeSlotRaw(SLOT, JSON.stringify(out)); } catch (e) { }
 }
 // Yard cut-maps: each cell packed into one byte (4 bits height + 4 bits stripe shade) and base64'd
 function packYards(only) {
@@ -735,7 +770,22 @@ function unpackYards(o) {
 }
 function saveYards() {
   if (!S.started || !Yards.list.length || Net.guestWorld) return; // never save the host's lawns into a guest's slot
-  try { localStorage.setItem(yardKey(SLOT), JSON.stringify(packYards(Y => !Y.lot.startsWith('race')))); } catch (e) { }
+  try { localStorage.setItem(yardKey(SLOT), JSON.stringify(packYards(Y => !Y.lot.startsWith('race')))); if (Acct) Cloud.yDirty.add(SLOT); } catch (e) { }
+}
+// Lawns are sent to your account squashed (runs of the same cell), which makes them about 100× smaller
+function rawToRle(o) {
+  const out = {};
+  for (const id in o) {
+    let bin; try { bin = atob(o[id]); } catch (e) { continue; }
+    let s = ''; for (let i = 0; i < bin.length;) { const c = bin[i]; let k = 1; while (i + k < bin.length && k < 255 && bin[i + k] === c) k++; s += c + String.fromCharCode(k); i += k; }
+    out[id] = btoa(s);
+  }
+  return out;
+}
+function rleToRaw(o) {
+  const raw = {};
+  for (const id in o) { let bin; try { bin = atob(o[id]); } catch (e) { continue; } let s = ''; for (let i = 0; i + 1 < bin.length; i += 2) s += bin[i].repeat(bin.charCodeAt(i + 1)); raw[id] = btoa(s); }
+  return raw;
 }
 function loadYards() { let o = null; try { o = JSON.parse(localStorage.getItem(yardKey(SLOT)) || 'null'); } catch (e) { } return unpackYards(o); }
 
@@ -3048,8 +3098,10 @@ function stickerOp(op) {
 /* ---------- Title, pause, settings ---------- */
 function showTitle() {
   Game.state = 'title'; $('#hud').classList.add('hidden'); closeDialog(); $('#raceResult').style.display = 'none'; $('#lobbyPanel').style.display = 'none';
-  $('#titleBtns').innerHTML = `<button class="btn primary" data-act="play" data-autofocus>▶ Play</button><button class="btn" data-act="mp">👥 Play Online</button><button class="btn" data-act="timeTrial">🏁 Fastest Lawn Cut (time trial)</button><button class="btn" data-act="settings">⚙️ Settings</button><div class="titleExtra"><button class="btn" data-act="openIdeas">💡 Recommendations</button><button class="btn" data-act="openLog">📜 Update Log${logUnseen() ? '<span class="newTag">NEW</span>' : ''}</button></div><div class="small muted" style="text-align:center;margin-top:6px">Version ${GAME_VERSION} · 3 save slots · best with keyboard + mouse · progress autosaves</div><div class="small mpConn" style="text-align:center;opacity:.8"></div>`;
+  $('#titleBtns').innerHTML = `<button class="btn primary" data-act="play" data-autofocus>▶ Play</button><button class="btn" data-act="mp">👥 Play Online</button><button class="btn" data-act="timeTrial">🏁 Fastest Lawn Cut (time trial)</button><button class="btn" data-act="openLb">🏆 Leaderboards</button><button class="btn" data-act="settings">⚙️ Settings</button><div class="titleExtra"><button class="btn" data-act="openIdeas">💡 Recommendations</button><button class="btn" data-act="openLog">📜 Update Log${logUnseen() ? '<span class="newTag">NEW</span>' : ''}</button></div><div class="small muted" style="text-align:center;margin-top:6px">Version ${GAME_VERSION} · 3 save slots · best with keyboard + mouse · progress autosaves</div><div class="small mpConn" style="text-align:center;opacity:.8"></div>`;
+  AcctUI.soConfirm = false; renderAcctBox();
   showScreen('title'); mpRefresh();
+  if (Acct && Cloud.dirty.size) cloudFlush(true);
 }
 function newGame() { showSlots('play'); }
 function startPlay() {
@@ -3063,7 +3115,7 @@ function pauseGame() {
     ${Net.on ? `<div class="small" style="color:var(--sky)">👥 Room <b>${Net.code}</b> · the game keeps running for your friend</div><div>${netPlayersHTML()}</div>` : ''}
     <button class="btn primary" data-act="resume" data-autofocus>▶ Resume</button><button class="btn" data-act="phonePause">📱 Phone</button><button class="btn" data-act="settings">⚙️ Settings</button>
     ${Race.on && !Net.on ? '<button class="btn" data-act="raceTown">🏳 Quit race</button>' : ''}${S.tut.state === 'active' && !Net.on ? '<button class="btn" data-act="tutSkip">⏭ Skip tutorial</button>' : ''}${Net.on ? '<button class="btn" data-act="mpLeave">🚪 Leave multiplayer</button>' : ''}
-    <div class="titleExtra"><button class="btn" data-act="openIdeas">💡 Recommendations</button><button class="btn" data-act="openLog">📜 Update Log</button></div>
+    <button class="btn" data-act="openLb">🏆 Leaderboards</button><div class="titleExtra"><button class="btn" data-act="openIdeas">💡 Recommendations</button><button class="btn" data-act="openLog">📜 Update Log</button></div>
     <button class="btn" data-act="saveQuit">💾 Save & quit to title</button><div class="small muted">Slot ${SLOT} · version ${GAME_VERSION}</div></div>`;
   showScreen('pause');
 }
@@ -3091,6 +3143,7 @@ const ACT = {
   // save slots
   play: () => showSlots('play'), timeTrial: () => showSlots('race'), slotBack: () => showTitle(),
   slotPick: a => {
+    if (Cloud.pulling) { toast('☁ Getting your saves from your account…', 'One moment, then press Play again.', 'var(--sky)'); return; }
     const n = +a, fresh = enterSlot(n);
     if (Game.slotMode === 'race') { placeAtArena(); startPlay(); startRace(true); }
     else { startPlay(); if (!fresh) banner(`DAY ${S.day}<small>Slot ${n} · ${fmtClock(S.clock)}</small>`); tutOnEnter(); }
@@ -3115,7 +3168,15 @@ const ACT = {
   useMower: a => { equipMower(a); refreshOpenUI(); },
   buyUp: a => { if (buyUpgrade(a)) refreshOpenUI(); },
   // main-screen buttons & menus
-  openName: () => openMenu('name'), nameSave: () => nameSave(), adminEnter: () => adminEnter(), adminTab: a => { Admin.tab = a; renderMenu(); $('#scr-menu .bbody').scrollTop = 0; focusAct('adminTab', a); },
+  // accounts & leaderboards
+  acctTab: a => { const n = $('#acName'), c = $('#acCode'); if (n) AcctUI.nameVal = n.value; if (c) AcctUI.codeVal = c.value; AcctUI.tab = a; renderSignin(); },
+  acctCreate: () => acctCreate(), acctSignIn: () => acctSignIn(), acctSignOut: () => acctSignOut(), acctCopy: () => acctCopy(),
+  acctOffline: () => { AcctUI.offline = true; showTitle(); }, acctDone: () => { AcctUI.fresh = null; showTitle(); }, acctSignInBtn: () => showSignin(guestSlots().length ? 'new' : 'code'),
+  acctShow: () => { AcctUI.show = !AcctUI.show; renderAcctBox(); },
+  openLb: () => openMenu('lb'), lbTab: a => { LB.tab = a; renderMenu(); }, lbRefresh: () => { lbLoad(true); renderMenu(); },
+  admPick: a => { AdminP.sel = a; renderMenu(); $('#scr-menu .bbody').scrollTop = 0; }, admBack: () => { AdminP.sel = null; renderMenu(); }, admRefresh: () => adminLoadPlayers(),
+  admSave: () => admSaveStats(), admAdd: a => admSend({ addMoney: +a }), admGive: a => admSend({ mower: a }),
+  openName: () => openMenu('name'), nameSave: () => nameSave(), adminEnter: () => adminEnter(), adminTab: a => { Admin.tab = a; if (a === 'players' && !AdminP.loading && (!AdminP.list || Date.now() - AdminP.at > 30000)) adminLoadPlayers(); renderMenu(); $('#scr-menu .bbody').scrollTop = 0; focusAct('adminTab', a); },
   adminMoney: a => adminMoney(a), adminMoneyAny: () => adminMoney($('#adminAmt').value),
   adminMower: a => { adminGiveMower(a); Sfx.complete(); toast('🚜 Added the ' + MOWERS[a].name, 'Press Use to drive it.'); save(); renderMenu(); },
   adminMowerAll: () => { MOWER_ORDER.forEach(adminGiveMower); Sfx.complete(); toast('🚜 Added every mower', ''); save(); renderMenu(); },
@@ -3191,8 +3252,8 @@ addEventListener('keydown', e => {
   }
   if (Game.state === 'menu' && !e.repeat) {
     if (code === 'Escape') { e.preventDefault(); if (Menu.cur !== 'tutw') closeMenu(); return; }
-    if (typing) { const id = document.activeElement.id; if (code === 'Enter' && id === 'nameInp') nameSave(); else if (code === 'Enter' && id === 'adminAmt') ACT.adminMoneyAny(); return; } // letters go into the text box, not the menu shortcuts
-    const m = { KeyJ: 'jobs', KeyQ: 'quests', KeyB: 'shop', KeyP: 'pass', KeyV: 'event' }[code]; if (m && !['tutw', 'stall', 'ideas', 'log', 'name', 'admin'].includes(Menu.cur)) { openMenu(m); return; }
+    if (typing) { const id = document.activeElement.id; if (code === 'Enter' && id === 'nameInp') nameSave(); else if (code === 'Enter' && id === 'adminAmt') ACT.adminMoneyAny(); else if (code === 'Enter' && /^adm(Money|Lawns|Jobs|Earned)$/.test(id)) admSaveStats(); return; } // letters go into the text box, not the menu shortcuts
+    const m = { KeyJ: 'jobs', KeyQ: 'quests', KeyB: 'shop', KeyP: 'pass', KeyV: 'event' }[code]; if (m && !['tutw', 'stall', 'ideas', 'log', 'name', 'admin', 'lb'].includes(Menu.cur)) { openMenu(m); return; }
   }
   if (code === 'Escape') {
     e.preventDefault();
@@ -3206,6 +3267,8 @@ addEventListener('keydown', e => {
   const ae = document.activeElement;
   if (code === 'Enter' && ae && ae.id === 'mpCode') { ACT.mpJoin(); return; }
   if (code === 'Enter' && ae && ae.id === 'adminPw') { adminEnter(); return; }
+  if (code === 'Enter' && ae && ae.id === 'acName') { acctCreate(); return; }
+  if (code === 'Enter' && ae && ae.id === 'acCode') { acctSignIn(); return; }
   if (ae && ae.tagName === 'TEXTAREA') return;
   if (ae && ae.tagName === 'INPUT' && (code === 'ArrowLeft' || code === 'ArrowRight')) return;
   const dirs = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
@@ -3434,6 +3497,7 @@ function enterSlot(n) { // loads a save slot into the world; returns true if it'
   if (activeJob()) Game.run = { damage: 0, align: 0, total: 0, knocked: 0, dogHit: false };
   claimPassTiers(false);                                                 // older saves: catch up on the faster Season Pass
   eventSync();                                                           // send any team lawns from an earlier offline session
+  lsSet(NS + 'last', String(n)); Cloud.lastProfile = 0;                  // your account shows the save you played last
   save(); saveYards(); return fresh;
 }
 function showSlots(mode) { Game.slotMode = mode; renderSlots(); showScreen('slots'); }
@@ -3441,6 +3505,7 @@ function renderSlots() {
   const title = Game.slotMode === 'race' ? '🏁 TIME TRIAL · PICK A SAVE' : '▶ PICK A SAVE';
   let h = `<div class="dlg panel" style="width:min(540px,95vw)"><div class="dlgHead"><h2 style="font-size:22px">${title}</h2><button class="btn" data-act="slotBack">✕ Back</button></div>`;
   if (Game.slotMode === 'race') h += '<div class="small muted">Race your own mower against the clock on the Speedway Lawns. Best times are saved per mower.</div>';
+  h += Acct ? `<div class="small" style="color:var(--sky)">☁ ${esc(Acct.name)}'s saves · backed up to your account</div>` : '<div class="small muted">⚠️ Offline saves: only on this computer. Sign in from the home screen to back them up.</div>';
   for (let n = 1; n <= SLOTS; n++) {
     const s = readSlot(n);
     if (s && s.started) h += `<div class="slotCard"><div class="n">${n}</div><div class="t"><h4>Day ${s.day} · <span class="cash">${money(s.money)}</span></h4><small>${MOWERS[s.mower].icon} ${MOWERS[s.mower].name} · ${s.stats.jobs} jobs · Pass tier ${passTierOf(s.pass.xp)}${s.tut.state === 'active' ? ' · tutorial in progress' : ''}</small></div><button class="btn primary" style="font-size:15px" data-act="slotPick" data-arg="${n}">▶ ${Game.slotMode === 'race' ? 'Race' : 'Play'}</button><button class="btn" data-act="slotDel" data-arg="${n}" aria-label="Delete slot ${n}">🗑</button></div>`;
@@ -3475,14 +3540,16 @@ const Net = {
     for (let i = 0; i < n; i++) this.send({ t: 'chunk', id, i, n, s: s.slice(i * 50000, (i + 1) * 50000) }, to);
   }
 };
-const netErrText = e => ({ room_not_found: 'No room with that code.', room_full: 'That room is full (2 players max).', room_locked: 'That room is locked.', bad_key: 'The game key was rejected by the server.', forbidden: 'This website isn\'t allowed to connect (check allowed origins in the dashboard).', timeout: 'The server didn\'t answer in time — try again.', not_connected: 'Not connected to the server.' }[e && e.code] || (e && e.message) || 'Something went wrong.');
+const netErrText = e => ({ replaced: 'You signed in on another computer, so this one went offline. Reload the page to come back.', room_not_found: 'No room with that code.', room_full: 'That room is full (2 players max).', room_locked: 'That room is locked.', bad_key: 'The game key was rejected by the server.', forbidden: 'This website isn\'t allowed to connect (check allowed origins in the dashboard).', timeout: 'The server didn\'t answer in time — try again.', not_connected: 'Not connected to the server.' }[e && e.code] || (e && e.message) || 'Something went wrong.');
 function netInit() {
   if (Net.mp) return;
   if (typeof Multiplayer === 'undefined') { Net.status = 'error'; Net.err = 'Couldn\'t load the multiplayer service. Check your internet connection.'; mpRefresh(); return; }
   // 'device' keeps the same player between visits, so scoreboard names don't duplicate. Add ?mptab to the address to test two players in two tabs.
   const mp = Net.mp = new Multiplayer({ url: MP_CFG.url, key: MP_CFG.key, name: pName(), identity: location.search.includes('mptab') ? 'tab' : 'device' });
-  mp.on('connected', () => { eventRefresh(true); eventSync(); });
-  mp.on('reconnected', () => eventSync());
+  mp.on('connected', () => { acctOnConnect().finally(() => { eventRefresh(true); eventSync(); }); });
+  mp.on('reconnected', () => { eventSync(); cloudFlush(true); });
+  mp.on('inbox', it => handleInbox(it));
+  mp.on('config', () => applyConfigEdits());
   mp.onMessage('g', (d, from) => { if (!Net.on || !d || from === mp.playerId) return; if (d.t === 'chunk') netChunk(d, from); else netMessage(d, from); });
   mp.on('playerJoined', p => { if (Net.on && p.id !== mp.playerId) netPeerJoined(p); });
   mp.on('playerLeft', p => { if (Net.on && p.id !== mp.playerId) netPeerLeft(p); });
@@ -3623,11 +3690,7 @@ function netPackYards() {
   }
   return out;
 }
-function netUnpackYards(o) {
-  const raw = {};
-  for (const id in o) { let bin; try { bin = atob(o[id]); } catch (e) { continue; } let s = ''; for (let i = 0; i + 1 < bin.length; i += 2) s += bin[i].repeat(bin.charCodeAt(i + 1)); raw[id] = btoa(s); }
-  return unpackYards(raw);
-}
+function netUnpackYards(o) { return unpackYards(rleToRaw(o)); }
 function sendWorld(to) { Net.sendBig({ t: 'world', day: S.day, clock: S.clock, jobs: S.jobs, active: S.active, yards: netPackYards() }, to); netHello(true); }
 function beginSession() {
   saveMPPrefs(); enterSlot(MPPrefs.slot);
@@ -3715,7 +3778,7 @@ function renderMP() {
   const slots = [1, 2, 3].map(n => { const s = readSlot(n); return `<button class="btn ${MPPrefs.slot === n ? 'sel' : ''}" data-act="mpSlot" data-arg="${n}">Slot ${n}: ${s && s.started ? MOWERS[s.mower].icon + ' ' + MOWERS[s.mower].name + ' · ' + money(s.money) : 'New save'}</button>`; }).join('');
   $('#scr-mp').innerHTML = `<div class="dlg panel scroll" style="width:min(600px,95vw)"><div class="dlgHead"><h2>👥 MOW TOWN ONLINE</h2><button class="btn" data-act="mpBack">✕ Back</button></div>
     <div class="row" style="justify-content:space-between"><span class="small mpConn"></span><button class="btn" id="mpRetry" data-act="mpRetry" style="display:none;padding:6px 10px;font-size:12px">↻ Retry</button></div>
-    <div class="lbl">Your name</div><input class="inp" id="mpName" maxlength="16" value="${esc(pName())}">
+    <div class="lbl">Your name</div>${Acct ? `<div class="small">👤 <b>${esc(Acct.name)}</b> <span class="muted">· your account name</span></div>` : `<input class="inp" id="mpName" maxlength="16" value="${esc(pName())}">`}
     <div class="lbl">Bring your mower from</div><div class="opts">${slots}</div>
     <div class="small muted">Your mower, paint, stickers, upgrades & money come from this save — and anything you earn goes back into it.</div>
     <div class="lbl">Quick play</div><div class="opts"><button class="btn primary" style="font-size:15px" data-act="mpHost" data-arg="quick-coop">⚡ Quick Co-op</button><button class="btn gold" data-act="mpHost" data-arg="quick-race">⚡ Quick Race</button></div>
@@ -3972,7 +4035,7 @@ const Menu = { cur: null, from: 'play', confirm: null, just: null };
 function openMenu(name) {
   if (Game.state === 'menu' && Menu.cur === name) { closeMenu(); return; }
   if (!['play', 'menu', 'bench', 'title', 'paused', 'phone'].includes(Game.state)) return;
-  if (Race.on && !['pass', 'ideas', 'log', 'name'].includes(name)) { Sfx.error(); toast('Not during a race', 'Finish or quit the race first.', 'var(--gold)'); return; }
+  if (Race.on && !['pass', 'ideas', 'log', 'name', 'lb'].includes(name)) { Sfx.error(); toast('Not during a race', 'Finish or quit the race first.', 'var(--gold)'); return; }
   if (Game.dialog) closeDialog();
   if (Game.state !== 'menu') Menu.from = Game.state; else if (Menu.cur === 'jobs') markJobsSeen();
   if (name === 'stall') hideAffordPop();
@@ -3994,7 +4057,7 @@ function closeMenu() {
 function refreshOpenUI() { if (Game.state === 'menu') renderMenu(); else if (Game.state === 'bench') renderBench(); }
 function renderMenu() {
   const c = Menu.cur, el = $('#scr-menu'), box = el.querySelector('.mbody, .bbody'), sy = box ? box.scrollTop : 0;
-  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'admin' ? adminHTML() : c === 'name' ? nameHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
+  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'admin' ? adminHTML() : c === 'lb' ? lbHTML() : c === 'name' ? nameHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
   const mb = el.querySelector('.mbody, .bbody'); if (mb) mb.scrollTop = sy;
   if (c === 'pass') { const row = $('#passRow'), cur = row && row.querySelector('.cur'); if (cur) row.scrollLeft = cur.offsetLeft - 160; }
   tutUI(true);
@@ -4010,31 +4073,46 @@ function nameHTML() {
     <button class="btn primary" style="font-size:15px" data-act="nameSave">✔ Save name</button>${first ? '<button class="btn" data-act="closeMenu">Stay as Sam for now</button>' : ''}
     <div id="nameMsg" class="small" style="min-height:18px;text-align:center;color:var(--bad)"></div></div></div>`;
 }
-function nameSave() {
-  const r = cleanName($('#nameInp').value);
-  if (r.err) { $('#nameMsg').textContent = r.err; Sfx.error(); return; }
+async function nameSave() {
+  const r = cleanName($('#nameInp').value), say = t => { const m = $('#nameMsg'); if (m) m.textContent = t; Sfx.error(); };
+  if (r.err) return say(r.err);
+  if (Acct && r.name.toLowerCase() !== Acct.name.toLowerCase()) { // an account name has to be free, so it's checked on the server
+    if (!cloudReady()) return say('Go online to change your account name.');
+    try { if (!(await nameFree(r.name))) return say('Someone already has that name.'); } catch (e) { return say(netErrText(e)); }
+  }
+  if (Acct) { Acct.name = r.name; saveAcct(); Cloud.lastProfile = 0; }
   applyName(r.name); toast('👋 Hi, ' + esc(r.name) + '!', 'You can change your name in Settings.', 'var(--sky)'); Sfx.unlock(); closeMenu();
 }
 
 /* ---------- 🛠️ Admin panel: reached from the very end of Settings with the password.
-   Everything here only changes the save on this device. It can't touch other players or the team scoreboard. ---------- */
-const ADMIN_HASH = 1126222251, ADMIN_MONEY = [100, 1000, 10000, 100000, 1000000];
-const Admin = { tab: 'money', tries: 0, lockUntil: 0 };
-const adminFieldHTML = () => `<div class="lbl">Admin</div><div class="setRow"><label>🔒 Admin password</label><input class="inp" id="adminPw" type="password" maxlength="12" autocomplete="off" style="width:120px"><button class="btn" data-act="adminEnter">Enter</button></div><div id="adminMsg" class="small" style="min-height:18px;color:var(--bad)"></div>`;
-function adminEnter() {
-  const inp = $('.screen.on #adminPw'), msg = $('.screen.on #adminMsg'); if (!inp) return;
-  const say = t => { msg.textContent = t; Sfx.error(); };
+   The password is checked by the server script and lives only there, never in the game's code, so nobody can dig it out.
+   Money / Mowers / Extras change the save you're playing. Players shows everyone's stats and can change their save. ---------- */
+const ADMIN_MONEY = [100, 1000, 10000, 100000, 1000000];
+const Admin = { tab: 'players', tries: 0, lockUntil: 0, pw: null };
+const adminFieldHTML = () => `<div class="lbl">Admin</div><div class="setRow"><label>🔒 Admin password</label><input class="inp" id="adminPw" type="password" maxlength="40" autocomplete="off" style="width:120px"><button class="btn" data-act="adminEnter">Enter</button></div><div id="adminMsg" class="small" style="min-height:18px;color:var(--bad)"></div>`;
+async function adminEnter() {
+  const inp = $('.screen.on #adminPw'); if (!inp || Admin.checking) return;
+  const say = (t, ok) => { const m = $('.screen.on #adminMsg'); if (m) { m.textContent = t; m.style.color = ok ? 'var(--sky)' : 'var(--bad)'; } if (!ok) Sfx.error(); };
   if (Date.now() < Admin.lockUntil) return say('Too many tries. Wait a moment.');
-  const ok = hashStr('mowtown-admin:' + inp.value) === ADMIN_HASH; inp.value = '';
-  if (!ok) { if (++Admin.tries >= 5) { Admin.tries = 0; Admin.lockUntil = Date.now() + 30000; } return say('Wrong password.'); }
-  Admin.tries = 0; if (!S.started) return say('Load a save first, then come back here.');
-  openMenu('admin');
+  const pw = inp.value; inp.value = ''; if (!pw) return say('Type the password.');
+  Admin.checking = true; say('Checking…', true);
+  try {
+    netInit(); if (!Net.mp || !(await netConnect())) throw { code: 'offline' };
+    const r = await srvCall('adm_check', { pw });
+    if (!r.ok) { if (++Admin.tries >= 5) { Admin.tries = 0; Admin.lockUntil = Date.now() + 30000; } throw new Error(r.why || 'Wrong password.'); }
+    Admin.tries = 0; Admin.pw = pw; if (!S.started) Admin.tab = 'players'; AdminP.sel = null; adminLoadPlayers(); openMenu('admin');
+  } catch (e) {
+    say(e && e.code === 'offline' ? 'The admin panel needs the internet: the password is checked on the server.' : e && ['no_server_script', 'timeout'].includes(e.code) ? 'The server needs the new server-script.js first (see SETUP-SERVER.md).' : (e && e.message) || 'Something went wrong.');
+  }
+  Admin.checking = false;
 }
 function adminHTML() {
-  const t = Admin.tab, tabs = [['money', '💵', 'Money'], ['mowers', '🚜', 'Mowers'], ['acc', '🧢', 'Extras']];
-  let h = `<div class="bpanel panel"><div class="gHead"><div class="gAdm">🛠️</div><div class="gWho"><div class="lbl">Admin panel</div><h2>${esc(pName())}</h2><div class="gStats"><span>Save slot ${SLOT}</span><span>Only changes this save</span></div></div>
-    <div class="gTop"><button class="btn" data-act="closeMenu" aria-label="Close">✕</button><span class="chip cash">${money(S.money)}</span></div></div>
+  const t = Admin.tab, tabs = [['players', '👥', 'Players'], ['money', '💵', 'Money'], ['mowers', '🚜', 'Mowers'], ['acc', '🧢', 'Extras']];
+  let h = `<div class="bpanel panel"><div class="gHead"><div class="gAdm">🛠️</div><div class="gWho"><div class="lbl">Admin panel</div><h2>${esc(pName())}</h2><div class="gStats"><span>${S.started ? 'Save slot ' + SLOT : 'No save loaded'}</span><span>${t === 'players' ? 'Every player' : 'Only changes your save'}</span></div></div>
+    <div class="gTop"><button class="btn" data-act="closeMenu" aria-label="Close">✕</button>${S.started ? `<span class="chip cash">${money(S.money)}</span>` : ''}</div></div>
     <div class="gRail">${tabs.map(([k, ic, n]) => `<button class="gTab ${t === k ? 'sel' : ''}" data-act="adminTab" data-arg="${k}"><i>${ic}</i>${n}</button>`).join('')}</div><div class="bbody scroll">`;
+  if (t === 'players') return h + adminPlayersHTML() + '</div><div class="gFoot">Changes reach a player straight away if they\'re online, or next time they play</div></div>';
+  if (!S.started) return h + '<div class="gNote">Load a save to use this tab. It changes the save you\'re playing.</div></div><div class="gFoot"></div></div>';
   if (t === 'money') {
     h += '<div class="gNote">Using any of these marks this save as changed, so it stops adding to the Scott Bonnar vs Rover team score.</div>' + gHead('Add money', 'You have ' + money(S.money)) + `<div class="gGrid">${ADMIN_MONEY.map(v => gTile('adminMoney', v, '+' + money(v), ['Add now', 'price'], { icon: '💵' })).join('')}</div>
       <div class="lbl">Any amount</div><div class="row"><input class="inp" id="adminAmt" type="number" min="1" max="1000000000" step="1" placeholder="Amount"><button class="btn gold" data-act="adminMoneyAny">Add</button></div>`;
@@ -4059,6 +4137,69 @@ function adminFit(id) { // refits the mower with Sam safely off it
   const a = ACCESSORIES.find(x => x.id === id); if (!a) return; if (!S.own.acc.includes(id)) { S.flags.modded = 'admin'; S.own.acc.push(id); }
   if (Game.mode !== 'foot') exitMower(); S.cfg.acc[a.slot] = id; rebuildMowerModel(); save();
 }
+/* ---------- 👥 Admin → Players: everyone with an account, who's online, their stats, and changing them ---------- */
+const AdminP = { list: null, loading: false, err: '', q: '', sel: null, online: {}, at: 0, sending: false };
+async function adminLoadPlayers() {
+  const mp = Net.mp; if (AdminP.loading) return; if (!mp || !mp.connected) { AdminP.err = 'Not connected to the server.'; return; }
+  AdminP.loading = true; AdminP.err = ''; if (Menu.cur === 'admin') renderMenu();
+  try {
+    const rows = await mp.storage.query({ key: 'profile', orderBy: 'seen', desc: true, limit: 100 });
+    AdminP.list = rows.map(r => ({ id: r.player, name: (r.value && r.value.name) || r.name || 'Player', p: r.value || {} }));
+    const prof = AdminP.list.length ? await mp.profiles.get(AdminP.list.map(x => x.id)).catch(() => []) : [];
+    AdminP.online = {}; (prof || []).forEach(p => { AdminP.online[p.id] = { on: !!p.online, seen: p.lastSeen }; });
+  } catch (e) { AdminP.err = netErrText(e); }
+  AdminP.loading = false; AdminP.at = Date.now(); if (Game.state === 'menu' && Menu.cur === 'admin') renderMenu();
+}
+const ago = t => { if (!t) return 'never'; const s = Math.max(0, (Date.now() - t) / 1000); return s < 90 ? 'just now' : s < 3600 ? Math.round(s / 60) + ' min ago' : s < 86400 ? Math.round(s / 3600) + ' h ago' : Math.round(s / 86400) + ' days ago'; };
+const admOn = x => !!(AdminP.online[x.id] && AdminP.online[x.id].on);
+function admListHTML() {
+  const q = AdminP.q.trim().toLowerCase(), list = (AdminP.list || []).filter(x => !q || x.name.toLowerCase().includes(q)).sort((a, b) => admOn(b) - admOn(a));
+  if (!list.length) return `<div class="small muted">${AdminP.list && AdminP.list.length ? 'Nobody matches that name.' : 'No players with an account yet.'}</div>`;
+  return list.map(x => `<button class="pRow" data-act="admPick" data-arg="${esc(x.id)}"><span class="onDot ${admOn(x) ? 'on' : ''}"></span><span><b>${esc(x.name)}</b><small>${MOWERS[x.p.mower] ? MOWERS[x.p.mower].icon + ' ' + esc(MOWERS[x.p.mower].name) : 'No save yet'} · ${admOn(x) ? '<span style="color:#4ade80">online now</span>' : 'seen ' + ago((AdminP.online[x.id] && AdminP.online[x.id].seen) || x.p.seen)}</small></span><span class="cash">${money(x.p.money || 0)}</span></button>`).join('');
+}
+function adminPlayersHTML() {
+  if (!AdminP.list) return AdminP.err ? `<div class="gNote">${esc(AdminP.err)}</div><button class="btn" data-act="admRefresh">↻ Try again</button>` : '<div class="small muted">Loading players…</div>';
+  const x = AdminP.sel && AdminP.list.find(p => p.id === AdminP.sel);
+  if (!x) {
+    const on = AdminP.list.filter(admOn).length;
+    return gHead('Players', `${AdminP.list.length} with an account · <span style="color:#4ade80">${on} online now</span>`) + `<div class="row"><input class="inp" id="admQ" placeholder="🔍 Search by name" value="${esc(AdminP.q)}" autocomplete="off"><button class="btn" data-act="admRefresh" aria-label="Refresh">${AdminP.loading ? '…' : '↻'}</button></div>
+      ${AdminP.err ? `<div class="small" style="color:var(--bad)">${esc(AdminP.err)}</div>` : ''}<div class="col" id="admList" style="gap:6px">${admListHTML()}</div>`;
+  }
+  const p = x.p, st = (k, v) => `<div>${k}<b>${v}</b></div>`, inp = (id, label, v) => `<label class="small muted">${label}<input class="inp" id="${id}" type="number" min="0" step="1" value="${Math.floor(v || 0)}"></label>`;
+  const missing = MOWER_ORDER.filter(id => !(p.owned || []).includes(id));
+  return `<div class="row" style="justify-content:space-between"><button class="btn sm" data-act="admBack">← All players</button><span class="small">${admOn(x) ? '<span class="onDot on"></span> Online now' : 'Last seen ' + ago((AdminP.online[x.id] && AdminP.online[x.id].seen) || p.seen)}</span></div>
+    ${gHead('👤 ' + esc(x.name), `Save slot ${p.slot || 1} · version ${esc(p.v || '?')}${p.modded ? ' · <span style="color:var(--bad)">save was changed outside normal play</span>' : ''}`)}
+    <div class="statGrid">${st('Money', money(p.money || 0))}${st('Total earned', money(p.earned || 0))}${st('Lawns mowed', p.lawns || 0)}${st('Jobs done', p.jobs || 0)}${st('Day', p.day || 1)}${st('Pass tier', p.tier || 0)}${st('Mower', MOWERS[p.mower] ? MOWERS[p.mower].icon + ' ' + esc(MOWERS[p.mower].name) : '–')}${st('Mowers owned', (p.owned || []).length + ' of ' + MOWER_ORDER.length)}${st('Team', p.side ? esc(BRAND[p.side].name) : '–')}${st('Best lawn cut', p.race ? fmtRace(p.race) : '–')}</div>
+    <div class="lbl">Give money</div><div class="gGrid">${[100, 1000, 10000, 100000].map(v => gTile('admAdd', v, '+' + money(v), ['Add', 'price'], { icon: '💵' })).join('')}</div>
+    <div class="lbl">Change stats</div><div class="admForm">${inp('admMoney', 'Money ($)', p.money)}${inp('admEarned', 'Total earned ($)', p.earned)}${inp('admLawns', 'Lawns mowed', p.lawns)}${inp('admJobs', 'Jobs done', p.jobs)}</div>
+    <button class="btn gold" data-act="admSave" ${AdminP.sending ? 'disabled' : ''}>💾 Save these numbers</button>
+    <div class="lbl">Give a mower</div>${missing.length ? `<button class="btn" data-act="admGive" data-arg="all">➕ Give every mower</button><div class="gGrid">${missing.map(id => gTile('admGive', id, MOWERS[id].name, ['Give', 'price'], { icon: MOWERS[id].icon })).join('')}</div>` : '<div class="small muted">They own every mower.</div>'}`;
+}
+function admSaveStats() {
+  const x = AdminP.sel && AdminP.list && AdminP.list.find(p => p.id === AdminP.sel); if (!x) return;
+  const ops = {}; [['admMoney', 'money'], ['admEarned', 'earned'], ['admLawns', 'lawns'], ['admJobs', 'jobs']].forEach(([id, k]) => {
+    const el = $('#' + id), v = el ? Math.floor(+el.value) : NaN; if (isFinite(v) && v >= 0 && v !== Math.floor(x.p[k] || 0)) ops[k] = Math.min(v, 1e12);
+  });
+  if (!Object.keys(ops).length) { toast('Nothing changed', 'Type new numbers first.', 'var(--gold)'); return; }
+  admSend(ops);
+}
+async function admSend(ops) {
+  const x = AdminP.sel && AdminP.list && AdminP.list.find(p => p.id === AdminP.sel); if (!x || AdminP.sending) return;
+  const p = x.p, show = () => { // show the change in the list straight away
+    if (ops.money != null) p.money = ops.money; if (ops.addMoney) p.money = Math.max(0, (p.money || 0) + ops.addMoney);
+    ['earned', 'lawns', 'jobs'].forEach(k => { if (ops[k] != null) p[k] = ops[k]; });
+    if (ops.mower) p.owned = ops.mower === 'all' ? MOWER_ORDER.slice() : [...new Set([...(p.owned || []), ops.mower])];
+  };
+  if (Acct && x.id === Net.mp.playerId) { if (applyOps(ops, p.slot)) show(); renderMenu(); return; } // it's you
+  AdminP.sending = true; renderMenu();
+  try {
+    const r = await srvCall('adm_edit', { pw: Admin.pw, to: x.id, slot: p.slot || 1, ops });
+    if (!r.ok) throw new Error(r.why || 'The server said no.');
+    show(); Sfx.cash(); toast('✔ Sent to ' + esc(x.name), admOn(x) ? 'It changes in their game right now.' : 'It changes next time they play.', 'var(--acc)');
+  } catch (e) { Sfx.error(); toast('Couldn\'t change that player', esc(e && e.code === 'timeout' ? 'The server didn\'t answer. Is the new server script installed?' : netErrText(e)), 'var(--bad)'); }
+  AdminP.sending = false; if (Menu.cur === 'admin') renderMenu();
+}
+addEventListener('input', e => { if (e.target && e.target.id === 'admQ') { AdminP.q = e.target.value; const el = $('#admList'); if (el) el.innerHTML = admListHTML(); } });
 
 /* ---------- 💡 Recommendations: players send ideas and bug reports to the ZD Studios feedback dashboard ----------
    The key can only send feedback, never read it, so it's safe in client code. */
@@ -4098,6 +4239,7 @@ async function sendIdea() {
 
 /* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
 const UPDATES = [
+  { v: '1.13', date: 'Nov 2026', title: 'Accounts & Leaderboards', add: ['Make an account with just a username: no password to remember', 'You get a secret sign-in code. Show or hide it on the home screen', 'Type your code on any computer to get all your saves back', 'Your saves back up to your account by themselves', 'Saves already on your computer move into your new account', 'Leaderboards for top earners, most lawns and fastest lawn cut'] },
   { v: '1.12', date: 'Nov 2026', title: 'Fair Play', add: ['Team scores are now checked by the server, so nobody can fake lawns or vote twice', 'Lawns count at a realistic speed, with a daily limit per player', 'Saves changed outside normal play no longer count toward team scores'] },
   { v: '1.11', date: 'Nov 2026', title: 'Team Scoreboard & Names', add: ['Live Scott Bonnar vs Rover scoreboard: players on each team and lawns cut', 'First team to 250 lawns wins', 'Top mowers list on the event page', 'Choose your own name, and characters call you by it'] },
   { v: '1.10', date: 'Nov 2026', title: 'Scott Bonnar Ride-On', add: ['The Scott Bonnar Classic 30" is now a ride-on mower, with the same stats'] },
@@ -4117,6 +4259,325 @@ const logUnseen = () => { try { return localStorage.getItem(LOG_KEY) !== GAME_VE
 function logHTML() {
   try { localStorage.setItem(LOG_KEY, GAME_VERSION); } catch (e) { }
   return `<div class="mdlg panel" style="width:min(600px,94vw)">${menuHead('📜 UPDATE LOG', `You're on version ${GAME_VERSION}`)}<div class="mbody">${UPDATES.map((u, i) => `<div class="logV ${i ? '' : 'now'}"><span class="lv">VERSION ${u.v}</span><span class="ld">${u.date}</span>${i ? '' : ' <span class="tag ok">LATEST</span>'}<h4>${esc(u.title)}</h4><ul>${u.add.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+}
+
+/* =====================================================================
+   👤 ACCOUNTS · ☁ ACCOUNT BACKUPS · 🏆 LEADERBOARDS
+   • Pick a username and get a secret sign-in code. There's no password: the code IS the password.
+     It uses the server's own accounts (mp.auth). The account's server username is a scramble (hash) of the code,
+     so typing the code alone signs you in, and nobody can work the code out from a username.
+   • Saves are copied to your account (private storage on the multiplayer server). The newest copy of each slot wins,
+     and any copy that gets replaced is kept on this computer as a backup, so progress is never thrown away.
+   • Your profile (name + stats) is public: it powers the leaderboards and the admin panel's player list.
+     With server-script.js installed, only the server writes profiles, and it caps leaderboard numbers at a believable speed.
+   ===================================================================== */
+const CODE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O or 1/I/L, so a code is easy to copy off the screen
+function newCode() { const b = new Uint32Array(10); crypto.getRandomValues(b); let s = ''; for (let i = 0; i < 10; i++) s += CODE_ABC[b[i] % CODE_ABC.length]; return s.slice(0, 5) + '-' + s.slice(5); }
+function normCode(v) { const s = String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); return s.length === 10 && [...s].every(c => CODE_ABC.includes(c)) ? s.slice(0, 5) + '-' + s.slice(5) : null; }
+function hash53(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) { const c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+const acctUser = code => 'mt' + hash53('mowtown-account|' + code).toString(36);
+const AcctUI = { tab: 'new', busy: false, show: false, fresh: null, offline: false, nameVal: '', codeVal: '', soConfirm: false };
+function saveAcct() { lsSet(ACCT_KEY, Acct ? JSON.stringify(Acct) : null); }
+function setAcct(a) {
+  Acct = a; NS = nsOf(a); saveAcct(); Cloud.dirty.clear(); Cloud.yDirty.clear(); Cloud.meta = null; Cloud.state = a ? 'idle' : 'off'; LB.at = {};
+  if (a) applyName(a.name); else { MPPrefs.name = 'Player'; MPPrefs.named = false; MPPrefs.askedName = false; saveMPPrefs(); }
+}
+// Offline saves that haven't gone into an account yet (or were played offline again since they did)
+const guestMoved = () => { try { const o = JSON.parse(ls(GUEST_NS + 'moved') || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } };
+const guestSlots = () => { const m = guestMoved(); return [1, 2, 3].filter(n => { const raw = ls(GUEST_NS + 'slot' + n); return raw && m[n] !== savedAtOf(raw); }); };
+function importGuestSaves(onlyEmpty) { // copies this computer's offline saves into the account; the originals stay where they were
+  if (!Acct) return 0; const m = guestMoved(); let moved = 0;
+  for (const n of guestSlots()) {
+    const raw = ls(GUEST_NS + 'slot' + n); if (onlyEmpty && ls(slotKey(n))) continue; // signing in: only into empty slots, so nothing is replaced
+    if (ls(slotKey(n))) lsSet(NS + 'bak' + n, ls(slotKey(n)));
+    lsSet(slotKey(n), raw); lsSet(sigKey(n), ls(GUEST_NS + 'sig' + n)); lsSet(yardKey(n), ls(GUEST_NS + 'yards_slot' + n)); lsSet(NS + 'del' + n, null);
+    Cloud.dirty.add(n); Cloud.yDirty.add(n); m[n] = savedAtOf(raw); moved++;
+  }
+  lsSet(GUEST_NS + 'moved', JSON.stringify(m)); // each offline save goes into an account once (until it's played offline again)
+  return moved;
+}
+
+/* ---------- ☁ Account backups ---------- */
+const Cloud = { dirty: new Set(), yDirty: new Set(), state: Acct ? 'idle' : 'off', busy: false, pulling: null, lastPush: 0, lastY: 0, lastProfile: 0, route: null, noScript: false, meta: null, seenInbox: new Set() };
+const cloudReady = () => !!(Acct && Net.mp && Net.mp.connected && Net.mp.playerId === Acct.pid);
+async function cloudWrite(key, value) {
+  if (Cloud.route !== 'server') {
+    try { await Net.mp.storage.set(key, value, { scope: 'private' }); Cloud.route = 'direct'; return; }
+    catch (e) { if (!['forbidden', 'bad_scope'].includes(e && e.code)) throw e; Cloud.route = 'server'; } // the dashboard only lets the server script write player data
+  }
+  const r = await srvCall('acct_put', { k: key, v: value });
+  if (!r.ok) throw Object.assign(new Error(r.why || 'refused'), { code: 'refused' });
+}
+async function pushSlot(n) {
+  const raw = ls(slotKey(n)), del = ls(NS + 'del' + n);
+  if (raw) await cloudWrite('s' + n, { raw, sig: ls(sigKey(n)), at: savedAtOf(raw) });
+  else if (del) await cloudWrite('s' + n, { del: true, at: +del || Date.now() });
+}
+async function pushYards(n) {
+  let y = null; try { y = JSON.parse(ls(yardKey(n)) || 'null'); } catch (e) { } if (!y || !ls(slotKey(n))) return;
+  const v = { rle: rawToRle(y), at: Date.now() }; if (JSON.stringify(v).length > 60000) return; // a super-stripy town is too big to back up: those lawns just regrow
+  await cloudWrite('y' + n, v);
+}
+async function cloudFlush(all) {
+  if (!cloudReady() || Cloud.busy || Cloud.pulling || !(Cloud.dirty.size || (all && Cloud.yDirty.size))) return;
+  Cloud.busy = true; Cloud.state = 'saving'; cloudUI(); Cloud.lastPush = Date.now();
+  try {
+    for (const n of [...Cloud.dirty]) { Cloud.dirty.delete(n); try { await pushSlot(n); } catch (e) { Cloud.dirty.add(n); throw e; } }
+    if (all || Date.now() - Cloud.lastY > 60000) { Cloud.lastY = Date.now(); for (const n of [...Cloud.yDirty]) { await pushYards(n); Cloud.yDirty.delete(n); } }
+    Cloud.state = 'ok';
+  } catch (e) {
+    Cloud.state = Cloud.route === 'server' && ['no_server_script', 'timeout', 'refused'].includes(e && e.code) ? 'blocked' : 'retry';
+    console.warn('[account backup]', e && (e.code || e.message));
+  }
+  Cloud.busy = false; cloudUI();
+}
+function cloudPull() { // brings down the account's saves; for each slot the newest copy wins
+  if (!cloudReady()) return Promise.resolve(false);
+  if (Cloud.pulling) return Cloud.pulling;
+  Cloud.pulling = (async () => {
+    const keys = ['meta']; for (let n = 1; n <= SLOTS; n++) keys.push('s' + n, 'y' + n);
+    const g = await Net.mp.storage.getMany(keys, { scope: 'private' }) || {};
+    const playing = S.started && Game.state !== 'title' && !(Game.state === 'menu' && Menu.from === 'title');
+    for (let n = 1; n <= SLOTS; n++) {
+      if (playing && n === SLOT) { Cloud.dirty.add(n); continue; } // the save you're playing right now wins
+      const c = g['s' + n], raw = ls(slotKey(n)), lAt = raw ? savedAtOf(raw) : +(ls(NS + 'del' + n) || 0), cAt = c ? +c.at || 1 : 0;
+      if (c && cAt > lAt) {
+        if (raw) lsSet(NS + 'bak' + n, raw); // the older copy is kept as a backup, never thrown away
+        if (c.del || typeof c.raw !== 'string') { lsSet(slotKey(n), null); lsSet(sigKey(n), null); lsSet(yardKey(n), null); lsSet(NS + 'del' + n, String(cAt)); }
+        else { const y = g['y' + n]; lsSet(slotKey(n), c.raw); lsSet(sigKey(n), c.sig == null ? null : String(c.sig)); lsSet(NS + 'del' + n, null); lsSet(yardKey(n), y && y.rle ? JSON.stringify(rleToRaw(y.rle)) : null); }
+      } else if (lAt > cAt) { Cloud.dirty.add(n); Cloud.yDirty.add(n); }
+    }
+    let local = null; try { local = JSON.parse(ls(NS + 'meta') || 'null'); } catch (e) { }
+    Cloud.meta = { edits: [...new Set([...((local && local.edits) || []), ...((g.meta && g.meta.edits) || [])])].slice(-300) };
+    lsSet(NS + 'meta', JSON.stringify(Cloud.meta));
+    return true;
+  })().catch(e => { console.warn('[account backup]', e && (e.code || e.message)); return false; }).finally(() => { Cloud.pulling = null; cloudUI(); });
+  return Cloud.pulling;
+}
+function metaSave() { lsSet(NS + 'meta', JSON.stringify(Cloud.meta)); if (cloudReady()) cloudWrite('meta', Cloud.meta).catch(() => { }); }
+function cloudUI() {
+  const t = !Acct ? '' : Cloud.state === 'badcode' ? '⚠️ Your code stopped working here. Sign out and back in.'
+    : Cloud.state === 'blocked' ? '⚠️ Backups are paused: the server needs its new script.'
+    : Cloud.state === 'saving' || Cloud.pulling ? '☁ Backing up your saves…'
+    : !cloudReady() ? (Cloud.dirty.size ? '☁ Will back up when you\'re online' : '☁ Offline right now')
+    : Cloud.state === 'retry' ? '☁ Couldn\'t back up yet. Trying again soon.'
+    : Cloud.dirty.size ? '☁ Changes waiting to back up' : '☁ All saves backed up';
+  $$('.cloudLine').forEach(el => { if (el.textContent !== t) el.textContent = t; });
+}
+setInterval(() => {
+  if (!cloudReady() || Cloud.pulling) return;
+  if (Cloud.dirty.size && Date.now() - Cloud.lastPush > 15000) cloudFlush(false);
+  else if (S.started && Date.now() - Cloud.lastProfile > 60000) pushProfile();
+}, 3000);
+addEventListener('visibilitychange', () => { if (document.hidden && Acct) { if (S.started) { save(); saveYards(); } cloudFlush(true); } });
+
+/* ---------- Admin changes reach a player's save (from the in-game admin panel or the dashboard's remote config) ---------- */
+function applyOps(o, slot) {
+  if (!o || typeof o !== 'object') return false;
+  const n = clamp(Math.floor(+slot || +ls(NS + 'last') || 1), 1, SLOTS), live = S.started && n === SLOT;
+  const s = live ? S : readSlot(n); if (!s || !s.started) return false;
+  const num = (v, lo, hi) => { v = Math.floor(+v); return isFinite(v) ? clamp(v, lo, hi) : null; }, what = [];
+  if (o.money != null && num(o.money, 0, 1e12) != null) { s.money = num(o.money, 0, 1e12); what.push('Money set to ' + money(s.money)); }
+  if (num(o.addMoney, -1e9, 1e9)) { const v = num(o.addMoney, -1e9, 1e9); s.money = Math.max(0, s.money + v); what.push((v > 0 ? '+' : '−') + money(Math.abs(v))); }
+  [['lawns', 'Lawns'], ['jobs', 'Jobs'], ['earned', 'Total earned']].forEach(([k, n]) => { if (o[k] != null && num(o[k], 0, 1e12) != null) { s.stats[k] = num(o[k], 0, 1e12); what.push(n + ' set to ' + (k === 'earned' ? money(s.stats[k]) : s.stats[k])); } });
+  const give = (o.mower === 'all' ? MOWER_ORDER : MOWERS[o.mower] ? [o.mower] : []).filter(id => !s.owned.includes(id));
+  give.forEach(id => { s.owned.push(id); s.fuel[id] = mowerStats(id).tank; }); if (give.length) what.push(give.length > 1 ? give.length + ' new mowers' : 'New mower: ' + MOWERS[give[0]].name);
+  if (!what.length) return false;
+  if (live) { save(); refreshOpenUI(); } else { s.savedAt = Date.now(); writeSlotRaw(n, JSON.stringify(s)); }
+  Cloud.lastProfile = 0; Sfx.cash(); toast('🛠️ The game owner changed your save', esc(what.join(' · ')) + (live ? '' : ' (slot ' + n + ')'), 'var(--gold)');
+  return true;
+}
+function handleInbox(it) {
+  if (!it || it.type !== 'mt_admin' || it.from !== 'server' || !Acct || !Cloud.meta) return; // only the server script can send these
+  const key = 'i:' + it.id; if (Cloud.seenInbox.has(it.id) || Cloud.meta.edits.includes(key)) { Net.mp.inbox.delete([it.id]).catch(() => { }); return; }
+  const d = it.data || {}; if (!applyOps(d.ops, d.slot)) return; // no save to change yet: it waits in the inbox
+  Cloud.seenInbox.add(it.id); Cloud.meta.edits.push(key); metaSave(); Net.mp.inbox.delete([it.id]).catch(() => { });
+}
+async function inboxCheck() { if (!cloudReady()) return; try { const r = await Net.mp.inbox.list({ unread: true, limit: 50 }); (r.items || []).slice().reverse().forEach(handleInbox); } catch (e) { } }
+// Dashboard → Settings → Remote config: {"edits": [{"id": 1, "player": "Name", "money": 5000}]}. Each id is used once.
+function applyConfigEdits() {
+  const cfg = Net.mp && Net.mp.config, list = cfg && cfg.edits; if (!Acct || !Cloud.meta || !Array.isArray(list)) return;
+  let changed = false;
+  for (const e of list) {
+    if (!e || e.id == null) continue; const who = String(e.player || '').trim().toLowerCase();
+    if (who !== Acct.name.toLowerCase() && who !== String(Acct.pid).toLowerCase()) continue;
+    const key = 'c:' + e.id; if (Cloud.meta.edits.includes(key)) continue;
+    if (applyOps(e, e.slot)) { Cloud.meta.edits.push(key); changed = true; }
+  }
+  if (changed) metaSave();
+}
+
+/* ---------- Public profile: name + stats for the leaderboards and the admin panel ---------- */
+const bestRace = s => { const v = Object.values(s.stats.raceBest || {}).filter(x => x > 0); return v.length ? Math.min(...v) : 0; };
+function profileOf() { // the save you're playing, or else the one you played last
+  let n = SLOT, s = S.started ? S : null;
+  if (!s) { const order = [+ls(NS + 'last') || 1, 1, 2, 3]; for (const k of order) { const r = readSlot(k); if (r && r.started) { s = r; n = k; break; } } }
+  if (!s) return { name: Acct.name, slot: 1, money: 0, earned: 0, lawns: 0, jobs: 0, day: 1, mower: null, owned: [], tier: 0, side: null, race: 0, modded: false, v: GAME_VERSION };
+  return { name: Acct.name, slot: n, money: Math.floor(s.money), earned: Math.floor(s.stats.earned), lawns: s.stats.lawns, jobs: s.stats.jobs, day: s.day, mower: s.mower,
+    owned: s.owned.slice(), tier: passTierOf(s.pass.xp), side: s.event.side, race: bestRace(s), modded: !!s.flags.modded, v: GAME_VERSION };
+}
+async function pushProfile() {
+  if (!cloudReady()) return; Cloud.lastProfile = Date.now();
+  const p = profileOf();
+  if (!Cloud.noScript) {
+    try { const r = await srvCall('acct_profile', { p }); if (r && r.ok) return; }
+    catch (e) { if (!['no_server_script', 'timeout'].includes(e && e.code)) return; Cloud.noScript = true; } // script not installed or too old
+  }
+  // no server script yet: write it ourselves (works while the dashboard lets clients write player data)
+  try { await Net.mp.storage.set('profile', Object.assign(p, { nameLc: p.name.toLowerCase(), seen: Date.now(), lbEarned: p.modded ? 0 : p.earned, lbLawns: p.modded ? 0 : p.lawns, lbRace: p.modded ? 0 : p.race })); } catch (e) { }
+}
+async function nameFree(name) { // is this username free? (the server script keeps a list; otherwise we check the profiles)
+  try { const r = await srvCall('acct_name', { name }); if (r && typeof r.ok === 'boolean') return r.ok; }
+  catch (e) { if (!['no_server_script', 'timeout'].includes(e && e.code)) throw e; }
+  try { const rows = await Net.mp.storage.query({ key: 'profile', where: [['nameLc', '=', name.toLowerCase()]], limit: 5 }); return !rows.some(r => r.player !== Net.mp.playerId); } catch (e) { return true; }
+}
+
+/* ---------- Signing in and out ---------- */
+async function acctOnConnect() { // runs every time we reach the server
+  const mp = Net.mp; if (!mp || !mp.connected || AcctUI.busy) return;
+  if (!Acct) { if (mp.username) await mp.auth.logout().catch(() => { }); return; } // signed out on this computer
+  if (mp.playerId !== Acct.pid) {
+    try { await mp.auth.login(acctUser(Acct.code), Acct.code); }
+    catch (e) { Cloud.state = e && e.code === 'bad_credentials' ? 'badcode' : 'retry'; cloudUI(); return; }
+    if (mp.playerId !== Acct.pid) { Cloud.state = 'badcode'; cloudUI(); return; }
+  }
+  if (mp.name !== Acct.name) mp.setName(Acct.name).catch(() => { });
+  if (Cloud.state === 'badcode' || Cloud.state === 'off') Cloud.state = 'idle';
+  await cloudPull(); applyConfigEdits(); inboxCheck(); await cloudFlush(true); pushProfile();
+  if ($('#scr-slots').classList.contains('on')) renderSlots(); cloudUI();
+}
+function acctSay(t, bad) { const el = $('#acMsg'); if (el) { el.textContent = t; el.style.color = bad ? 'var(--bad)' : 'var(--sky)'; } if (bad) Sfx.error(); }
+const acctErr = e => ({ offline: 'Can\'t reach the Mow Town server. Check your internet, or play offline for now.', name_taken: 'Someone already has that name. Try another one.', bad_code: 'That code didn\'t work. Check it and try again.', rate_limited: 'Too many tries. Wait a minute, then try again.' }[e && e.code] || netErrText(e));
+async function acctReady() {
+  netInit(); if (!Net.mp) throw { code: 'offline' };
+  if (AcctUI.loggingOut) await AcctUI.loggingOut; // still switching back to a guest after signing out
+  for (let i = 0; i < 3 && !Net.mp.connected; i++) { if (await netConnect()) break; await new Promise(r => setTimeout(r, 1200)); }
+  if (!Net.mp.connected) throw { code: 'offline' };
+  return Net.mp;
+}
+async function acctCreate() {
+  if (AcctUI.busy) return; const inp = $('#acName'); AcctUI.nameVal = inp ? inp.value : '';
+  const r = cleanName(AcctUI.nameVal); if (r.err) return acctSay(r.err, true);
+  AcctUI.busy = true; acctSay('Connecting to the Mow Town server…');
+  try {
+    const mp = await acctReady();
+    if (mp.username) await mp.auth.logout(); // a server account was still signed in here: start from a fresh player
+    acctSay('Checking that name…'); if (!(await nameFree(r.name))) throw { code: 'name_taken' };
+    acctSay('Making your account…'); let code = null;
+    for (let i = 0; i < 4 && !code; i++) {
+      const c = newCode();
+      try { await mp.auth.register(acctUser(c), c); code = c; }
+      catch (e) { if (e && e.code === 'already_registered') await mp.auth.logout(); else if (!(e && e.code === 'username_taken')) throw e; }
+    }
+    if (!code) throw new Error('Couldn\'t make an account. Try again.');
+    setAcct({ pid: mp.playerId, name: r.name, code, at: Date.now() });
+    await mp.setName(r.name).catch(() => { });
+    const moved = importGuestSaves(false); Cloud.meta = { edits: [] }; lsSet(NS + 'meta', JSON.stringify(Cloud.meta));
+    AcctUI.fresh = { code, moved }; AcctUI.nameVal = ''; Sfx.complete(); renderSignin();
+    cloudFlush(true).then(pushProfile);
+  } catch (e) { acctSay(acctErr(e), true); }
+  AcctUI.busy = false;
+}
+async function acctSignIn() {
+  if (AcctUI.busy) return; const inp = $('#acCode'); AcctUI.codeVal = inp ? inp.value : '';
+  const code = normCode(AcctUI.codeVal); if (!code) return acctSay('A code has 10 letters and numbers, like ABCDE-23456.', true);
+  AcctUI.busy = true; acctSay('Signing you in…');
+  try {
+    const mp = await acctReady(); let r;
+    try { r = await mp.auth.login(acctUser(code), code); } catch (e) { throw e && e.code === 'bad_credentials' ? { code: 'bad_code' } : e; }
+    const name = cleanName(r.name || mp.name).name || 'Player';
+    setAcct({ pid: r.playerId || mp.playerId, name, code, at: Date.now() });
+    acctSay('Getting your saves…'); await cloudPull();
+    const moved = importGuestSaves(true); applyConfigEdits(); inboxCheck(); cloudFlush(true).then(pushProfile);
+    AcctUI.codeVal = ''; Sfx.complete(); showTitle();
+    toast('👋 Welcome back, ' + esc(name) + '!', moved ? `Your saves are here, plus ${moved} from this computer.` : 'Your saves are ready.', 'var(--acc)');
+  } catch (e) { acctSay(acctErr(e), true); }
+  AcctUI.busy = false;
+}
+async function acctSignOut() {
+  if (!Acct) return;
+  if (!AcctUI.soConfirm) { AcctUI.soConfirm = true; renderAcctBox(); setTimeout(() => { AcctUI.soConfirm = false; renderAcctBox(); }, 4000); return; }
+  AcctUI.soConfirm = false; AcctUI.show = false;
+  if (S.started) { save(); saveYards(); }
+  if (cloudReady()) { toast('☁ Backing up before you go…', ''); await Promise.race([cloudFlush(true), new Promise(r => setTimeout(r, 5000))]); }
+  if (Net.on) endSession(false);
+  const left = Cloud.dirty.size;
+  setAcct(null); S = defaultSave(); S.settings = GS; Cloud.noScript = false; Cloud.route = null;
+  if (Net.mp) AcctUI.loggingOut = Net.mp.auth.logout().catch(() => { }).then(() => { AcctUI.loggingOut = null; Net.status = Net.mp.connected ? 'on' : Net.status; mpRefresh(); }); // forgets this computer's sign-in and carries on as a guest
+  showSignin('code');
+  if (left) toast('Some changes are still on this computer', 'Sign in here again to back them up.', 'var(--gold)');
+}
+function showSignin(tab) {
+  Game.state = 'title'; $('#hud').classList.add('hidden'); closeDialog(); if (tab) AcctUI.tab = tab; AcctUI.fresh = null;
+  renderSignin(); showScreen('signin'); netInit(); netConnect(); mpRefresh();
+}
+function renderSignin() {
+  const U = AcctUI, g = guestSlots().length;
+  let body;
+  if (U.fresh) body = `<h2 style="font-size:22px">🎉 Welcome, ${esc(Acct.name)}!</h2>
+    <div class="small">This is your secret sign-in code. <b>Write it down or take a photo.</b> You need it to sign in on another computer and get your saves back.</div>
+    <div class="codeBig">${esc(U.fresh.code)}</div>
+    <button class="btn" data-act="acctCopy">📋 Copy code</button>
+    <div class="small muted">Keep it secret: anyone with your code can play your saves. You can see it again on the home screen.${U.fresh.moved ? ` Your ${U.fresh.moved} ${U.fresh.moved === 1 ? 'save' : 'saves'} from this computer ${U.fresh.moved === 1 ? 'is' : 'are'} now in your account.` : ''}</div>
+    <button class="btn primary" data-act="acctDone" data-autofocus>✔ I've saved my code</button>`;
+  else body = `<div class="tabs" style="justify-content:center"><button class="btn ${U.tab === 'new' ? 'sel' : ''}" data-act="acctTab" data-arg="new">🌱 New player</button><button class="btn ${U.tab === 'code' ? 'sel' : ''}" data-act="acctTab" data-arg="code">🔑 I have a code</button></div>` + (U.tab === 'new'
+    ? `<div class="lbl">Pick a username</div><input class="inp" id="acName" maxlength="16" value="${esc(U.nameVal || (MPPrefs.named ? MPPrefs.name : ''))}" placeholder="Your username" autocomplete="off" spellcheck="false" data-autofocus>
+      <div class="small muted">2 to 16 letters or numbers. Everyone sees it on the leaderboards, so don't use your full real name.</div>
+      ${g ? `<div class="gNote">💾 Your ${g} ${g === 1 ? 'save' : 'saves'} on this computer will move into your new account.</div>` : ''}
+      <button class="btn primary" data-act="acctCreate">✔ Create my account</button>
+      <div class="small muted" style="text-align:center">No password! You'll get a secret code to sign in with instead.</div>`
+    : `<div class="lbl">Your sign-in code</div><input class="inp codeInp" id="acCode" maxlength="14" value="${esc(U.codeVal)}" placeholder="ABCDE-23456" autocomplete="off" spellcheck="false" data-autofocus>
+      <button class="btn primary" data-act="acctSignIn">🔑 Sign in</button>
+      <div class="small muted" style="text-align:center">All your saves come back, right where you left them.</div>`)
+    + `<div id="acMsg" class="small" style="min-height:18px;text-align:center"></div>
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap"><span class="small mpConn" style="opacity:.8"></span><button class="btn sm" data-act="acctOffline">Play offline for now</button></div>`;
+  $('#scr-signin').innerHTML = `<div class="logo" style="font-size:clamp(40px,7vw,76px)">MOW TOWN</div><div class="dlg panel" style="width:min(440px,94vw)">${body}</div>`;
+  mpRefresh(); setTimeout(() => focusFirst(), 0);
+}
+function renderAcctBox() {
+  const el = $('#acctBox'); if (!el) return;
+  el.innerHTML = Acct ? `<div class="row" style="justify-content:space-between"><div><div class="lbl">Signed in</div><b style="font-size:16px">👤 ${esc(Acct.name)}</b></div><button class="btn sm" data-act="acctSignOut">${AcctUI.soConfirm ? 'Sure? Click again' : '🚪 Sign out'}</button></div>
+    <div class="lbl">Your sign-in code</div><div class="row" style="gap:6px"><span class="codeTxt">${AcctUI.show ? esc(Acct.code) : '•••••-•••••'}</span><button class="btn sm" data-act="acctShow">${AcctUI.show ? '🙈 Hide' : '👁 Show'}</button><button class="btn sm" data-act="acctCopy" aria-label="Copy code">📋</button></div>
+    <div class="small cloudLine" style="color:var(--sky)"></div>`
+    : `<div class="small">⚠️ Playing offline. Your saves are only on this computer.</div><button class="btn gold" data-act="acctSignInBtn">🔑 Sign in or make an account</button>`;
+  cloudUI();
+}
+function acctCopy() {
+  const code = AcctUI.fresh ? AcctUI.fresh.code : Acct && Acct.code; if (!code) return;
+  const ok = () => toast('📋 Code copied', 'Paste it somewhere safe.', 'var(--sky)');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(ok, () => toast('Couldn\'t copy', 'Write the code down instead.', 'var(--gold)'));
+  else toast('Couldn\'t copy', 'Write the code down instead.', 'var(--gold)');
+}
+
+/* ---------- 🏆 Leaderboards (read straight from everyone's public profile) ---------- */
+const LB = { tab: 'earned', rows: {}, err: {}, loading: false, at: {} };
+const LB_TABS = { earned: ['💵', 'Top earners', 'lbEarned', v => money(v)], lawns: ['🌱', 'Most lawns', 'lbLawns', v => Number(v).toLocaleString('en-US') + ' lawns'], race: ['🏁', 'Fastest lawn cut', 'lbRace', v => fmtRace(v)] };
+async function lbLoad(force) {
+  const t = LB.tab, mp = Net.mp; if (LB.loading || (!force && LB.at[t] && Date.now() - LB.at[t] < 20000)) return;
+  if (!mp || !mp.connected) { LB.err[t] = 'Connect to the internet to see the leaderboards.'; return; }
+  LB.loading = true; LB.err[t] = ''; LB.at[t] = Date.now();
+  try {
+    const f = LB_TABS[t][2], rows = await mp.storage.query({ key: 'profile', where: [[f, '>', 0]], orderBy: f, desc: t !== 'race', limit: 50 });
+    LB.rows[t] = rows.map(r => ({ id: r.player, name: (r.value && r.value.name) || r.name || 'Player', v: r.value[f], mower: r.value.mower }));
+  } catch (e) { LB.err[t] = netErrText(e); }
+  LB.loading = false; if (Game.state === 'menu' && Menu.cur === 'lb') renderMenu();
+}
+function lbHTML() {
+  lbLoad(false);
+  const t = LB.tab, [, , , fmt] = LB_TABS[t], rows = LB.rows[t], me = Net.mp && Net.mp.playerId;
+  let h = `<div class="mdlg panel" style="width:min(560px,94vw)">${menuHead('🏆 LEADERBOARDS', 'The best mowers in Mow Town')}<div class="tabs">${Object.entries(LB_TABS).map(([k, [ic, n]]) => `<button class="btn ${t === k ? 'sel' : ''}" data-act="lbTab" data-arg="${k}">${ic} ${n}</button>`).join('')}<button class="btn" data-act="lbRefresh" aria-label="Refresh">↻</button></div><div class="mbody">`;
+  if (LB.err[t]) h += `<div class="small" style="color:var(--bad)">${esc(LB.err[t])}</div>`;
+  else if (!rows) h += '<div class="small muted">Loading…</div>';
+  else if (!rows.length) h += '<div class="small muted">No scores yet. Be the first!</div>';
+  else h += rows.map((r, i) => `<div class="lbRow ${r.id === me ? 'me' : ''}"><span class="lbN">${i < 3 ? ['🥇', '🥈', '🥉'][i] : '#' + (i + 1)}</span><b>${esc(r.name)}${r.id === me ? ' <span class="tag ok">YOU</span>' : ''}</b><span class="small">${MOWERS[r.mower] ? MOWERS[r.mower].icon : ''}</span><span class="lbV">${fmt(r.v)}</span></div>`).join('');
+  if (rows && rows.length && !rows.some(r => r.id === me)) h += `<div class="small muted" style="text-align:center">${Acct ? 'You\'re not in the top 50 yet. Keep mowing!' : 'Sign in from the home screen to get on the leaderboards.'}</div>`;
+  return h + '<div class="small muted" style="text-align:center">Scores update about once a minute while people play.</div></div></div>';
 }
 
 /* ---------- ⚔️ LIMITED EVENT: pick one side, mow 50 lawns with that mower, wear the top ----------
@@ -4173,9 +4634,13 @@ async function claimWin(side) { // the counter makes this safe: only the first c
 }
 // Votes and lawns go to the server script (server-script.js), which decides what counts and replies.
 // Until that script is installed, the game falls back to writing the totals itself (eventSyncDirect).
-async function evServer(type, data) {
-  const mp = Net.mp;
-  if (!mp.room) await mp.create({ private: true, maxPlayers: 1, tag: 'mowtown-solo', meta: { game: MP_CFG.game, mode: 'solo' } }); // the script only hears players who are in a room
+let soloJoin = null;
+async function srvCall(type, data) { // one request to server-script.js; resolves with its reply
+  const mp = Net.mp; if (!mp || !mp.connected) throw Object.assign(new Error('offline'), { code: 'not_connected' });
+  if (!mp.room) { // the script only hears players who are in a room, so single player sits in a private room of one
+    if (!soloJoin) soloJoin = mp.create({ private: true, maxPlayers: 1, tag: 'mowtown-solo', meta: { game: MP_CFG.game, mode: 'solo' } }).finally(() => { soloJoin = null; });
+    await soloJoin;
+  }
   const id = Math.random().toString(36).slice(2, 10);
   return new Promise((resolve, reject) => {
     let off = null; const done = (f, v) => { clearTimeout(t); if (off) off(); f(v); };
@@ -4184,6 +4649,7 @@ async function evServer(type, data) {
     mp.sendReliable(type, Object.assign({ id }, data), 'server').catch(e => done(reject, e));
   });
 }
+const evServer = srvCall;
 async function eventSync() {
   const E = S.event, mp = Net.mp; if (!mp || !mp.connected || !S.started || !E.side || EvStats.syncing || S.flags.modded) return; // edited saves still play, but don't count for the team
   EvStats.syncing = true;
@@ -4804,7 +5270,7 @@ function boot() {
   initFX(); buildInteriors(); updatePaint(); applyDecor(); updatePlayerLook();
   resetWorldFresh(); applySeason(true); // each save slot loads its own lawns when you pick it
   buildMinimapBase(); applyQuality(); spawnAtHome(); updateTimeOfDay(true);
-  showTitle(); $('#loading').remove();
+  if (Acct) showTitle(); else showSignin('new'); $('#loading').remove(); // new players (and old saves) start at the sign-in screen
   requestAnimationFrame(t => { lastT = t; frame(t); });
   addEventListener('beforeunload', () => { save(); saveYards(); });
   // connect to the multiplayer server once at startup, in the background
