@@ -269,6 +269,8 @@ textarea.inp{resize:none;min-height:112px;line-height:1.4;display:block}.inp{use
 #lobbyPanel{position:absolute;top:84px;left:50%;transform:translateX(-50%);width:min(420px,92vw);padding:12px 16px;display:none;pointer-events:auto;text-align:center}
 /* main-screen buttons (Quests / Shop / Season Pass) */
 #hudBtns{display:flex;gap:6px;margin-top:2px;pointer-events:auto}
+.hudTab{pointer-events:auto;width:max-content;background:rgba(8,14,10,.72);border:1px solid rgba(155,232,74,.35);border-radius:8px;padding:2px 10px;font-size:11px;font-weight:900;color:var(--acc);letter-spacing:.3px}
+.hudTab:hover{background:#25402a}.hudTab.off{border-color:rgba(255,255,255,.25);color:var(--txt)}
 .hbtn{background:linear-gradient(180deg,rgba(40,62,46,.95),rgba(20,32,24,.95));border:2px solid rgba(155,232,74,.35);border-radius:12px;padding:7px 11px;font-weight:900;font-size:14px;display:inline-flex;align-items:center;gap:6px;position:relative;box-shadow:0 4px 0 rgba(0,0,0,.35)}
 .hbtn:hover{border-color:var(--acc);background:linear-gradient(180deg,#3f6a3a,#25402a)}
 .hbtn kbd{font-size:10px;padding:0 5px}
@@ -368,6 +370,7 @@ textarea.inp{resize:none;min-height:112px;line-height:1.4;display:block}.inp{use
       <div class="chip" id="mpChip"></div>
       <div class="chip" id="boostChip"></div>
       <div class="chip" id="onlineChip" style="display:none;font-size:12px"></div>
+      <button class="hudTab" id="hudTab" data-act="toggleHudBtns" title="Hide or show the buttons" aria-label="Hide or show the buttons">▲ Hide buttons</button>
       <div id="hudBtns">
         <button class="hbtn" id="btnJobs" data-act="openJobs">📋 Jobs <kbd>J</kbd><span class="badge" id="bdgJobs"></span></button>
         <button class="hbtn" id="btnQuests" data-act="openQuests">🎯 Quests <kbd>Q</kbd><span class="badge" id="bdgQuests"></span></button>
@@ -3267,7 +3270,15 @@ function tryBuy(kind, it) {
 /* ---------- HUD ---------- */
 const H = { t: 0, mapT: 0, last: {} };
 function setHTML(id, v) { if (H.last[id] !== v) { H.last[id] = v; $('#' + id).innerHTML = v; } }
+// The little "Hide buttons" tab above the HUD buttons (remembered on this computer; always shown during the tutorial)
+const HudTab = { hidden: ls('mowtown_hudhide') === '1', shown: null };
+function applyHudTab() {
+  const hide = HudTab.hidden && S.tut.state !== 'active', t = $('#hudTab'); if (HudTab.shown === !hide && t.dataset.done) return;
+  HudTab.shown = !hide; t.dataset.done = 1; $('#hudBtns').classList.toggle('hidden', hide);
+  t.textContent = hide ? '▼ Show buttons' : '▲ Hide buttons'; t.classList.toggle('off', hide);
+}
 function updateHud(dt) {
+  applyHudTab();
   if ((H.t -= dt) > 0) return; H.t = 0.1;
   H.disp = H.disp == null ? S.money : (Math.abs(S.money - H.disp) < 0.5 ? S.money : H.disp + (S.money - H.disp) * 0.3); // money counts up
   if (S.money - H.disp > 0.5 && Math.random() < 0.6) Sfx.coin();
@@ -3297,7 +3308,7 @@ function updateHud(dt) {
   checkAffordPopup();
   const j = activeJob(), jp = $('#jobPanel'), bc = $('#boostChip');
   bc.style.display = Game.boostT > 0 ? 'inline-flex' : 'none'; if (Game.boostT > 0) setHTML('boostChip', `⚡ Boost ${Math.ceil(Game.boostT)}s`);
-  const oc = $('#onlineChip'), on = lobbyCount(); oc.style.display = on ? 'inline-flex' : 'none'; if (on) setHTML('onlineChip', `🌍 ${on} online${Ghosts.size ? ` · ${Ghosts.size} near you` : ''}`);
+  const oc = $('#onlineChip'), on = lobbyCount(); oc.style.display = on ? 'inline-flex' : 'none'; if (on) setHTML('onlineChip', `🌍 ${esc(Lobby.name)} · ${on} online${Ghosts.size ? ` · ${Ghosts.size} near you` : ''}`);
   if (Race.on) jp.style.display = 'none';
   else if (j) {
     const cl = CLIENTS[j.client], L = Town.lotsById[j.lot], d = Math.hypot(Game.pl.x - L.door.x, Game.pl.z - L.door.z);
@@ -3614,8 +3625,9 @@ function pauseGame() {
   if (Game.state !== 'play') return; unlockMouse(); Game.state = 'paused'; Game.keys = {};
   $('#scr-pause').innerHTML = `<div class="dlg panel" style="width:min(360px,92vw);text-align:center"><h2>PAUSED</h2><div class="muted small">${esc(pName())} · Day ${S.day} · ${fmtClock(S.clock)}</div>
     ${Net.on ? `<div class="small" style="color:var(--sky)">👥 Room <b>${Net.code}</b> · the game keeps running for your friend</div><div>${netPlayersHTML()}</div>` : ''}
+    ${Lobby.on ? `<div class="small" style="color:var(--sky)">🌍 On <b>${esc(Lobby.name)}</b> · ${lobbyCount()} player${lobbyCount() === 1 ? '' : 's'}</div>` : ''}
     <button class="btn primary" data-act="resume" data-autofocus>▶ Resume</button><button class="btn" data-act="phonePause">📱 Phone</button><button class="btn" data-act="settings">⚙️ Settings</button>
-    ${Race.on && !Net.on ? '<button class="btn" data-act="raceTown">🏳 Quit race</button>' : ''}${S.tut.state === 'active' && !Net.on ? '<button class="btn" data-act="tutSkip">⏭ Skip tutorial</button>' : ''}${Net.on ? '<button class="btn" data-act="mpLeave">🚪 Leave multiplayer</button>' : ''}
+    ${Race.on && !Net.on ? '<button class="btn" data-act="raceTown">🏳 Quit race</button>' : ''}${S.tut.state === 'active' && !Net.on ? '<button class="btn" data-act="tutSkip">⏭ Skip tutorial</button>' : ''}${Net.on ? '<button class="btn" data-act="mpLeave">🚪 Leave multiplayer</button>' : ''}${Lobby.on ? '<button class="btn" data-act="worldLeave">🚪 Leave online server</button>' : ''}
     <button class="btn" data-act="openLb">🏆 Leaderboards</button><div class="titleExtra"><button class="btn" data-act="openIdeas">💡 Recommendations</button><button class="btn" data-act="openLog">📜 Update Log</button></div>
     <button class="btn" data-act="saveQuit">💾 Save & quit to title</button><div class="small muted">Slot ${SLOT} · version ${GAME_VERSION}</div></div>`;
   showScreen('pause');
@@ -3658,6 +3670,10 @@ const ACT = {
   mpLeave: () => { endSession(true); },
   raceStart: () => { if (Net.role !== 'host' || !Net.peer) return; Net.send({ t: 'raceGo', at: Net.mp.serverTime() }); startRace(false); },
   raceAgain: () => { if (Net.on) { if (!Net.peer) { toast('Your opponent left', '', 'var(--bad)'); return; } if (Net.role !== 'host') return; Net.send({ t: 'raceGo', at: Net.mp.serverTime() }); startRace(false); } else startRace(true); },
+  mpServer: a => { $('#mpQueueCancel') && ($('#mpQueueCancel').style.display = 'inline-flex'); worldJoin(a).finally(() => { const b = $('#mpQueueCancel'); if (b) b.style.display = 'none'; }); },
+  mpQueueCancel: () => { if (Net.mp) Net.mp.leaveQueue().catch(() => { }); },
+  worldLeave: () => { worldLeave(); Game.state = 'play'; pauseGame(); },
+  toggleHudBtns: () => { HudTab.hidden = !HudTab.hidden; lsSet('mowtown_hudhide', HudTab.hidden ? '1' : null); applyHudTab(); Sfx.click(); },
   mpJoinRoom: a => mpStart('join', a), mpRooms: () => { Net.roomsT = false; mpLoadRooms(); }, mpRetry: () => { netInit(); netConnect(); },
   raceTown: () => { if (Game.state === 'paused') { Game.state = 'play'; showScreen(null); } endRace(); },
   dlg: a => { const o = Game.dialog && Game.dialog.opts[+a]; if (o && !o.disabled) o.act(); },
@@ -4067,9 +4083,10 @@ function netInit() {
   if (typeof Multiplayer === 'undefined') { Net.status = 'error'; Net.err = 'Couldn\'t load the multiplayer service. Check your internet connection.'; mpRefresh(); return; }
   // 'device' keeps the same player between visits, so scoreboard names don't duplicate. Add ?mptab to the address to test two players in two tabs.
   const mp = Net.mp = new Multiplayer({ url: MP_CFG.url, key: MP_CFG.key, name: pName(), identity: location.search.includes('mptab') ? 'tab' : 'device' });
-  mp.on('connected', () => { lobbyJoin().finally(() => acctOnConnect().finally(() => { eventRefresh(true); eventSync(); if (!Acct) inboxCheck(); })); });
-  mp.on('joined', room => { Lobby.on = isLobbyRoom(room); if (!Lobby.on) clearGhosts(); mpRefresh(); });
-  mp.on('left', () => { Lobby.on = false; clearGhosts(); if (!Net.on) setTimeout(lobbyJoin, 1500); }); // back to the lobby after co-op / race
+  mp.on('connected', () => { acctOnConnect().finally(() => { eventRefresh(true); eventSync(); if (!Acct) inboxCheck(); }); });
+  mp.on('joined', room => { if (!isLobbyRoom(room)) { Lobby.on = false; clearGhosts(); } mpRefresh(); });
+  mp.on('left', (room, reason) => { if (Lobby.on && isLobbyRoom(room) && reason !== 'left') { toast('🔌 Disconnected from the online server', 'You\'re playing single player now.', 'var(--gold)'); Lobby.on = false; Lobby.id = null; clearGhosts(); } });
+  mp.on('queue', q => { Lobby.queue = q && q.position || 0; if (Lobby.queue) mpStatus(`That server is full. You're number ${Lobby.queue} in the queue…`); });
   mp.on('reconnected', () => { eventSync(); cloudFlush(true); });
   mp.on('inbox', it => handleInbox(it));
   mp.onMessage('announcement', (d, from) => { if (from === 'server') showOwnerMsg(typeof d === 'string' ? d : d && (d.text || d.message) || JSON.stringify(d)); }); // dashboard → Settings → Broadcast
@@ -4265,7 +4282,7 @@ function spawnGuest() {
 function endSession(toTitle) {
   const wasGuest = !!Net.guestWorld, mp = Net.mp;
   clearTimeout(Net.worldTimer);
-  if (mp && mp.room) mp.leave().catch(() => { }).then(() => setTimeout(lobbyJoin, 400)); // back to the always-online lobby
+  if (mp && mp.room) mp.leave().catch(() => { });
   Object.assign(Net, { on: false, code: null, mode: null, role: null, peer: null, cuts: [], trims: [], lastSent: {}, chunks: {} });
   removeRemote(); if (Race.on) endRace(true);
   if (wasGuest) { Object.assign(S, Net.guestWorld); Net.guestWorld = null; resetWorldFresh(); loadYards(); resetKnock(); applySeason(); }
@@ -4283,7 +4300,7 @@ function updateMpChip() {
   el.innerHTML = `👥 ${Net.mode === 'coop' ? 'Co-op' : 'Race'} · <b style="color:var(--gold);letter-spacing:2px">${Net.code}</b> · ${Net.status === 'reconnecting' ? '<span style="color:var(--gold)">reconnecting…</span>' : Net.peer ? (away ? '📶 ' : '🟢 ') + esc(Net.peer.name) : '<span class="muted">waiting for player 2…</span>'}`;
 }
 function mpRefresh() { // live connection line on the title + multiplayer screens
-  const t = Net.status === 'on' ? '🟢 Online — Mow Town server' + (lobbyCount() > 1 ? ` · 🌍 ${lobbyCount()} players in Mow Town Online` : '') : Net.status === 'connecting' ? '🟡 Connecting to the Mow Town server…' : Net.status === 'reconnecting' ? '🟡 Reconnecting…' : Net.status === 'error' ? '🔴 Offline — ' + Net.err : Net.status === 'replaced' ? '🟠 Mow Town is open in another tab on this computer. Close one of them.' : '⚪ Not connected';
+  const t = Net.status === 'on' ? '🟢 Online — Mow Town server' + (lobbyCount() ? ` · 🌍 ${lobbyCount()} on ${Lobby.name}` : '') : Net.status === 'connecting' ? '🟡 Connecting to the Mow Town server…' : Net.status === 'reconnecting' ? '🟡 Reconnecting…' : Net.status === 'error' ? '🔴 Offline — ' + Net.err : Net.status === 'replaced' ? '🟠 Mow Town is open in another tab on this computer. Close one of them.' : '⚪ Not connected';
   $$('.mpConn').forEach(el => el.textContent = t);
   const rb = $('#mpRetry'); if (rb) rb.style.display = Net.status === 'error' ? 'inline-flex' : 'none';
   if (Net.status === 'on' && $('#scr-mp').classList.contains('on') && !Net.roomsT) mpLoadRooms();
@@ -4296,6 +4313,13 @@ async function mpLoadRooms() {
     el.innerHTML = list.length ? list.map(r => `<div class="qcard" style="padding:8px 12px"><div class="t"><h4>${r.meta && r.meta.mode === 'race' ? '🏁 Fastest Lawn Cut' : '🏡 Co-op Town'} · ${esc((r.meta && r.meta.host) || 'Someone')}</h4><small>Room ${esc(r.id)} · ${r.players}/${r.maxPlayers} players</small></div><button class="btn primary" style="font-size:14px;padding:8px 14px" data-act="mpJoinRoom" data-arg="${esc(r.id)}">Join</button></div>`).join('')
       : '<div class="small muted">No open rooms right now — host one, or press Quick play and a friend\'s Quick play will find you.</div>';
   } catch (e) { el.innerHTML = '<div class="small muted">Couldn\'t load the room list.</div>'; }
+  const sv = $('#mpServers'); if (!sv) return;
+  const list = await loadServers();
+  sv.innerHTML = list && list.length ? list.map(s => {
+    const full = s.full || s.players >= s.maxPlayers, flag = { au: '🇦🇺', eu: '🇪🇺', us: '🇺🇸', asia: '🌏' }[s.region] || '🌍';
+    return `<div class="qcard" style="padding:8px 12px"><div class="ic">${flag}</div><div class="t"><h4>${esc(s.name || s.id)}${s.hasPassword ? ' 🔒' : ''}</h4><small>${esc(s.description || s.motd || 'A shared Mow Town')} · <b>${s.players}/${s.maxPlayers}</b> players${full ? (s.queue ? ' · full, there\'s a queue' : ' · full') : ''}</small></div>
+      <button class="btn ${full && !s.queue ? '' : 'primary'}" style="font-size:14px;padding:8px 14px" data-act="mpServer" data-arg="${esc(s.id)}" ${(full && !s.queue) || s.hasPassword ? 'disabled' : ''}>🌍 Play online</button></div>`;
+  }).join('') : `<div class="small muted">${Lobby.srvErr ? esc(Lobby.srvErr) : 'No public servers yet. Make one in the dashboard under Servers.'}</div>`;
 }
 function showMP() { Game.state = 'title'; renderMP(); showScreen('mp'); netInit(); netConnect(); mpRefresh(); }
 function renderMP() {
@@ -4310,6 +4334,10 @@ function renderMP() {
     <div class="small muted"><b>Co-op Town:</b> single player but with 2 people in the host's town — shared jobs, pay split by who mowed more. <b>Fastest Lawn Cut:</b> race side by side on two identical lawns.</div>
     <div class="lbl">Join by code</div><div class="row"><input class="inp" id="mpCode" maxlength="10" placeholder="CODE" style="text-transform:uppercase;letter-spacing:5px;font-family:var(--display);width:180px" spellcheck="false"><button class="btn primary" style="font-size:15px" data-act="mpJoin">Join</button></div>
     <div class="lbl">Open rooms <button class="btn" style="padding:3px 8px;font-size:11px;margin-left:6px" data-act="mpRooms">↻</button></div><div id="mpRooms" class="col" style="gap:6px"><div class="small muted">Connecting…</div></div>
+    <div class="lbl" style="margin-top:6px">🌍 Play online: public servers <button class="btn" style="padding:3px 8px;font-size:11px;margin-left:6px" data-act="mpRooms">↻</button></div>
+    <div class="small muted">Play your save in a shared town: everyone on the server drives and mows around you. Uses the save slot picked above.</div>
+    <div id="mpServers" class="col" style="gap:6px"><div class="small muted">Connecting…</div></div>
+    <div class="row"><button class="btn" id="mpQueueCancel" data-act="mpQueueCancel" style="display:none">✕ Leave the queue</button></div>
     <div id="mpStatus" class="small" style="min-height:18px;color:var(--sky)"></div></div>`;
 }
 
@@ -4793,6 +4821,7 @@ async function sendIdea() {
 
 /* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
 const UPDATES = [
+  { v: '1.16', date: 'Nov 2026', title: 'Pick Your Server', add: ['Play is single player again: no more joining the online world by itself', 'Play Online → Play online: pick a public server and play your save with everyone on it', 'A little "Hide buttons" tab tucks the HUD buttons away (press it again to bring them back)', 'Leave an online server any time from the pause menu'] },
   { v: '1.15', date: 'Nov 2026', title: 'Your Style, Every Device', add: ['New 👕 Style button (Y): skin colour, hair colour, caps and tops, all in one place', 'Play the same account on several devices at the same time', 'Mow Town Online: see everyone else who\'s playing, driving and mowing around the towns','Your saves follow you to every device you sign in on', 'Accounts from before this update move over by themselves', 'The game stays connected and reconnects by itself'] },
   { v: '1.14', date: 'Nov 2026', title: 'Road Trip', add: ['3 new towns down the highway: Oakridge, Seaview Bay and Summit Hills. Bigger lawns, better pay', 'Drive there yourself in your own truck, no cutscenes', 'Hook up a trailer and tow your mower', 'Buy faster trucks and a double trailer in the Shop', 'Hire Jake, a worker who mows the front or back lawn for you', 'Mow Town Golf Club: fairways, bunkers and a putting green', 'Press M for the big map', 'Reverse with S in mouse mode', 'The boombox radio is now on R','Lucky Lawns pay double, golden grass hides cash, and great jobs spin the bonus tip wheel', 'Bad driving costs money: crashes, driving on lawns and running over gnomes', '6 new quests'] },
   { v: '1.13', date: 'Nov 2026', title: 'Accounts & Leaderboards', add: ['Make an account with just a username: no password to remember', 'You get a secret sign-in code. Show or hide it on the home screen', 'Type your code on any computer to get all your saves back', 'Your saves back up to your account by themselves', 'Saves already on your computer move into your new account', 'Leaderboards for top earners, most lawns and fastest lawn cut'] },
@@ -5278,8 +5307,8 @@ async function claimWin(side) { // the counter makes this safe: only the first c
 let soloJoin = null;
 async function srvCall(type, data) { // one request to server-script.js; resolves with its reply
   const mp = Net.mp; if (!mp || !mp.connected) throw Object.assign(new Error('offline'), { code: 'not_connected' });
-  if (!mp.room) await lobbyJoin(); // the script only hears players who are in a room: normally that's the always-online lobby
-  if (!mp.room) { // lobby full or not there: a private room of one instead
+  if (Lobby.joining) await Lobby.joining.catch(() => { }); // never pull someone out of a server they're joining
+  if (!mp.room) { // the script only hears players who are in a room, so single player sits in a private room of one
     if (!soloJoin) soloJoin = mp.create({ type: 'solo', private: true, maxPlayers: 1, tag: 'mowtown-solo', meta: { game: MP_CFG.game, mode: 'solo' } }).finally(() => { soloJoin = null; });
     await soloJoin;
   }
@@ -5294,24 +5323,43 @@ async function srvCall(type, data) { // one request to server-script.js; resolve
 const evServer = srvCall;
 
 /* =====================================================================
-   🌍 MOW TOWN ONLINE: the always-online lobby (public server "lobby" on the multiplayer server)
-   Whenever you're not in a co-op or race room you're in the lobby, and everyone else who's playing shows up
-   as a live "ghost" (their character, mower or truck, and a name tag) if they're within about 150 m of you.
+   🌍 ONLINE SERVERS: Play Online → "Play online" lists the public servers set up in the dashboard.
+   Pick one (with a save slot) and you play your own save in that shared world: everyone else on the server
+   shows up as a live "ghost" (their character, mower or truck, and a name tag) when they're within ~150 m.
    Your position goes out about 10 times a second while you move; interest management (aoi on x/z) means you
-   only get the players near you, so it stays cheap even with 100 people online. Ghosts are just for show:
-   everyone still mows their own lawns in their own game.
+   only get the players near you. Ghosts are just for show: everyone still mows their own lawns.
+   Plain "Play" from the home screen is single player: no server room at all.
    ===================================================================== */
-const Lobby = { on: false, joining: null, t: 0, last: '', lookKey: '', failT: 0 };
+const Lobby = { on: false, id: null, name: '', joining: null, t: 0, last: '', lookKey: '', servers: null, queue: 0 };
 const Ghosts = new Map();
-const isLobbyRoom = r => !!r && (r.id === 'lobby' || r.server === 'lobby' || r.type === 'lobby');
-function lobbyJoin() {
-  const mp = Net.mp; if (!mp || !mp.connected || Net.on || Net.joining || Net.status === 'replaced') return Promise.resolve(false);
-  if (isLobbyRoom(mp.room)) { Lobby.on = true; return Promise.resolve(true); }
-  if (mp.room || Date.now() - Lobby.failT < 30000) return Promise.resolve(false);
-  if (!Lobby.joining) Lobby.joining = mp.joinServer('lobby', { queue: false, playerData: { look: lookData() } })
-    .then(() => { Lobby.on = isLobbyRoom(mp.room); Lobby.last = ''; mpRefresh(); return Lobby.on; }, () => { Lobby.failT = Date.now(); return false; })
-    .finally(() => { Lobby.joining = null; });
-  return Lobby.joining;
+const isLobbyRoom = r => !!r && !!Lobby.id && r.id === Lobby.id;
+async function loadServers() { // the public servers from the dashboard, busiest first
+  try { Lobby.servers = await Net.mp.servers.list(); } catch (e) { Lobby.servers = Lobby.servers || []; Lobby.srvErr = netErrText(e); }
+  return Lobby.servers;
+}
+async function worldJoin(id) {
+  if (Net.on || Net.joining || Lobby.joining) return;
+  if (Game.kickUntil > Date.now()) { mpStatus('You were kicked. Wait a minute before joining again.', true); return; }
+  const nameErr = readMPInputs(); if (nameErr) { mpStatus(nameErr, true); return; }
+  netInit(); if (!Net.mp || !(await netConnect())) { mpStatus(Net.err || 'Can\'t reach the server.', true); return; }
+  const srv = (Lobby.servers || []).find(s => s.id === id) || { id, name: id };
+  if (srv.hasPassword) { mpStatus('That server needs a password. Pick another one.', true); return; }
+  mpStatus(`Joining ${srv.name}…`); Net.joining = true;
+  try {
+    const fresh = enterSlot(MPPrefs.slot); // your own save comes with you
+    Lobby.id = id; Lobby.joining = Net.mp.joinServer(id, { playerData: { look: lookData() } });
+    await Lobby.joining;
+    Object.assign(Lobby, { on: true, name: srv.name || id, last: '', queue: 0 });
+    startPlay(); banner(`🌍 ${esc((srv.name || id).toUpperCase())}<small>${esc(srv.motd || 'Everyone on this server shows up around town')}</small>`); Sfx.unlock();
+    if (!fresh) toast(`🌍 Joined ${esc(srv.name || id)}`, `Slot ${MPPrefs.slot} · ${Net.mp.playerCount} player${Net.mp.playerCount === 1 ? '' : 's'} on the server`, 'var(--sky)');
+    tutOnEnter();
+  } catch (e) { Lobby.id = null; Lobby.on = false; mpStatus(e && e.code === 'cancelled' ? 'Left the queue.' : e && e.code === 'room_full' ? 'That server is full.' : netErrText(e), true); }
+  finally { Lobby.joining = null; Net.joining = false; Lobby.queue = 0; }
+}
+function worldLeave(quiet) { // back to single player
+  const mp = Net.mp, was = Lobby.on; Lobby.on = false; Lobby.last = ''; clearGhosts();
+  if (was && mp && mp.room && Lobby.id && mp.room.id === Lobby.id) mp.leave().catch(() => { });
+  Lobby.id = null; if (was && !quiet) toast('🚪 Left the online server', 'You\'re playing single player now.', 'var(--sky)');
 }
 const lookData = () => ({ cap: S.player.cap, shirt: S.player.shirt, skin: S.player.skin, hair: S.player.hair });
 function lobbyData() {
@@ -5324,7 +5372,7 @@ function lobbySend(dt) { // ~10 Hz while you move; nothing when you stand still
   const d = lobbyData(), k = JSON.stringify(d); if (k === Lobby.last) return; Lobby.last = k;
   mp.setPlayer(d, { unreliable: true });
 }
-function lobbyHide() { const mp = Net.mp; Lobby.last = ''; if (Lobby.on && mp && mp.connected) mp.setPlayer({ x: null, z: null }); clearGhosts(); } // on the home screen nobody sees you
+function lobbyHide() { worldLeave(true); clearGhosts(); } // the home screen is never on a server
 function makeGhost(p) {
   const P = buildPlayer(); scene.add(P.root); const tag = nameTagSprite(); scene.add(tag);
   return { P, tag, veh: null, vk: '', x: p.data.x, z: p.data.z, h: p.data.h || 0, px: p.data.x, pz: p.data.z, ph: 0, look: '', name: '' };
