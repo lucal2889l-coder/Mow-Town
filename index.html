@@ -461,7 +461,8 @@ function fmtClock(m) { const h = Math.floor(m / 60) % 24, mm = Math.floor(m % 60
 // The first six mowers are close together in price so you feel each step quickly; after that the gaps grow
 // (and the pro machines need a few finished jobs on your record first). `model` = which 3D model it uses.
 // ⚔️ Limited event brands: change a name or colour here and the mower, paint, sticker and top all follow
-const BRAND = { scott: { name: 'Scott Bonnar', col: '#2f7d4f', colName: 'Alpine Green' }, rover: { name: 'Rover', col: '#c8102e', colName: 'Rover Red' } };
+const BRAND = { scott: { name: 'Scott Bonnar', col: '#2f7d4f', colName: 'Alpine Green' }, rover: { name: 'Rover', col: '#c8102e', colName: 'Rover Red' },
+  deere: { name: 'John Deere', col: '#367c2b', colName: 'Deere Green', trim: '#ffde00' }, mowmaster: { name: 'Mow Master', col: '#e2601b', colName: 'Mow Master Orange', trim: '#1b1d20' } };
 const MOWERS = {
   push:    { id: 'push',   model: 'push',  name: 'Hand-Me-Down 21"',    type: 'Push mower',            icon: '🧑‍🌾', price: 0,    speed: 1.7,  transport: 1.9, width: 0.56, tank: 1.0, burn: 0.16, turn: 2.6, accel: 3,   radius: 0.4,  push: true,  cam: [3.6, 2.6], desc: "Grandpa's old mower. Faded paint, still runs." },
   lite:    { id: 'lite',    model: 'push',  name: 'Greenline 21" Lite',  type: 'Push mower',            icon: '🌱',  price: 50,   speed: 1.95, transport: 2.1, width: 0.6,  tank: 1.3, burn: 0.15, turn: 2.75, accel: 3.3, radius: 0.4,  push: true,  cam: [3.6, 2.6], desc: 'Lighter deck, sharper blade, bigger tank. A real first upgrade.' },
@@ -477,9 +478,15 @@ const MOWERS = {
   titan:   { id: 'titan',   model: 'titan', name: 'Fairway 5-Gang Reel', type: 'Commercial reel mower', icon: '🏟️', price: 3400, speed: 5.2,  transport: 7.5, width: 2.6,  tank: 25,  burn: 1.2,  turn: 1.7, accel: 3.5, radius: 1.05, push: false, cam: [8.8, 6.0], req: { jobs: 20 }, desc: 'Five reel units. Built for parks & sports fields.' },
   // ⚔️ limited event mowers: never for sale, you get the one you pick. Same mowing rate, different strengths.
   scott:   { id: 'scott',   model: 'ride',  look: 'brand', limited: true, brand: 'scott', name: BRAND.scott.name + ' Classic 30"', type: 'Limited ride-on', icon: '🟢', price: 0, speed: 2.9, transport: 3.2, width: 0.76, tank: 2.6, burn: 0.16, turn: 3.0, accel: 4.4, radius: 0.6, push: false, cam: [5.6, 3.6], desc: 'Green-keeper\'s ride-on: nimble and thrifty on fuel.' },
-  rover:   { id: 'rover',   model: 'ride',  look: 'brand', limited: true, brand: 'rover', name: BRAND.rover.name + ' Mini Rider 30"', type: 'Limited ride-on', icon: '🔴', price: 0, speed: 2.9, transport: 5.2, width: 0.76, tank: 4.9, burn: 0.38, turn: 2.0, accel: 3.6, radius: 0.6, push: false, cam: [5.6, 3.6], desc: 'Compact ride-on: sit down, big tank and fast between lawns.' }
+  rover:   { id: 'rover',   model: 'ride',  look: 'brand', limited: true, brand: 'rover', name: BRAND.rover.name + ' Mini Rider 30"', type: 'Limited ride-on', icon: '🔴', price: 0, speed: 2.9, transport: 5.2, width: 0.76, tank: 4.9, burn: 0.38, turn: 2.0, accel: 3.6, radius: 0.6, push: false, cam: [5.6, 3.6], desc: 'Compact ride-on: sit down, big tank and fast between lawns.' },
+  // 🏪 Mow Shop exclusives (Main Street, Mow Town): bought with money, but ONLY at the Mow Shop
+  mm_push: { id: 'mm_push', model: 'sp',    look: 'brand', mowshop: true, brand: 'mowmaster', name: 'Mow Master 21" Pro',      type: 'Mow Shop walk-behind', icon: '🟠', price: 2000, speed: 3.8, transport: 4.0, width: 0.86, tank: 4.6, burn: 0.19, turn: 3.7, accel: 6.4, radius: 0.45, push: true,  cam: [3.6, 2.6], desc: 'The best push mower in the game: the fastest and the nimblest. Very orange.' },
+  jd_push: { id: 'jd_push', model: 'sp',    look: 'brand', mowshop: true, brand: 'deere',     name: 'John Deere 22" Commercial', type: 'Mow Shop walk-behind', icon: '🦌', price: 2000, speed: 3.6, transport: 3.9, width: 0.94, tank: 5.4, burn: 0.19, turn: 3.5, accel: 6.1, radius: 0.46, push: true,  cam: [3.6, 2.6], desc: 'The best push mower in the game: the widest deck and the biggest tank. Mows all day.' },
+  mm_ride: { id: 'mm_ride', model: 'ride',  look: 'brand', mowshop: true, brand: 'mowmaster', name: 'Mow Master Ride-On 44"',  type: 'Mow Shop ride-on',     icon: '🧡', price: 2500, speed: 5.1, transport: 8.4, width: 1.4,  tank: 14,  burn: 0.8,  turn: 2.5, accel: 5.2, radius: 0.7,  push: false, cam: [5.9, 3.8], desc: 'Quick and nimble. Gets between towns fast.' },
+  jd_ride: { id: 'jd_ride', model: 'ride',  look: 'brand', mowshop: true, brand: 'deere',     name: 'John Deere Ride-On 48"',  type: 'Mow Shop ride-on',     icon: '💚', price: 2500, speed: 4.8, transport: 8.0, width: 1.52, tank: 17,  burn: 0.85, turn: 2.2, accel: 4.8, radius: 0.74, push: false, cam: [6.0, 3.9], desc: 'Wide 48" deck and a big tank. The classic green-and-yellow.' }
 };
-const MOWER_ORDER = ['push', 'lite', 'sp', 'wide', 'ride', 'tractor', 'zero', 'hover', 'zeropro', 'monster', 'platinum', 'titan', 'scott', 'rover'];
+const MOWER_ORDER = ['push', 'lite', 'sp', 'wide', 'ride', 'tractor', 'zero', 'hover', 'zeropro', 'monster', 'platinum', 'titan', 'scott', 'rover', 'mm_push', 'jd_push', 'mm_ride', 'jd_ride'];
+const MOWSHOP = ['mm_push', 'jd_push', 'mm_ride', 'jd_ride'], CUSTOM_KIT_PRICE = 300;
 const mdl = id => (MOWERS[id] && MOWERS[id].model) || id;
 // Speed & Fuel Capacity are the headline upgrades (Ray's Upgrade Stall). Upgrades apply to every mower you own.
 const UPGRADES = [
@@ -505,8 +512,14 @@ const PAINTS = [
   { id: 'cherry', c: '#b0123a', name: 'Cherry Bomb', quest: true }, { id: 'sky', c: '#5ec8f2', name: 'Sky Blue', quest: true }, { id: 'coral', c: '#ff6f61', name: 'Coral Reef', quest: true },
   { id: 'galaxy', c: '#3b2a8f', name: 'Galaxy', quest: true }, { id: 'aurora', c: '#3fe0b0', name: 'Aurora', quest: true }, { id: 'lava', c: '#e8460f', name: 'Lava Orange', quest: true },
   // ⚔️ limited event colours
-  { id: 'ev_scott', c: BRAND.scott.col, name: BRAND.scott.name + ' ' + BRAND.scott.colName, event: true }, { id: 'ev_rover', c: BRAND.rover.col, name: BRAND.rover.colName, event: true }
+  { id: 'ev_scott', c: BRAND.scott.col, name: BRAND.scott.name + ' ' + BRAND.scott.colName, event: true }, { id: 'ev_rover', c: BRAND.rover.col, name: BRAND.rover.colName, event: true },
+  // 🏪 Mow Shop limited colours: both come in the Limited Colour Pack ($300), only sold at the Mow Shop
+  { id: 'ms_deere', c: BRAND.deere.col, name: 'John Deere Green', mowshop: true }, { id: 'ms_mowmaster', c: BRAND.mowmaster.col, name: 'Mow Master Orange', mowshop: true },
+  { id: 'custom', c: '#ff4da6', name: 'Custom colour', hidden: true } // from v1.17 (kept so old saves still look right)
 ];
+const MS_COLOURS = ['ms_deere', 'ms_mowmaster'];
+const hasMsColours = () => MS_COLOURS.every(id => S.own.paint.includes(id));
+const msPaint = id => !!(PAINTS.find(p => p.id === id) || {}).mowshop || id === 'custom';
 const FINISHES = [{ id: 'glossy', name: 'Glossy', rough: 0.25, metal: 0.05, price: 0 }, { id: 'matte', name: 'Matte', rough: 0.88, metal: 0, price: 40 }, { id: 'metallic', name: 'Metallic', rough: 0.33, metal: 0.75, price: 120 }, { id: 'chrome', name: 'Chrome', rough: 0.07, metal: 1, pass: true }];
 const WHEELS   = [{ id: 'standard', name: 'Standard', price: 0 }, { id: 'turf', name: 'Turf Tread', price: 50 }, { id: 'chrome', name: 'Chrome Rims', price: 140 }, { id: 'offroad', name: 'Off-Road', price: 110 }, { id: 'whitewall', name: 'Whitewall', pass: true }];
 const LIGHTS   = [{ id: 'none', name: 'None', price: 0 }, { id: 'round', name: 'Round Lamps', price: 45 }, { id: 'led', name: 'LED Bar', price: 90 }, { id: 'glow', name: 'Neon Underglow', pass: true }];
@@ -525,7 +538,14 @@ const ACCESSORIES = [
   { id: 'bullbar',   slot: 'front', name: 'Bull Bar',            icon: '🛡️', pass: true },
   { id: 'grille',    slot: 'front', name: 'Chrome Grille Guard', icon: '✨', pass: true },
   { id: 'boombox',   slot: 'side2', name: 'Boombox (press M)',   icon: '📻', pass: true },
-  { id: 'turbo',     slot: 'turbo', name: 'Chrome Twin-Turbo Kit', icon: '🔥', pass: true, legendary: true }
+  { id: 'turbo',     slot: 'turbo', name: 'Chrome Twin-Turbo Kit', icon: '🔥', pass: true, legendary: true },
+  // ⛽ sold only at the petrol station in each town (store = the town's id)
+  { id: 'pennant',   slot: 'top',   name: 'Acorn Pennant',       icon: '🌰', price: 60,  store: 'oak' },
+  { id: 'toolrack',  slot: 'rear',  name: 'Timber Tool Rack',    icon: '🪵', price: 90,  store: 'oak' },
+  { id: 'surfboard', slot: 'top',   name: 'Surfboard Rack',      icon: '🏄', price: 140, store: 'bay' },
+  { id: 'anchor',    slot: 'front', name: 'Anchor Bumper',       icon: '⚓', price: 120, store: 'bay' },
+  { id: 'goldgrille',slot: 'front', name: 'Gold Grille',         icon: '🥇', price: 400, store: 'peak' },
+  { id: 'champagne', slot: 'side',  name: 'Champagne Cooler',    icon: '🍾', price: 250, store: 'peak' }
 ];
 // Garage decor — each slot shows one item in the 3D garage
 const DECOR = {
@@ -662,6 +682,13 @@ const TOWN_LOOK = {
   bay: { body: ['#f4f2ea', '#bfe0ec', '#f0e0b0', '#e8f0f4', '#f6d6c8'], roof: ['#2a5a7a', '#3a6a8a', '#8a5a3a', '#2e3036'] },
   peak: { body: ['#f4f2ea', '#e6e0d4', '#d8d0c4', '#f0ece4', '#cfc6b8'], roof: ['#2e3036', '#3a2a2a', '#2a3a3a', '#4a3a5a'] }
 };
+// ⛽ the petrol stations in the new towns (each one sells its own accessories inside)
+const STATIONS = {
+  oak:  { name: 'OAKRIDGE FUEL', short: 'Oakridge Fuel', col: '#2f6a24', clerk: 'Bev',     hello: 'Welcome to Oakridge Fuel! Fresh from the woods: a pennant and a proper tool rack.' },
+  bay:  { name: 'SEAVIEW GAS',   short: 'Seaview Gas',   col: '#1d6fa8', clerk: 'Marco',   hello: 'Ahoy! Beach stuff for your mower: a surfboard rack and an anchor bumper.' },
+  peak: { name: 'SUMMIT PETROL', short: 'Summit Petrol', col: '#5a3a8a', clerk: 'Celeste', hello: 'Good day. Only the finest up here: a gold grille and a champagne cooler.' }
+};
+const storeName = L => L && L.station ? L.station.short : 'Pump & Go';
 (function addTowns() {
   const pool = ['roses', 'birdbath', 'gnomes', 'shed', 'swing', 'trampoline', 'goal', 'toys', 'fountain', 'hedges', 'zen', 'pool', 'bbq', 'veggie', 'trees'];
   const clash = { shed: ['zen'], zen: ['shed'], pool: ['fountain', 'veggie'], fountain: ['pool'], veggie: ['pool'] }; // things that would sit on top of each other
@@ -674,7 +701,9 @@ const TOWN_LOOK = {
         body: look.body[Math.floor(r() * look.body.length)], roof: look.roof[Math.floor(r() * look.roof.length)], extras: ex });
       CLIENTS[id] = { name: p[0], short: p[1], rate: 0.3 + r() * 0.06, line: p[2], town: T.id };
     });
+    LOTS.push({ id: T.id + '_gas', x: T.x1 - 24, side: 1, w: 30, kind: 'gas', town: T.id, station: STATIONS[T.id] }); // ⛽ every town has its own petrol station
   });
+  LOTS.push({ id: 'mowshop', x: 82, side: -1, w: 28, kind: 'mowshop', town: 'mow' }); // 🏪 the Mow Shop on Main Street
   // ⛳ the golf course, out on the highway just past Mow Town
   LOTS.push({ id: 'golf', x: 368, side: 1, w: 150, depth: 78, kind: 'golf', client: 'golf', town: 'mow' });
   CLIENTS.golf = { name: 'Mow Town Golf Club', short: 'Golf Club', rate: 0.24, big: true, golf: true, line: 'The club championship is this weekend. Fairways and the green, please. Mind the bunkers!' };
@@ -726,7 +755,7 @@ function defaultSave() {
     tut: { state: 'new', step: 0, f: {}, bonus: 0 }, // tutorial: new → active → done | skipped
     owned: ['push'], mower: 'push', fuel: { push: 0.7 }, gasCan: 0, hasGasCan: false, hasTrimmer: false,
     upgrades: { engine: 0, blades: 0, tank: 0, tires: 0 },
-    cfg: { paint: 'faded', finish: 'glossy', wheels: 'standard', lights: 'none', glow: 0, horn: 'classic', stickers: [], acc: {} },
+    cfg: { paint: 'faded', custom: '#ff4da6', finish: 'glossy', wheels: 'standard', lights: 'none', glow: 0, horn: 'classic', stickers: [], acc: {} },
     own: { paint: [], finish: [], wheels: [], lights: [], horn: [], acc: [], sticker: [], cap: [], shirt: [], decor: [] },
     decor: { wall: 'grey', floor: 'concrete', light: 'tube', poster: 'none', sign: 'none', tools: 'none', fridge: 'none', shelf: 'none' },
     decorOwned: {},
@@ -786,6 +815,7 @@ function readSlot(n) {
     s.owned = s.owned.filter((id, i, a) => MOWERS[id] && a.indexOf(id) === i); if (!s.owned.includes('push')) s.owned.unshift('push'); // fix duplicate/unknown mowers
     if (!MOWERS[s.mower] || !s.owned.includes(s.mower)) s.mower = 'push';
     for (const k in s.upgrades) s.upgrades[k] = clamp(Math.floor(s.upgrades[k] || 0), 0, UPG_MAX);
+    if (s.own.paint.includes('custom')) MS_COLOURS.forEach(id => { if (!s.own.paint.includes(id)) s.own.paint.push(id); }); // bought the v1.17 kit: you get the limited colours
     return s;
   } catch (e) { return null; }
 }
@@ -1408,7 +1438,7 @@ function buildStreet(sx0, sx1, walks) {
 }
 function buildLot(L, rng) {
   Town.lotsById[L.id] = L; L.half = L.w / 2;
-  if (L.kind === 'house') buildHouse(L, rng); else if (L.kind === 'gas') buildGas(L); else if (L.kind === 'park') buildPark(L, rng); else if (L.kind === 'race') buildRaceLawn(L); else if (L.kind === 'golf') buildGolf(L, rng); else buildField(L, rng);
+  if (L.kind === 'house') buildHouse(L, rng); else if (L.kind === 'gas') buildGas(L); else if (L.kind === 'park') buildPark(L, rng); else if (L.kind === 'race') buildRaceLawn(L); else if (L.kind === 'golf') buildGolf(L, rng); else if (L.kind === 'mowshop') buildMowShop(L); else buildField(L, rng);
 }
 // Each town (and the golf course) lives in its own group, so towns far down the road aren't drawn
 function townGroup(id, x0, x1) { const g = new THREE.Group(); Town.root.add(g); Town.parts.push({ g, x0, x1 }); return (Town.group = g); }
@@ -1621,27 +1651,49 @@ function updateGarageDoor(dt, near) {
 function buildGas(L) {
   boxAt(lrect(L, -15, -0.3, 15, 14), 0, 0.03, M.concrete).castShadow = false;
   [[-6.5, 3.5], [6.5, 3.5], [-6.5, 10.5], [6.5, 10.5]].forEach(([u, v]) => { const p = lw(L, u, v), c = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 4.6, 10), M.white); c.position.set(p.x, 2.3, p.z); c.castShadow = true; Town.group.add(c); addCol({ type: 'circle', x: p.x, z: p.z, r: 0.25 }); });
-  boxAt(lrect(L, -8.5, 2, 8.5, 12), 4.6, 5.2, M.white); boxAt(lrect(L, -8.55, 1.95, 8.55, 12.05), 4.75, 5.05, M.red);
+  const st = L.station, brandM = st ? obm('station' + L.id, () => std(st.col, 0.6)) : M.red; // other towns' stations have their own colours
+  boxAt(lrect(L, -8.5, 2, 8.5, 12), 4.6, 5.2, M.white); boxAt(lrect(L, -8.55, 1.95, 8.55, 12.05), 4.75, 5.05, brandM);
   const under = new THREE.Mesh(new THREE.PlaneGeometry(16, 9.5).rotateX(Math.PI / 2), Town.lampMat); const uc = lw(L, 0, 7); under.position.set(uc.x, 4.59, uc.z); Town.group.add(under);
   [-3.2, 3.2].forEach(u => {
     boxAt(lrect(L, u - 0.6, 5.2, u + 0.6, 8.8), 0, 0.16, M.concrete, true);
     boxAt(lrect(L, u - 0.35, 6.6, u + 0.35, 7.4), 0.16, 1.8, obm('pumpB', () => std('#e8e8e4', 0.5)));
-    boxAt(lrect(L, u - 0.37, 6.58, u + 0.37, 7.42), 1.3, 1.6, M.red);
+    boxAt(lrect(L, u - 0.37, 6.58, u + 0.37, 7.42), 1.3, 1.6, brandM);
     const p = lw(L, u, 7); Town.pumps.push({ x: p.x, z: p.z });
     Town.interact.push({ kind: 'pump', x: p.x, z: p.z, r: 2.6 });
   });
   boxAt(lrect(L, -10, 15, 10, 24), 0, 4, obm('store', () => std('#e6e2d8', 0.9)), true); boxAt(lrect(L, -10.2, 14.8, 10.2, 24.2), 4, 4.3, M.dark);
   boxAt(lrect(L, -7, 14.92, 4, 15.02), 0.6, 2.8, Town.windowMat); boxAt(lrect(L, 5, 14.9, 7, 15.02), 0, 2.3, M.glass);
-  const sign = canvasTex(512, 96, (c, w, h) => { c.fillStyle = '#c8302a'; c.fillRect(0, 0, w, h); c.font = '900 64px "Arial Black",Impact,sans-serif'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('PUMP & GO', w / 2, h / 2 + 4); });
+  const sign = canvasTex(512, 96, (c, w, h) => { c.fillStyle = st ? st.col : '#c8302a'; c.fillRect(0, 0, w, h); c.font = '900 ' + (st ? 52 : 64) + 'px "Arial Black",Impact,sans-serif'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(st ? st.name : 'PUMP & GO', w / 2, h / 2 + 4, w - 20); });
   const sm = new THREE.Mesh(new THREE.PlaneGeometry(9, 1.7), new THREE.MeshStandardMaterial({ map: sign, emissive: C('#ffffff'), emissiveMap: sign, emissiveIntensity: 0.4 }));
   const sp = lw(L, -1.5, 14.85); sm.position.set(sp.x, 3.3, sp.z); sm.rotation.y = L.side > 0 ? Math.PI : 0; Town.group.add(sm);
   const price = canvasTex(256, 192, (c, w, h) => { c.fillStyle = '#1a1a1a'; c.fillRect(0, 0, w, h); c.fillStyle = '#c8302a'; c.fillRect(0, 0, w, 52); c.font = '900 36px Arial'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.fillText('GAS', w / 2, 40); c.font = '900 70px "Courier New",monospace'; c.fillStyle = '#ffd23b'; c.fillText('$' + GAS_PRICE.toFixed(2), w / 2, 130); c.font = '700 26px Arial'; c.fillStyle = '#ddd'; c.fillText('per litre', w / 2, 172); });
   const pp = lw(L, 13, 1.2), pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 4, 8), M.metal); pole.position.set(pp.x, 2, pp.z); Town.group.add(pole); addCol({ type: 'circle', x: pp.x, z: pp.z, r: 0.12 });
   const pb = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.35), new THREE.MeshStandardMaterial({ map: price, emissive: C('#ffffff'), emissiveMap: price, emissiveIntensity: 0.3, side: THREE.DoubleSide })); pb.position.set(pp.x, 4.2, pp.z); Town.group.add(pb);
-  const store = lw(L, 6, 14.2); Town.interact.push({ kind: 'store', x: store.x, z: store.z, r: 1.8 });
+  const store = lw(L, 6, 14.2); Town.interact.push({ kind: 'store', lot: L, x: store.x, z: store.z, r: 1.8 });
   Town.mapRects.push({ r: lrect(L, -10, 15, 10, 24), c: '#e6e2d8' }, { r: lrect(L, -8.5, 2, 8.5, 12), c: '#ffffff' });
   L.door = store;
-  buildUpgradeStall(L);
+  if (!st) buildUpgradeStall(L); // Ray's stall is only in Mow Town
+}
+// 🏪 The Mow Shop: limited John Deere & Mow Master mowers, and the Custom Colour Kit
+function buildMowShop(L) {
+  const wall = obm('mowshopWall', () => std('#f4f2ea', 0.85)), green = obm('mowshopGreen', () => std('#2f6a24', 0.6));
+  boxAt(lrect(L, -13, -0.3, 13, 4.5), 0, 0.04, M.paver).castShadow = false;                                   // forecourt
+  const shop = lrect(L, -12, 5, 12, 15); boxAt(shop, 0, 5, wall, true).userData.col.y1 = 6;
+  boxAt(lrect(L, -12.2, 4.8, 12.2, 15.2), 5, 5.35, green);                                                    // flat roof edge
+  boxAt(lrect(L, -10, 4.9, -1.5, 5.02), 0.6, 3.6, M.glass); boxAt(lrect(L, 2.5, 4.9, 10, 5.02), 0.6, 3.6, M.glass); // shop windows
+  boxAt(lrect(L, -0.8, 4.88, 1.8, 5.02), 0, 2.6, M.door);
+  const awnT = canvasTex(256, 64, (c, w, h) => { for (let i = 0; i < 8; i++) { c.fillStyle = i % 2 ? '#ffde00' : '#2f6a24'; c.fillRect(i * 32, 0, 32, h); } });
+  const aw = boxAt(lrect(L, -12.2, 3.6, 12.2, 5), 3.7, 3.85, new THREE.MeshStandardMaterial({ map: awnT, roughness: 0.85 })); aw.rotation.x = L.side < 0 ? -0.12 : 0.12;
+  const sign = canvasTex(1024, 192, (c, w, h) => { c.fillStyle = '#1b1d20'; c.fillRect(0, 0, w, h); c.strokeStyle = '#ffde00'; c.lineWidth = 12; c.strokeRect(8, 8, w - 16, h - 16); c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '900 92px "Arial Black",Impact,sans-serif'; c.fillStyle = '#ffde00'; c.fillText('MOW SHOP', w / 2, 80); c.font = '800 34px Arial'; c.fillStyle = '#e8f5d8'; c.fillText('JOHN DEERE  ·  MOW MASTER  ·  LIMITED COLOURS', w / 2, 152); });
+  const sp = lw(L, 0, 4.85), sm = new THREE.Mesh(new THREE.PlaneGeometry(10, 1.9), new THREE.MeshStandardMaterial({ map: sign, emissive: C('#ffffff'), emissiveMap: sign, emissiveIntensity: 0.35 })); sm.position.set(sp.x, 4.45, sp.z); sm.rotation.y = L.side > 0 ? Math.PI : 0; Town.group.add(sm);
+  // the four Mow Shop mowers on display out front
+  MOWSHOP.forEach((id, i) => {
+    const p = lw(L, -9 + i * 6, 2.2), info = buildMower(id, defaultSave().cfg); info.root.position.set(p.x, 0.04, p.z); info.root.rotation.y = L.side < 0 ? 0.35 : Math.PI + 0.35;
+    Town.group.add(info.root); addCol({ type: 'circle', x: p.x, z: p.z, r: MOWERS[id].radius });
+  });
+  const door = lw(L, 0.5, 3.6); L.door = door; L.yards = [];
+  Town.interact.push({ kind: 'mowshop', lot: L, x: door.x, z: door.z, r: 2.4 });
+  Town.mapRects.push({ r: shop, c: '#2f6a24' });
 }
 // Ray's Upgrade Stall — a little market stall beside the Pump & Go (right across the street from home)
 function buildUpgradeStall(L) {
@@ -1776,6 +1828,7 @@ function statsWith(id, u) {
 const MAT = {};
 const Livery = { cv: null, ctx: null, tex: null, thumbs: {}, cache: {} };
 const paintById = id => PAINTS.find(p => p.id === id) || PAINTS[0];
+const paintCol = cfg => cfg.paint === 'custom' && /^#[0-9a-f]{6}$/i.test(cfg.custom || '') ? cfg.custom : paintById(cfg.paint).c; // custom colours come from the save
 function initLivery() {
   Livery.cv = document.createElement('canvas'); Livery.cv.width = 512; Livery.cv.height = 256; Livery.ctx = Livery.cv.getContext('2d');
   Livery.tex = new THREE.CanvasTexture(Livery.cv); Livery.tex.encoding = THREE.sRGBEncoding; Livery.tex.anisotropy = 4;
@@ -1800,7 +1853,7 @@ function stickerCanvas(id) {
 }
 const stickerThumb = id => Livery.thumbs[id] || (Livery.thumbs[id] = stickerCanvas(id).toDataURL());
 function paintLivery(ctx, W, H, cfg, sel) {
-  const p = paintById(cfg.paint); ctx.clearRect(0, 0, W, H); ctx.fillStyle = p.c; ctx.fillRect(0, 0, W, H);
+  ctx.clearRect(0, 0, W, H); ctx.fillStyle = paintCol(cfg); ctx.fillRect(0, 0, W, H);
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, 'rgba(255,255,255,.14)'); g.addColorStop(0.5, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(0,0,0,.2)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   if (cfg.paint === 'faded') { const r = mulberry32(3); for (let i = 0; i < 60; i++) { ctx.fillStyle = `rgba(${r() < 0.5 ? '255,240,220' : '60,30,20'},${0.05 + r() * 0.08})`; ctx.beginPath(); ctx.ellipse(r() * W, r() * H, 4 + r() * 30, 3 + r() * 14, r() * 3, 0, 7); ctx.fill(); } }
@@ -1813,9 +1866,9 @@ function paintLivery(ctx, W, H, cfg, sel) {
 }
 function drawLivery() { paintLivery(Livery.ctx, 512, 256, S.cfg, -1); Livery.tex.needsUpdate = true; netHello(); }
 function updatePaint() {
-  const cfg = S.cfg, p = paintById(cfg.paint), f = FINISHES.find(x => x.id === cfg.finish) || FINISHES[0];
+  const cfg = S.cfg, f = FINISHES.find(x => x.id === cfg.finish) || FINISHES[0];
   [MAT.paint, MAT.paintL].forEach(m => { m.roughness = cfg.paint === 'faded' ? 0.75 : f.rough; m.metalness = f.metal; });
-  MAT.paint.color.copy(C(p.c)); drawLivery();
+  MAT.paint.color.copy(C(paintCol(cfg))); drawLivery();
 }
 /* ---------- geometry helpers ---------- */
 function mk(geo, mat, x, y, z, p) { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); p.add(m); return m; }
@@ -1971,6 +2024,14 @@ function addAccessories(b, info, acc) {
     if (id === 'spoiler') at('rear', g => { [-0.25, 0.25].forEach(x => bx(0.03, 0.3, 0.06, MAT.plastic, x, 0.2, 0, g)); const w = bx(0.8, 0.03, 0.22, MAT.paint, 0, 0.36, -0.02, g); w.rotation.x = 0.15; [-0.4, 0.4].forEach(x => bx(0.02, 0.12, 0.24, MAT.plastic, x, 0.38, -0.02, g)); });
     if (id === 'bullbar') at('front', g => { rod([-0.3, 0, 0], [-0.3, 0.35, 0], 0.025, MAT.plastic, g); rod([0.3, 0, 0], [0.3, 0.35, 0], 0.025, MAT.plastic, g); rod([-0.3, 0.35, 0], [0.3, 0.35, 0], 0.025, MAT.plastic, g); rod([-0.3, 0.15, 0.02], [0.3, 0.15, 0.02], 0.02, MAT.plastic, g); });
     if (id === 'grille') at('front', g => { for (let k = 0; k < 5; k++) bx(0.5, 0.02, 0.02, MAT.chrome, 0, 0.04 + k * 0.06, 0.03, g); [-0.26, 0.26].forEach(x => bx(0.03, 0.3, 0.03, MAT.chrome, x, 0.16, 0.03, g)); });
+    // ⛽ town petrol-station exclusives
+    const wood = obm('accWood', () => std('#8a6a48', 0.85)), gold = obm('accGold', () => std('#e0b030', 0.22, 0.95)), dark = obm('accDark', () => std('#2a2d30', 0.5, 0.6));
+    if (id === 'pennant') at('top', g => { rod([0, 0, -0.05], [0, 1.1, -0.05], 0.009, wood, g); const f = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.4, 3), obm('accBrown', () => std('#a0622a', 0.7))); f.rotation.z = -Math.PI / 2; f.scale.z = 0.1; f.position.set(0.19, 1.0, -0.05); g.add(f); info.flag = f; mk(new THREE.SphereGeometry(0.05, 10, 8), obm('accAcorn', () => std('#6a4020', 0.6)), 0, 1.14, -0.05, g); });
+    if (id === 'toolrack') at('rear', g => { [-0.2, 0.2].forEach(x => bx(0.04, 0.5, 0.04, wood, x, 0.25, 0, g)); bx(0.5, 0.04, 0.05, wood, 0, 0.45, 0, g); rod([-0.1, 0.05, 0.03], [-0.16, 0.85, 0.03], 0.012, wood, g); bx(0.18, 0.03, 0.04, MAT.alu, -0.17, 0.86, 0.03, g); rod([0.1, 0.05, 0.03], [0.14, 0.8, 0.03], 0.012, wood, g); });
+    if (id === 'surfboard') at('top', g => { [-0.2, 0.2].forEach(x => rod([x, 0, 0], [x, 0.18, 0], 0.012, MAT.alu, g)); const b2 = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 8), obm('accSurf', () => std('#2fb8e8', 0.3))); b2.scale.set(0.32, 0.05, 1.5); b2.position.set(0, 0.22, 0); g.add(b2); bx(0.02, 0.012, 1.3, MAT.white, 0, 0.245, 0, g); });
+    if (id === 'anchor') at('front', g => { rod([0, 0.05, 0.03], [0, 0.4, 0.03], 0.025, dark, g); rod([-0.12, 0.33, 0.03], [0.12, 0.33, 0.03], 0.018, dark, g); const t = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.022, 8, 16, Math.PI), dark); t.rotation.z = Math.PI; t.position.set(0, 0.12, 0.03); g.add(t); const r = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.012, 6, 12), dark); r.position.set(0, 0.45, 0.03); g.add(r); });
+    if (id === 'goldgrille') at('front', g => { for (let k = 0; k < 6; k++) bx(0.56, 0.025, 0.025, gold, 0, 0.03 + k * 0.055, 0.03, g); [-0.29, 0.29].forEach(x => bx(0.035, 0.33, 0.035, gold, x, 0.17, 0.03, g)); });
+    if (id === 'champagne') at('side', g => { cy(0.07, 0.055, 0.14, 14, MAT.chrome, 0, 0.07, 0, g); cy(0.03, 0.03, 0.2, 10, obm('accBottle', () => std('#1f4a2a', 0.15, 0.3)), 0, 0.2, 0, g); cy(0.012, 0.025, 0.06, 8, obm('accFoil', () => std('#e0b030', 0.3, 0.9)), 0, 0.33, 0, g); });
     if (id === 'boombox') at('side2', g => { bx(0.3, 0.16, 0.1, MAT.plastic, 0, 0.08, 0, g); [-0.08, 0.08].forEach(x => cyZ(0.05, 0.02, 14, MAT.chrome, x, 0.08, 0.052, g)); rod([-0.13, 0.16, 0], [0.13, 0.16, 0], 0.006, MAT.chrome, g); });
     if (id === 'turbo') at('turbo', g => {
       info.turbo = []; [-0.12, 0.12].forEach(x => { cy(0.045, 0.06, 0.5, 14, MAT.chrome, x, 0.3, 0, g); cy(0.07, 0.05, 0.06, 14, MAT.chrome, x, 0.56, 0, g); info.turbo.push(new THREE.Vector3(x * s + A.turbo[0], A.turbo[1] + 0.6 * s, A.turbo[2])); });
@@ -1985,7 +2046,7 @@ function buildMower(id, cfg) {
   if (md === 'push' || md === 'sp') pushMowerModel(body, info, cfg.wheels, md === 'sp');
   else if (md === 'ride') rideModel(body, info, cfg.wheels); else if (md === 'zero') zeroModel(body, info, cfg.wheels); else titanModel(body, info, cfg.wheels);
   addExhaust(body, info); addLights(body, info, cfg.lights, cfg.glow || 0); addAccessories(body, info, cfg.acc || {});
-  applyMowerLook(body, info, (MOWERS[id] || {}).look, MOWERS[id] || {});
+  applyMowerLook(body, info, (MOWERS[id] || {}).look, MOWERS[id] || {}, cfg);
   body.traverse(o => { if (!o.isMesh) return; const m = Array.isArray(o.material) ? o.material[0] : o.material; if (m.isMeshStandardMaterial && !m.transparent) { o.castShadow = true; o.receiveShadow = true; } });
   return info;
 }
@@ -1994,10 +2055,11 @@ function repaintBody(body, mat) { // swaps the player's paint & livery for a fix
   const swap = m => m === MAT.paint || m === MAT.paintL ? mat : m;
   body.traverse(o => { if (!o.isMesh) return; o.material = Array.isArray(o.material) ? o.material.map(swap) : swap(o.material); });
 }
-function applyMowerLook(body, info, look, def) {
-  if (look === 'brand') { // ⚔️ limited event mowers wear their brand's colour and a name badge
+function applyMowerLook(body, info, look, def, cfg) {
+  if (look === 'brand') { // ⚔️ limited event mowers and 🏪 Mow Shop mowers wear their brand's colour and a name badge
     const B = BRAND[def.brand], ride = def.model === 'ride';
-    repaintBody(body, obm('brand' + def.brand, () => std(B.col, 0.42, 0.25)));
+    if (!(def.mowshop && cfg && msPaint(cfg.paint))) repaintBody(body, obm('brand' + def.brand, () => std(B.col, 0.42, 0.25))); // Mow Shop mowers take a Mow Shop limited colour if you've painted with one
+    if (B.trim && ride) [-1, 1].forEach(s => { const t = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.06, 1.3), obm('trim' + def.brand, () => std(B.trim, 0.4, 0.2))); t.position.set(s * 0.6, 0.6, 0.15); body.add(t); }); // brand stripes
     const tex = obm('badge' + def.brand, () => { const t = canvasTex(512, 128, (c, w, h) => { c.fillStyle = '#fff'; c.fillRect(0, 0, w, h); c.strokeStyle = B.col; c.lineWidth = 14; c.strokeRect(7, 7, w - 14, h - 14); c.fillStyle = '#141414'; c.font = '900 64px "Arial Black",Impact,sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(B.name.toUpperCase(), w / 2, h / 2 + 4, w - 44); }); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 }); });
     const w = ride ? 0.56 : 0.34, plate = new THREE.Mesh(new THREE.PlaneGeometry(w, w / 4).rotateX(-Math.PI / 2).rotateY(Math.PI), tex);
     plate.position.set(0, ride ? 0.775 : 0.277, ride ? 0.5 : 0.17); body.add(plate); // reads the right way up from behind, where the camera sits
@@ -3114,7 +3176,11 @@ function findInteractions() {
     const d = Math.hypot(pl.x - it.x, pl.z - it.z); if (d > it.r) continue;
     if (it.kind === 'door') { const cl = CLIENTS[it.lot.client]; if (it.lot.kind === 'house') consider(d, { label: cl.own ? 'Go inside — Home' : 'Go inside — ' + cl.short + (S.jobs.list.some(j => j.lot === it.lot.id) ? ' 💼' : ''), act: () => enterBuilding('house', it.lot) }); else if (!cl.race) consider(d, { label: 'Talk to ' + cl.short, act: () => talkTo(it.lot) }); }
     if (it.kind === 'bench') consider(d, { label: 'Use workbench & computer', act: openBench });
-    if (it.kind === 'store') consider(d, { label: 'Go inside — Pump & Go store', act: () => enterBuilding('store') });
+    if (it.kind === 'store') consider(d, { label: `Go inside — ${storeName(it.lot)} store`, act: () => enterBuilding('store', it.lot) });
+    if (it.kind === 'mowshop') consider(d, { label: 'Go inside — 🏪 Mow Shop showroom', act: () => enterBuilding('mowshop', it.lot) });
+    if (it.kind === 'msclerk') consider(d, { label: 'Talk to Kev — buy a mower or the Custom Colour Kit', act: () => openMenu('mowshop') });
+    if (it.kind === 'mskit') consider(d, { label: hasMsColours() ? '🎨 Paint with a Mow Shop limited colour' : `🎨 Limited Colour Pack (2 colours) — ${money(CUSTOM_KIT_PRICE)}`, act: () => openMenu('mowshop') });
+    if (it.kind === 'display') { const m = MOWERS[it.id]; consider(d, { label: S.owned.includes(it.id) ? `${m.icon} ${m.name} — yours! (use it)` : `${m.icon} ${m.name} — ${money(m.price)} (buy)`, act: () => openMenu('mowshop') }); }
     if (it.kind === 'exit') consider(d - 0.3, { label: 'Go outside', act: exitBuilding });
     if (it.kind === 'npc') consider(d, { label: 'Talk to ' + it.name, act: () => talkTo(it.lot) });
     if (it.kind === 'clerk') consider(d, { label: 'Talk to the clerk (shop)', act: storeDialog });
@@ -3259,7 +3325,8 @@ function owns(kind, it) { if (it.store) return S.own[kind].includes(it.id); if (
 const decorOwns = (slot, it) => !it.price && !it.pass && !it.story ? true : !!S.decorOwned[slot + ':' + it.id];
 function tryBuy(kind, it) {
   if (owns(kind, it)) return true;
-  if (it.store) { toast('🏪 Sold at the Pump & Go', 'Go inside the gas station store to buy it.', 'var(--gold)'); Sfx.error(); return false; }
+  if (it.store) { const st = it.store === true ? null : STATIONS[it.store]; toast('🏪 Sold at ' + (st ? st.short : 'the Pump & Go'), st ? `Drive to ${townById(it.store).name} and go inside the petrol station store.` : 'Go inside the gas station store to buy it.', 'var(--gold)'); Sfx.error(); return false; }
+  if (it.mowshop) { toast('🏪 Limited colour: get the Limited Colour Pack at the Mow Shop', 'It\'s on Main Street, next to the water tower.', 'var(--gold)'); Sfx.error(); return false; }
   if (it.pass) { toast('🎟️ Season Pass reward', 'Keep doing jobs to reach it in the Season Pass.', 'var(--gold)'); Sfx.error(); return false; }
   if (it.quest) { toast('🎯 Quest reward', 'Complete Quests (press Q) to unlock ' + it.name + '.', 'var(--gold)'); Sfx.error(); return false; }
   if (it.event) { toast('⚔️ Limited event reward', it.name + ' can\'t be bought. Earn it in the Event (press V).', 'var(--gold)'); Sfx.error(); return false; }
@@ -3354,6 +3421,8 @@ function drawMapMarkers(x, sx, sy, sc, full) {
   const home = Town.lotsById.home, gas = Town.lotsById.gas, sz = full ? 16 : 14;
   icon('🏠', home.door.x, home.door.z, sz); icon('⛽', gas.door.x, gas.door.z, sz); icon('🏁', (Town.lotsById.raceA.x + Town.lotsById.raceB.x) / 2, Town.lotsById.raceA.door.z + 8, sz); if (Town.stall) icon('🔧', Town.stall.x, Town.stall.z + 2, sz);
   icon('⛳', Town.lotsById.golf.door.x, Town.lotsById.golf.door.z + 20, sz);
+  const ms = Town.lotsById.mowshop; if (ms) icon('🏪', ms.door.x, ms.door.z - 6, sz);
+  TOWNS.slice(1).forEach(T => { const g = Town.lotsById[T.id + '_gas']; if (g) icon('⛽', g.door.x, g.door.z, sz); });
   if (full) {
     icon('🌳', Town.lotsById.park.door.x, Town.lotsById.park.door.z, 16); icon('⚽', Town.lotsById.field.door.x, Town.lotsById.field.door.z, 16);
     S.jobs.list.forEach(jb => { const L = Town.lotsById[jb.lot]; const [a, b] = P(L.door.x, L.door.z); x.fillStyle = jb.lucky ? '#fff27a' : '#ffcf4a'; x.font = '800 11px Segoe UI'; x.fillText((jb.lucky ? '⭐ ' : '') + money(jb.pay), a, b - 13); });
@@ -3448,7 +3517,33 @@ function talkTo(L) {
 }
 // Pump & Go shop (inside the store, at the counter)
 const ENERGY_PRICE = 4, PGCAP_PRICE = 15;
+// 🎨 custom colour picker (garage Paint tab and the Mow Shop)
+const CUSTOM_SWATCHES = ['#ff4da6', '#00c2ff', '#7cff3a', '#ffde00', '#ff7a00', '#9b5cff', '#00e5a8', '#ff2a2a', '#ffffff', '#111111'];
+function customColourHTML() {
+  const on = S.cfg.paint === 'custom';
+  return `<div class="row" style="flex-wrap:wrap;gap:8px"><input type="color" id="customCol" value="${esc(S.cfg.custom || '#ff4da6')}" style="width:56px;height:40px;border:none;background:none;cursor:pointer" aria-label="Pick any colour">
+    ${CUSTOM_SWATCHES.map(c => `<button class="swatch ${on && S.cfg.custom === c ? 'sel' : ''}" style="background:${c};width:30px;height:30px" data-act="customCol" data-arg="${c}" aria-label="Colour ${c}"></button>`).join('')}
+    <button class="btn ${on ? 'sel' : 'primary'}" data-act="customCol" data-arg="use">${on ? '✔ Using your custom colour' : '🎨 Use my custom colour'}</button></div>`;
+}
+function setCustomColour(c) {
+  if (!S.own.paint.includes('custom')) return; if (c && /^#[0-9a-f]{6}$/i.test(c)) S.cfg.custom = c.toLowerCase();
+  S.cfg.paint = 'custom'; updatePaint(); if (Game.mw && MOWERS[Game.mw.id].mowshop) rebuildMowerModel(); save();
+}
+addEventListener('input', e => { if (e.target && e.target.id === 'customCol') setCustomColour(e.target.value); });   // live while you drag
+addEventListener('change', e => { if (e.target && e.target.id === 'customCol') { setCustomColour(e.target.value); refreshOpenUI(); } }); // redraw once you've picked
+// ⛽ the stores in the other towns: each sells two accessories you can't get anywhere else
+function townStoreDialog(L) {
+  const st = L.station, items = ACCESSORIES.filter(a => a.store === L.town);
+  const opts = items.map(a => { const own = S.own.acc.includes(a.id); return { label: own ? `${a.icon} ${a.name} (owned · fit it now)` : `${a.icon} ${a.name} — ${money(a.price)}`, act: () => {
+    if (!own) { if (S.money < a.price) { Sfx.error(); toast('Not enough money', `${a.name} costs ${money(a.price)}`, 'var(--bad)'); return; } S.money -= a.price; S.own.acc.push(a.id); Sfx.cash(); cashFly(3); }
+    S.cfg.acc[a.slot] = a.id; rebuildMowerModel(); save(); closeDialog(); toast(`${a.icon} ${a.name}${own ? ' fitted' : ' bought & fitted!'}`, `Only sold at ${st.short}. Swap it on the garage computer.`, 'var(--acc)');
+  } }; });
+  showDialog(`🏪 ${st.short} — ${st.clerk} at the counter`, `${esc(st.hello)} Gas is ${money(GAS_PRICE)} a litre at the pumps outside.`, opts.concat([
+    { label: S.hasGasCan ? 'Gas can (you have one)' : `5 L gas can — ${money(GASCAN_PRICE)}`, disabled: S.hasGasCan, act: () => { if (S.money < GASCAN_PRICE) { Sfx.error(); return; } S.money -= GASCAN_PRICE; S.hasGasCan = true; S.gasCan = 0; Sfx.cash(); closeDialog(); toast('⛽ Bought a gas can', 'Fill it at a pump, then press G next to your mower.'); } },
+    { label: 'Just looking', act: closeDialog }]));
+}
 function storeDialog() {
+  if (Interior.cur && Interior.cur.L && Interior.cur.L.station) return townStoreDialog(Interior.cur.L);
   const buy = (price, fn) => () => { if (S.money < price) { Sfx.error(); toast('Not enough money', money(price) + ' needed', 'var(--bad)'); return; } S.money -= price; Sfx.cash(); fn(); closeDialog(); };
   const hasCap = S.own.cap.includes('pumpgo');
   showDialog('🏪 Pump & Go — Dee at the counter', `Hey ${esc(Net.on ? Net.myName : 'Sam')}! Gas is ${money(GAS_PRICE)} a litre at the pumps outside. What can I get you?`, [
@@ -3511,7 +3606,7 @@ function closeBench() { const M = Game.mw, G = Town.garage; M.h = G.parkH; syncM
 // Garage tiles: every item shows its name plus what it takes to get it
 function itemSub(it, ok, cur, kind) {
   if (cur) return ['In use', 'use']; if (ok) return ['Owned', ''];
-  if (it.store) return ['🏪 Pump & Go store', 'how']; if (it.pass) return ['🎟️ Season Pass', 'how']; if (it.quest) return ['🎯 Quest reward', 'how'];
+  if (it.store) return [it.store === true ? '🏪 Pump & Go store' : '⛽ ' + (STATIONS[it.store] || {}).short + ' store', 'how']; if (it.mowshop) return ['🏪 Mow Shop kit', 'how']; if (it.pass) return ['🎟️ Season Pass', 'how']; if (it.quest) return ['🎯 Quest reward', 'how'];
   if (it.event) return ['⚔️ Limited event', 'how']; if (it.story) return ['📖 Story reward', 'how'];
   return [money(it.price), S.money >= it.price ? 'price' : 'poor'];
 }
@@ -3540,8 +3635,9 @@ function renderBench() {
       <div class="card"><div class="ic">⛽</div><div class="t"><h4>5 L gas can</h4><small>Fill at a pump, then press <kbd>G</kbd> by your mower to top up anywhere.</small></div>${S.hasGasCan ? `<button class="btn" disabled>✔ ${S.gasCan.toFixed(1)} L</button>` : `<button class="btn gold" data-act="buyTool" data-arg="can">${money(GASCAN_PRICE)}</button>`}</div>`;
   } else if (t === 'paint') {
     const fixed = m.look === 'brand' || m.look === 'platinum';
-    const groups = [['Free', p => !p.price && !p.pass && !p.quest && !p.event], ['For sale', p => p.price], ['🎟️ Season Pass', p => p.pass], ['🎯 Quest rewards', p => p.quest], ['⚔️ Limited event', p => p.event]];
-    h += gHead('Paint', 'Now: ' + esc(paintById(cfg.paint).name)) + (fixed ? `<div class="gNote">The ${esc(m.name)} keeps its factory finish. Your paint shows on your other mowers.</div>` : '');
+    const groups = [['Free', p => !p.price && !p.pass && !p.quest && !p.event && !p.mowshop && !p.hidden], ['For sale', p => p.price], ['🎟️ Season Pass', p => p.pass], ['🎯 Quest rewards', p => p.quest], ['⚔️ Limited event', p => p.event], ['🏪 Mow Shop limited', p => p.mowshop]];
+    h += gHead('Paint', 'Now: ' + esc(paintById(cfg.paint).name)) + (fixed ? `<div class="gNote">The ${esc(m.name)} keeps its factory finish${m.mowshop ? ' unless you paint it a Mow Shop limited colour' : ''}. Your paint shows on your other mowers.</div>` : '');
+    if (!MS_COLOURS.every(id => S.own.paint.includes(id))) h += `<div class="gNote">🏪 The two Mow Shop limited colours come in the <b>Limited Colour Pack</b> (${money(CUSTOM_KIT_PRICE)}), only sold at the Mow Shop on Main Street.</div>`;
     groups.forEach(([n, f]) => { h += `<div class="lbl">${n}</div><div class="pGrid">${PAINTS.filter(f).map(p => { const ok = owns('paint', p), on = cfg.paint === p.id, [sub, cls] = itemSub(p, ok, on); return `<button class="pTile ${on ? 'sel' : ''} ${ok ? '' : 'lock'}" data-act="paint" data-arg="${p.id}" title="${esc(p.name)}"><i style="background:${p.c}">${ok ? '' : '🔒'}</i><b>${esc(p.name)}</b>${p.price && !ok ? `<span class="gSub ${cls}">${sub}</span>` : ''}</button>`; }).join('')}</div>`; });
     h += `<div class="lbl">Finish</div>${itemRow('finish', FINISHES, cfg.finish, 'finish')}`;
   } else if (t === 'parts') {
@@ -3670,6 +3766,11 @@ const ACT = {
   mpLeave: () => { endSession(true); },
   raceStart: () => { if (Net.role !== 'host' || !Net.peer) return; Net.send({ t: 'raceGo', at: Net.mp.serverTime() }); startRace(false); },
   raceAgain: () => { if (Net.on) { if (!Net.peer) { toast('Your opponent left', '', 'var(--bad)'); return; } if (Net.role !== 'host') return; Net.send({ t: 'raceGo', at: Net.mp.serverTime() }); startRace(false); } else startRace(true); },
+  customCol: a => { setCustomColour(a === 'use' ? null : a); Sfx.click(); refreshOpenUI(); },
+  routeMowShop: () => { const L = Town.lotsById.mowshop; Game.waypoint = { x: L.door.x, z: L.door.z, label: 'Mow Shop' }; closeMenu(); toast('📍 Route set to the Mow Shop', 'Follow the gold beam to Main Street.', 'var(--sky)'); },
+  msBuy: a => { if (buyMower(a)) { Menu.just = a; cashFly(5); if (Interior.cur && Interior.cur.kind === 'mowshop') drawPriceSign(a); } renderMenu(); }, msUse: a => { if (equipMower(a)) closeMenu(); else renderMenu(); },
+  msKit: () => { if (hasMsColours()) return; if (S.money < CUSTOM_KIT_PRICE) { Sfx.error(); toast('Not enough money', `The Limited Colour Pack costs ${money(CUSTOM_KIT_PRICE)}.`, 'var(--bad)'); return; } S.money -= CUSTOM_KIT_PRICE; MS_COLOURS.forEach(id => { if (!S.own.paint.includes(id)) S.own.paint.push(id); }); Sfx.complete(); cashFly(3); toast('🎨 Limited Colour Pack unlocked!', 'John Deere Green and Mow Master Orange: paint with them below, or in the garage Paint tab.', 'var(--acc)'); save(); renderMenu(); },
+  msPaint: a => { if (!MS_COLOURS.includes(a) || !S.own.paint.includes(a)) return; S.cfg.paint = a; updatePaint(); if (Game.mw && MOWERS[Game.mw.id].mowshop) rebuildMowerModel(); save(); Sfx.click(); toast('🎨 Painted ' + paintById(a).name, 'It shows on all your mowers, Mow Shop ones too.', 'var(--acc)'); renderMenu(); },
   mpServer: a => { $('#mpQueueCancel') && ($('#mpQueueCancel').style.display = 'inline-flex'); worldJoin(a).finally(() => { const b = $('#mpQueueCancel'); if (b) b.style.display = 'none'; }); },
   mpQueueCancel: () => { if (Net.mp) Net.mp.leaveQueue().catch(() => { }); },
   worldLeave: () => { worldLeave(); Game.state = 'play'; pauseGame(); },
@@ -3720,7 +3821,7 @@ const ACT = {
   stallBuy: a => { if (Menu.confirm !== a) { Menu.confirm = a; renderMenu(); focusAct('stallBuy', a); return; } Menu.confirm = null; buyUpgrade(a); renderMenu(); focusAct('stallBuy', a); },
   tutStart: () => tutStart(), tutSkip: () => tutSkip(), tutNext: () => tutNext(),
   buyTool: a => { const p = a === 'trimmer' ? TRIMMER_PRICE : GASCAN_PRICE; if (a === 'trimmer' ? S.hasTrimmer : S.hasGasCan) return; if (S.money < p) { Sfx.error(); toast('Not enough money', money(p), 'var(--bad)'); return; } S.money -= p; if (a === 'trimmer') S.hasTrimmer = true; else { S.hasGasCan = true; S.gasCan = 0; } Sfx.cash(); toast('🧰 Bought ' + (a === 'trimmer' ? 'a string trimmer' : 'a gas can'), a === 'trimmer' ? 'Press T on foot to use it.' : 'Fill it at the Pump & Go.'); renderBench(); },
-  paint: a => { const p = PAINTS.find(x => x.id === a); if (!tryBuy('paint', p)) return; S.cfg.paint = a; updatePaint(); renderBench(); focusAct('paint', a); },
+  paint: a => { const p = PAINTS.find(x => x.id === a); if (!tryBuy('paint', p)) return; const was = S.cfg.paint; S.cfg.paint = a; updatePaint(); if (Game.mw && MOWERS[Game.mw.id].mowshop && msPaint(was) !== msPaint(a)) rebuildMowerModel(); renderBench(); focusAct('paint', a); },
   finish: a => { const f = FINISHES.find(x => x.id === a); if (!tryBuy('finish', f)) return; S.cfg.finish = a; updatePaint(); renderBench(); focusAct('finish', a); },
   wheels: a => { if (!tryBuy('wheels', WHEELS.find(x => x.id === a))) return; S.cfg.wheels = a; rebuildMowerModel(); renderBench(); focusAct('wheels', a); },
   lights: a => { if (!tryBuy('lights', LIGHTS.find(x => x.id === a))) return; S.cfg.lights = a; rebuildMowerModel(); renderBench(); focusAct('lights', a); },
@@ -4356,7 +4457,7 @@ function remoteHello(h) {
     Remote.mats.paint.userData.shared = Remote.mats.paintL.userData.shared = true;
   }
   const cfg = Object.assign({ stickers: [], acc: {} }, h.cfg || {}), p = paintById(cfg.paint), f = FINISHES.find(x => x.id === cfg.finish) || FINISHES[0];
-  [Remote.mats.paint, Remote.mats.paintL].forEach(m => { m.roughness = cfg.paint === 'faded' ? 0.75 : f.rough; m.metalness = f.metal; }); Remote.mats.paint.color.copy(C(p.c));
+  [Remote.mats.paint, Remote.mats.paintL].forEach(m => { m.roughness = cfg.paint === 'faded' ? 0.75 : f.rough; m.metalness = f.metal; }); Remote.mats.paint.color.copy(C(paintCol(cfg)));
   paintLivery(Remote.mats.ctx, 512, 256, cfg, -1); Remote.mats.tex.needsUpdate = true;
   if (Remote.model) { if (Remote.P.root.parent !== scene) scene.add(Remote.P.root); disposeModel(Remote.model); }
   const keepP = MAT.paint, keepL = MAT.paintL; MAT.paint = Remote.mats.paint; MAT.paintL = Remote.mats.paintL; // build their mower with THEIR paint/livery
@@ -4543,7 +4644,56 @@ function buildInteriors() {
   Interior.store = { g: s, clerk, spawn: { x: 0, z: STORE.D / 2 - 0.9 }, clerkPos: { x: 2.6, z: -STORE.D / 2 + 3.3 }, exit: { x: 0, z: STORE.D / 2 - 0.4 } };
   roomColliders(STORE_O, STORE.W, STORE.D, [[0.85, -STORE.D / 2 + 2.05, 4.35, -STORE.D / 2 + 2.95, 1.1], [1.3, -STORE.D / 2, 3.9, -STORE.D / 2 + 0.5, 2], [-4.6, -1.45, -3.8, 2.65, 1.7], [-2.6, -1.45, -1.8, 2.65, 1.7], [-0.6, -1.45, 0.2, 2.65, 1.7], [-STORE.W / 2, -STORE.D / 2 + 0.75, -STORE.W / 2 + 0.9, -STORE.D / 2 + 4.05, 2.2]]);
   Interior.light = new THREE.PointLight(0xfff2dd, 0, 16, 1.6); scene.add(Interior.light);
-  showRoom(Interior.house, false); showRoom(Interior.store, false); // rooms only exist while you're inside them
+  buildShowroom();
+  showRoom(Interior.house, false); showRoom(Interior.store, false); showRoom(Interior.showroom, false); // rooms only exist while you're inside them
+}
+// 🏪 Mow Shop showroom: the four limited mowers spin on turntables, each with a price sign; Kev at the counter sells them
+const SHOW = { W: 16, D: 12, H: 4.2 }, SHOW_O = { x: -330, z: -900 };
+function buildShowroom() {
+  const { W, D, H } = SHOW, g = new THREE.Group(); g.position.set(SHOW_O.x, 0, SHOW_O.z); scene.add(g);
+  const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; g.add(m); return m; };
+  const tiles = canvasTex(128, 128, c => { for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { c.fillStyle = (i + j) % 2 ? '#2a2d30' : '#34383c'; c.fillRect(i * 32, j * 32, 32, 32); } c.fillStyle = 'rgba(255,255,255,.06)'; c.fillRect(0, 0, 128, 3); });
+  tiles.wrapS = tiles.wrapT = THREE.RepeatWrapping; tiles.repeat.set(8, 6);
+  roomShell(g, W, D, H, std('#f4f2ea', 0.85), new THREE.MeshStandardMaterial({ map: tiles, roughness: 0.25, metalness: 0.2 }));
+  // green & yellow stripe round the walls, and a big sign on the back wall
+  [[0, -D / 2 + 0.02, W, 0], [-W / 2 + 0.02, 0, D, Math.PI / 2], [W / 2 - 0.02, 0, D, -Math.PI / 2]].forEach(([x, z, w, ry]) => { [['#2f6a24', 1.15], ['#ffde00', 1.4]].forEach(([c, y]) => { const s = add(new THREE.PlaneGeometry(w, 0.22), obm('srStripe' + c, () => std(c, 0.6)), x, y, z); s.rotation.y = ry; s.castShadow = false; }); });
+  const sign = canvasTex(1024, 192, (c, w, h) => { c.fillStyle = '#1b1d20'; c.fillRect(0, 0, w, h); c.strokeStyle = '#ffde00'; c.lineWidth = 12; c.strokeRect(8, 8, w - 16, h - 16); c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '900 96px "Arial Black",Impact,sans-serif'; c.fillStyle = '#ffde00'; c.fillText('MOW SHOP SHOWROOM', w / 2, 84); c.font = '800 32px Arial'; c.fillStyle = '#e8f5d8'; c.fillText('LIMITED  ·  ONLY SOLD HERE  ·  JOHN DEERE  ·  MOW MASTER', w / 2, 154); });
+  add(new THREE.PlaneGeometry(7, 1.3), new THREE.MeshBasicMaterial({ map: sign }), -2, 3.25, -D / 2 + 0.03).castShadow = false;
+  // counter + till, and Kev the salesman
+  add(new THREE.BoxGeometry(3.4, 1.0, 0.8), obm('srCounter', () => std('#2f6a24', 0.5)), 5, 0.5, -D / 2 + 2.2); add(new THREE.BoxGeometry(3.5, 0.06, 0.9), M.dark, 5, 1.03, -D / 2 + 2.2);
+  add(new THREE.BoxGeometry(0.45, 0.3, 0.35), M.dark, 5.8, 1.21, -D / 2 + 2.15);
+  // a wall of paint tins: the Custom Colour Kit
+  const tins = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.11, 0.11, 0.2, 12), std('#ffffff', 0.4, 0.3), 40), dm = new THREE.Object3D(), col = new THREE.Color();
+  add(new THREE.BoxGeometry(0.5, 2.0, 3.2), M.wood, -W / 2 + 0.3, 1.0, 2.6);
+  for (let i = 0; i < 40; i++) { dm.position.set(-W / 2 + 0.6, 0.25 + Math.floor(i / 10) * 0.48, 1.2 + (i % 10) * 0.3); dm.updateMatrix(); tins.setMatrixAt(i, dm.matrix); tins.setColorAt(i, col.copy(C(i % 2 ? BRAND.deere.col : BRAND.mowmaster.col))); } // the two limited colours
+  tins.frustumCulled = false; g.add(tins);
+  const kit = canvasTex(512, 128, (c, w, h) => { const gr = c.createLinearGradient(0, 0, w, 0); for (let i = 0; i <= 6; i++) gr.addColorStop(i / 6, `hsl(${i * 60},90%,55%)`); c.fillStyle = gr; c.fillRect(0, 0, w, h); c.fillStyle = 'rgba(0,0,0,.55)'; c.fillRect(0, 34, w, 60); c.font = '900 40px "Arial Black",Impact'; c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('🎨 LIMITED COLOURS', w / 2, 64); });
+  const ks = add(new THREE.PlaneGeometry(3, 0.75), new THREE.MeshBasicMaterial({ map: kit }), -W / 2 + 0.04, 2.5, 2.6); ks.rotation.y = Math.PI / 2; ks.castShadow = false;
+  // the four turntables, each with a price sign facing the door
+  const tables = [], signs = {};
+  MOWSHOP.forEach((id, i) => {
+    const x = -5.6 + i * 3.73, z = -1.6, tt = new THREE.Group(); tt.position.set(x, 0, z); g.add(tt);
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(1.45, 1.55, 0.18, 32), obm('srTable', () => std('#e8e8e2', 0.2, 0.6))); base.position.y = 0.09; base.receiveShadow = true; tt.add(base);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.04, 8, 40), obm('srRing', () => std('#ffde00', 0.3, 0.8))); ring.rotation.x = Math.PI / 2; ring.position.y = 0.18; tt.add(ring);
+    const spin = new THREE.Group(); spin.position.y = 0.18; tt.add(spin);
+    const info = buildMower(id, defaultSave().cfg); spin.add(info.root); info.root.rotation.y = i * 1.3; tables.push(spin);
+    const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256; const tex = new THREE.CanvasTexture(cv); tex.encoding = THREE.sRGBEncoding;
+    const sg = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.75), new THREE.MeshBasicMaterial({ map: tex })); sg.position.set(x, 1.0, z + 2.0); g.add(sg);
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.65, 8), M.metal); post.position.set(x, 0.32, z + 2.0); g.add(post);
+    signs[id] = { cv, tex, x, z: z + 2.0 };
+  });
+  const spots = new THREE.PointLight(0xfff6e0, 1.3, 14, 1.4); spots.position.set(0, 3.6, -1.6); g.add(spots);
+  const clerk = buildNpc(1.1); clerk.P.shirtMat.color.copy(C('#2f6a24')); clerk.P.capMat.color.copy(C('#ffde00')); drawTag(clerk.tag, 'Kev (sales)', '#ffde00');
+  clerk.P.root.position.set(SHOW_O.x + 5, 0, SHOW_O.z - D / 2 + 1.3); clerk.tag.position.set(SHOW_O.x + 5, 2.25, SHOW_O.z - D / 2 + 1.3);
+  Interior.showroom = { g, clerk, tables, signs, spawn: { x: 0, z: D / 2 - 0.9 }, clerkPos: { x: 5, z: -D / 2 + 3.1 }, exit: { x: 0, z: D / 2 - 0.4 } };
+  roomColliders(SHOW_O, W, D, [[3.25, -D / 2 + 1.8, 6.75, -D / 2 + 2.6, 1.1], [-W / 2, 0.9, -W / 2 + 0.6, 4.3, 2.1]]);
+  MOWSHOP.forEach((id, i) => addCol({ type: 'circle', x: SHOW_O.x - 5.6 + i * 3.73, z: SHOW_O.z - 1.6, r: 1.55 }));
+}
+function drawPriceSign(id) { // name + price, or OWNED once it's yours
+  const s = Interior.showroom.signs[id], m = MOWERS[id], B = BRAND[m.brand], x = s.cv.getContext('2d'), own = S.owned.includes(id), W = 512, H = 256;
+  x.fillStyle = '#1b1d20'; x.fillRect(0, 0, W, H); x.fillStyle = B.col; x.fillRect(0, 0, W, 54); x.font = '900 34px "Arial Black",Impact'; x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(B.name.toUpperCase(), W / 2, 29);
+  x.font = '800 30px Arial'; x.fillStyle = '#e8f5d8'; x.fillText(m.name.replace(B.name + ' ', ''), W / 2, 92, W - 30); x.font = '700 22px Arial'; x.fillStyle = '#9fb8a4'; x.fillText(`${m.push ? 'Walk-behind' : 'Ride-on'} · ${Math.round(m.width * 100)} cm cut · ${m.speed} m/s`, W / 2, 132, W - 30);
+  x.font = '900 60px "Arial Black",Impact'; x.fillStyle = own ? '#7be08a' : '#ffde00'; x.fillText(own ? '✔ OWNED' : money(m.price), W / 2, 196); s.tex.needsUpdate = true;
 }
 function showRoom(R, on) { const n = R.npc || R.clerk; R.g.visible = on; n.P.root.visible = on; n.tag.visible = on; }
 function enterBuilding(kind, L) {
@@ -4551,6 +4701,11 @@ function enterBuilding(kind, L) {
   fadeOut(() => {
     Interior.busy = false; const back = { x: Game.pl.x, z: Game.pl.z, h: Game.pl.h }; let o, R;
     if (kind === 'store') { o = STORE_O; R = Interior.store; Interior.items = [{ kind: 'exit', x: o.x + R.exit.x, z: o.z + R.exit.z, r: 1.4 }, { kind: 'clerk', x: o.x + R.clerkPos.x, z: o.z + R.clerkPos.z, r: 1.8 }]; }
+    else if (kind === 'mowshop') { // 🏪 the showroom: walk up to a mower or to Kev at the counter
+      o = SHOW_O; R = Interior.showroom; MOWSHOP.forEach(drawPriceSign);
+      Interior.items = [{ kind: 'exit', x: o.x + R.exit.x, z: o.z + R.exit.z, r: 1.4 }, { kind: 'msclerk', x: o.x + R.clerkPos.x, z: o.z + R.clerkPos.z, r: 1.9 }, { kind: 'mskit', x: o.x - SHOW.W / 2 + 1.2, z: o.z + 2.6, r: 1.8 }]
+        .concat(MOWSHOP.map(id => ({ kind: 'display', id, x: o.x + R.signs[id].x, z: o.z + R.signs[id].z + 0.5, r: 1.5 })));
+    }
     else {
       o = houseOrigin(L); R = Interior.house; R.g.position.set(o.x, 0, o.z);
       const cl = CLIENTS[L.client], look = NPC_LOOK[L.client] || [['#2a5fc8', '#3a2a1e'], ['#c8302a', '#111111'], ['#3f8a2a', '#5a3a22'], ['#7a3ad0', '#d8c49a'], ['#e8a23a', '#2a1a12'], ['#18a796', '#8a6a3a']][hashStr(L.client) % 6], name = cl.own ? 'Mom' : cl.short;
@@ -4564,7 +4719,7 @@ function enterBuilding(kind, L) {
     Interior.cur = { kind, L, back, o, R }; showRoom(R, true);
     Object.assign(Game.pl, { x: o.x + R.spawn.x, z: o.z + R.spawn.z, h: Math.PI, vx: 0, vz: 0 }); Game.cam.yaw = Math.PI; Game.cam.pitch = 0.32; Game.trimOn = false;
     Interior.light.position.set(o.x, 2.7, o.z); Interior.light.intensity = 1.6;
-    toast(kind === 'store' ? '🏪 Pump & Go' : CLIENTS[L.client].own ? '🏠 Home' : '🏡 ' + esc(CLIENTS[L.client].name) + '\'s house', 'Talk with E · the door takes you back outside', 'var(--sky)');
+    toast(kind === 'mowshop' ? '🏪 Mow Shop showroom' : kind === 'store' ? '🏪 ' + storeName(L) : CLIENTS[L.client].own ? '🏠 Home' : '🏡 ' + esc(CLIENTS[L.client].name) + '\'s house', 'Talk with E · the door takes you back outside', 'var(--sky)');
   });
 }
 function leaveInteriorNow() {
@@ -4574,7 +4729,8 @@ function leaveInteriorNow() {
 function exitBuilding() { if (!Interior.cur || Interior.busy) return; Interior.busy = true; Sfx.door(); fadeOut(() => { Interior.busy = false; if (Interior.cur) leaveInteriorNow(); }); }
 function updateInterior(dt) {
   const cur = Interior.cur; if (!cur) return;
-  const P = cur.kind === 'store' ? Interior.store.clerk.P : Interior.house.npc.P, tag = cur.kind === 'store' ? Interior.store.clerk.tag : Interior.house.npc.tag;
+  if (cur.R.tables) cur.R.tables.forEach((t, i) => t.rotation.y += dt * (0.35 + i * 0.04)); // the showroom turntables
+  const n = cur.R.npc || cur.R.clerk, P = n.P, tag = n.tag;
   const r = P.root, a = Math.atan2(Game.pl.x - r.position.x, Game.pl.z - r.position.z);
   P.head.rotation.y = clamp(angDiff(r.rotation.y, a), -1, 1) * 0.8; P.torso.position.y = 1.03 + Math.sin(Game.t * 2) * 0.008;
   if (cur.kind !== 'store') tag.position.set(r.position.x, 2.3, r.position.z);
@@ -4610,7 +4766,7 @@ function closeMenu() {
 function refreshOpenUI() { if (Game.state === 'menu') renderMenu(); else if (Game.state === 'bench') renderBench(); }
 function renderMenu() {
   const c = Menu.cur, el = $('#scr-menu'), box = el.querySelector('.mbody, .bbody'), sy = box ? box.scrollTop : 0;
-  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'admin' ? adminHTML() : c === 'lb' ? lbHTML() : c === 'map' ? mapHTML() : c === 'crew' ? crewHTML() : c === 'style' ? styleHTML() : c === 'name' ? nameHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
+  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'admin' ? adminHTML() : c === 'lb' ? lbHTML() : c === 'map' ? mapHTML() : c === 'crew' ? crewHTML() : c === 'style' ? styleHTML() : c === 'mowshop' ? mowShopHTML() : c === 'name' ? nameHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
   const mb = el.querySelector('.mbody, .bbody'); if (mb) mb.scrollTop = sy;
   if (c === 'pass') { const row = $('#passRow'), cur = row && row.querySelector('.cur'); if (cur) row.scrollLeft = cur.offsetLeft - 160; }
   if (c === 'map') { drawBigMap(MapV.fresh); MapV.fresh = false; }
@@ -4821,6 +4977,8 @@ async function sendIdea() {
 
 /* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
 const UPDATES = [
+  { v: '1.18', date: 'Nov 2026', title: 'Best in Show', add: ['The John Deere and Mow Master walk-behinds are now the best push mowers in the game', 'The Mow Shop\'s $300 pack now gives two limited colours: John Deere Green and Mow Master Orange', 'Bought the old Custom Colour Kit? You get both limited colours free'] },
+  { v: '1.17', date: 'Nov 2026', title: 'The Mow Shop', add: ['New 🏪 Mow Shop on Main Street (next to the water tower)', 'Walk inside the Mow Shop showroom: the mowers spin on turntables with price signs, and Kev at the counter sells them', 'Limited John Deere and Mow Master walk-behinds ($2,000) and ride-ons ($2,500), only sold at the Mow Shop', 'Custom Colour Kit: paint your mowers any colour you like', 'Petrol stations in Oakridge, Seaview Bay and Summit Hills, each selling its own accessories'] },
   { v: '1.16', date: 'Nov 2026', title: 'Pick Your Server', add: ['Play is single player again: no more joining the online world by itself', 'Play Online → Play online: pick a public server and play your save with everyone on it', 'A little "Hide buttons" tab tucks the HUD buttons away (press it again to bring them back)', 'Leave an online server any time from the pause menu'] },
   { v: '1.15', date: 'Nov 2026', title: 'Your Style, Every Device', add: ['New 👕 Style button (Y): skin colour, hair colour, caps and tops, all in one place', 'Play the same account on several devices at the same time', 'Mow Town Online: see everyone else who\'s playing, driving and mowing around the towns','Your saves follow you to every device you sign in on', 'Accounts from before this update move over by themselves', 'The game stays connected and reconnects by itself'] },
   { v: '1.14', date: 'Nov 2026', title: 'Road Trip', add: ['3 new towns down the highway: Oakridge, Seaview Bay and Summit Hills. Bigger lawns, better pay', 'Drive there yourself in your own truck, no cutscenes', 'Hook up a trailer and tow your mower', 'Buy faster trucks and a double trailer in the Shop', 'Hire Jake, a worker who mows the front or back lawn for you', 'Mow Town Golf Club: fairways, bunkers and a putting green', 'Press M for the big map', 'Reverse with S in mouse mode', 'The boombox radio is now on R','Lucky Lawns pay double, golden grass hides cash, and great jobs spin the bonus tip wheel', 'Bad driving costs money: crashes, driving on lawns and running over gnomes', '6 new quests'] },
@@ -5591,7 +5749,8 @@ function jobsHTML() {
 }
 
 /* ---------- Mower Shop ---------- */
-function mowerLock(id) { if (MOWERS[id].limited && !S.owned.includes(id)) return 'Limited event mower — it can\'t be bought with money'; const r = MOWERS[id].req; return r && r.jobs && S.stats.jobs < r.jobs ? `Finish ${r.jobs} jobs to unlock (${S.stats.jobs}/${r.jobs})` : null; }
+function mowerLock(id) { if (MOWERS[id].limited && !S.owned.includes(id)) return 'Limited event mower — it can\'t be bought with money';
+  if (MOWERS[id].mowshop && Menu.cur !== 'mowshop' && !S.owned.includes(id)) return 'Only sold at the Mow Shop on Main Street'; const r = MOWERS[id].req; return r && r.jobs && S.stats.jobs < r.jobs ? `Finish ${r.jobs} jobs to unlock (${S.stats.jobs}/${r.jobs})` : null; }
 function buyMower(id) {
   const m = MOWERS[id]; if (!m) return false;
   if (S.owned.includes(id)) { toast('You already own the ' + m.name, 'Press "Use" to drive it.', 'var(--sky)'); return false; }
@@ -5609,6 +5768,10 @@ function equipMower(id) {
   Veh.load = false;
   const G = Town.garage, pl = Game.pl, atHome = Menu.from === 'bench' || Game.state === 'bench' || Interior.cur || Math.hypot(pl.x - G.park.x, pl.z - G.park.z) < 7;
   S.mower = id;
+  if (Interior.cur && Interior.cur.kind === 'mowshop') { // bought in the showroom: it's waiting outside the shop
+    const b = Interior.cur.back, r = MOWERS[id].radius, sp = collide(b.x + Math.cos(b.h) * (r + 1.6), b.z - Math.sin(b.h) * (r + 1.6), r);
+    placeMower(id, sp.x, sp.z, b.h + Math.PI); toast('🚚 ' + MOWERS[id].name + ' is ready!', 'It\'s parked outside the Mow Shop. Walk out and press E next to it.'); save(); netHello(); return true;
+  }
   if (atHome) { placeMower(id, G.park.x, G.park.z, G.parkH); toast('🔁 Now using the ' + MOWERS[id].name, 'It\'s parked in your garage.'); }
   else { // delivered right next to Sam, wherever he is
     const r = MOWERS[id].radius, a = pl.h; let spot = null;
@@ -5652,10 +5815,11 @@ function shopHTML() {
     if (MOWERS[id].limited && !S.owned.includes(id) && eventOver()) return; // gone once the event ends
     const m = MOWERS[id], st = mowerStats(id), own = S.owned.includes(id), eq = S.mower === id, lock = mowerLock(id), afford = S.money >= m.price, lim = m.limited && !own;
     const hot = S.settings.hlAfford && !own && !lock && afford, cls = (eq ? 'eq' : own ? 'own' : lim ? 'limited' : lock ? 'lock' : afford ? '' : 'cant') + (hot ? ' redHL' : '');
-    const rib = eq ? ['✔ IN USE', 'var(--acc)'] : own ? ['OWNED', 'var(--cash)'] : lim ? ['⚔️ LIMITED · NOT FOR SALE', 'var(--gold)'] : lock ? ['🔒 LOCKED', 'var(--mut)'] : afford ? ['✔ AFFORDABLE', 'var(--gold)'] : ['NEED ' + money(m.price - S.money), 'var(--bad)'];
+    const rib = eq ? ['✔ IN USE', 'var(--acc)'] : own ? ['OWNED', 'var(--cash)'] : lim ? ['⚔️ LIMITED · NOT FOR SALE', 'var(--gold)'] : m.mowshop ? ['🏪 MOW SHOP ONLY', 'var(--gold)'] : lock ? ['🔒 LOCKED', 'var(--mut)'] : afford ? ['✔ AFFORDABLE', 'var(--gold)'] : ['NEED ' + money(m.price - S.money), 'var(--bad)'];
     const btn = eq ? '<button class="btn" disabled>✔ In use</button>'
       : own ? `<button class="btn primary" style="font-size:14px;padding:8px" data-act="shopUse" data-arg="${id}">${Menu.just === id ? '🚚 Use it now!' : 'Use this mower'}</button>`
       : lim ? (S.event.side ? `<button class="btn" disabled>You picked ${esc(BRAND[S.event.side].name)}</button>` : '<button class="btn gold" data-act="openEvent">⚔️ Choose it in the Event</button>')
+      : m.mowshop ? `<button class="btn gold" data-act="routeMowShop">🏪 ${money(m.price)} at the Mow Shop · 📍 Route</button>`
       : `<button class="btn ${!lock && afford ? 'gold' : ''}" data-act="shopBuy" data-arg="${id}" ${id === tut ? 'data-tut="1"' : ''}>${lock ? '🔒 ' : 'Buy · '}${money(m.price)}</button>`;
     h += `<div class="mcard ${cls}"><img src="${mowerThumb(id)}" alt="${esc(m.name)}"><span class="ribbon" style="color:${rib[1]}">${rib[0]}</span><h4>${m.icon} ${m.name}</h4><div class="ty">${m.type} · ${m.push ? 'you push it' : 'ride-on'}</div>
       <div class="st">${bar('Mowing', m.width * st.speed, 20, Math.round(m.width * st.speed * 60) + ' m²/m')}${bar('Cut width', m.width, 2.6, Math.round(m.width * 100) + ' cm')}${bar('Speed', st.speed, 8, st.speed.toFixed(1) + ' m/s')}${bar('Fuel tank', st.tank, 50, st.tank.toFixed(1) + ' L')}${bar('Handling', m.turn, 3.2, m.zero ? 'spins!' : m.turn.toFixed(1))}</div>
@@ -5673,6 +5837,24 @@ function styleHTML() {
     <div class="lbl">Cap</div>${itemRow('cap', CAPS, S.player.cap, 'cap')}
     <div class="lbl">Top</div>${itemRow('shirt', SHIRTS, S.player.shirt, 'shirt')}
     <div class="small muted">Other players see your look in multiplayer. Mower paint, stickers and parts are on the garage computer.</div></div></div>`;
+}
+// 🏪 Mow Shop (Main Street): limited John Deere & Mow Master mowers + the Custom Colour Kit
+function mowShopHTML() {
+  const bar = (label, v, max, txt) => `<span>${label}</span><div class="pbar"><i style="width:${(clamp(Math.sqrt(v / max), 0.05, 1) * 100).toFixed(0)}%"></i></div><span>${txt}</span>`;
+  let h = `<div class="mdlg panel" style="width:min(940px,96vw)">${menuHead('🏪 MOW SHOP', 'Limited mowers you can only buy here · walk-behinds $2,000 · ride-ons $2,500')}<div class="mbody"><div class="mgrid">`;
+  MOWSHOP.forEach(id => {
+    const m = MOWERS[id], st = mowerStats(id), own = S.owned.includes(id), eq = S.mower === id, afford = S.money >= m.price, B = BRAND[m.brand];
+    const btn = eq ? '<button class="btn" disabled>✔ In use</button>' : own ? `<button class="btn primary" style="font-size:14px;padding:8px" data-act="msUse" data-arg="${id}">${Menu.just === id ? '🚚 Use it now!' : 'Use this mower'}</button>`
+      : `<button class="btn ${afford ? 'gold' : ''}" data-act="msBuy" data-arg="${id}">Buy · ${money(m.price)}</button>`;
+    h += `<div class="mcard ${eq ? 'eq' : own ? 'own' : afford ? '' : 'cant'}${S.settings.hlAfford && !own && afford ? ' redHL' : ''}"><img src="${mowerThumb(id)}" alt="${esc(m.name)}"><span class="ribbon" style="color:${own ? 'var(--cash)' : B.col}">${own ? 'OWNED' : '🏪 MOW SHOP LIMITED'}</span><h4>${m.icon} ${esc(m.name)}</h4><div class="ty">${esc(B.name)} · ${m.push ? 'walk-behind' : 'ride-on'}</div>
+      <div class="st">${bar('Mowing', m.width * st.speed, 20, Math.round(m.width * st.speed * 60) + ' m²/m')}${bar('Cut width', m.width, 2.6, Math.round(m.width * 100) + ' cm')}${bar('Speed', st.speed, 8, st.speed.toFixed(1) + ' m/s')}${bar('Fuel tank', st.tank, 50, st.tank.toFixed(1) + ' L')}</div>
+      <small class="muted" style="font-size:11px;min-height:28px">${esc(m.desc)}</small>${btn}</div>`;
+  });
+  h += '</div><div class="lbl">🎨 Limited Colour Pack · 2 colours you can only get here</div>';
+  const chip = id => { const p = paintById(id), on = S.cfg.paint === id; return `<button class="btn ${on ? 'sel' : ''}" data-act="msPaint" data-arg="${id}"><i style="display:inline-block;width:18px;height:18px;border-radius:5px;background:${p.c};border:2px solid rgba(255,255,255,.4)"></i>${on ? '✔ ' : ''}${esc(p.name)}</button>`; };
+  h += hasMsColours() ? `<div class="small muted">Paint with either colour. It shows on all your mowers, and the John Deere and Mow Master ones swap their factory colours for it.</div><div class="row" style="flex-wrap:wrap;gap:8px">${MS_COLOURS.map(chip).join('')}</div>`
+    : `<div class="qcard ${S.settings.hlAfford && S.money >= CUSTOM_KIT_PRICE ? 'redHL' : ''}"><div class="ic">🎨</div><div class="t"><h4>Limited Colour Pack</h4><small>Two limited paints for any mower: <b style="color:${BRAND.deere.col}">■ John Deere Green</b> and <b style="color:${BRAND.mowmaster.col}">■ Mow Master Orange</b>. Only sold at the Mow Shop.</small></div><div class="side"><b class="cash" style="font-size:17px">${money(CUSTOM_KIT_PRICE)}</b><button class="btn ${S.money >= CUSTOM_KIT_PRICE ? 'gold' : ''}" data-act="msKit">Buy both colours</button></div></div>`;
+  return h + '<div class="small muted">These mowers are only sold here. Ray\'s speed and fuel upgrades work on them too.</div></div></div>';
 }
 const shopTabs = () => `<div class="tabs"><button class="btn ${Menu.shopTab !== 'vehicles' ? 'sel' : ''}" data-act="shopTab" data-arg="mowers">🚜 Mowers</button><button class="btn ${Menu.shopTab === 'vehicles' ? 'sel' : ''}" data-act="shopTab" data-arg="vehicles">🚚 Trucks & trailers</button></div>`;
 function vehShopHTML() {
