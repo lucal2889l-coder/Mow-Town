@@ -476,6 +476,19 @@ const MOWERS = {
   monster: { id: 'monster', model: 'ride',  look: 'monster', name: 'Mud Monster LT', type: 'Lifted lawn tractor', icon: '🦖',  price: 1950, speed: 4.4,  transport: 8.0, width: 1.3,  tank: 12,  burn: 0.75, turn: 2.1, accel: 4.6, radius: 0.78, push: false, cam: [6.4, 4.4], req: { jobs: 14 }, desc: 'A lawn tractor on monster-truck tyres. Ridiculous. Glorious.' },
   platinum:{ id: 'platinum',model: 'zero',  look: 'platinum', name: 'Z-Spin Platinum 66', type: 'Luxury zero-turn', icon: '💎', price: 2600, speed: 6.0,  transport: 8.6, width: 1.68, tank: 18,  burn: 0.95, turn: 3.3, accel: 6,   radius: 0.86, push: false, zero: true, cam: [6.7, 4.3], req: { jobs: 17 }, desc: 'Factory platinum finish, 66" deck. Sounds like money.' },
   titan:   { id: 'titan',   model: 'titan', name: 'Fairway 5-Gang Reel', type: 'Commercial reel mower', icon: '🏟️', price: 3400, speed: 5.2,  transport: 7.5, width: 2.6,  tank: 25,  burn: 1.2,  turn: 1.7, accel: 3.5, radius: 1.05, push: false, cam: [8.8, 6.0], req: { jobs: 20 }, desc: 'Five reel units. Built for parks & sports fields.' },
+  // ✨ v1.21 factory specials: 12 more mowers, $500 → $6,000 in $500 steps. Each has its own factory paint job (look 'fx', see applyMowerLook)
+  kart:    { id: 'kart',    model: 'ride',  look: 'fx', fx: { col: '#7ad33a', rough: 0.3, metal: 0.35, stripe: '#121316' },                                    name: 'Street Kart 40"',        type: 'Sport lawn tractor',    icon: '🏎️', price: 500,  speed: 4.2, transport: 6.8,  width: 1.15, tank: 6.5, burn: 0.48, turn: 2.3,  accel: 4.6, radius: 0.64, push: false, cam: [5.6, 3.6], req: { jobs: 3 },  desc: 'Lime green with twin black racing stripes and a tuned engine. Small, quick and loud.' },
+  neon:    { id: 'neon',    model: 'zero',  look: 'fx', fx: { col: '#16171c', rough: 0.28, metal: 0.5, stripe: '#28f0ff', glow: '#28f0ff' },                name: 'Neon Nightrider 54"',    type: 'Zero-turn',             icon: '🌃', price: 1000, speed: 5.1, transport: 7.4,  width: 1.4,  tank: 12,  burn: 0.72, turn: 3.0,  accel: 5.4, radius: 0.74, push: false, zero: true, cam: [6.2, 4.0], req: { jobs: 7 },  desc: 'Gloss black with cyan neon stripes and underglow. Best seen at night.' },
+  inferno: { id: 'inferno', model: 'ride',  look: 'fx', fx: { col: '#c4161c', rough: 0.22, metal: 0.45, flames: true, trim: '#ffb020' },                    name: 'Hot Rod Inferno LT',     type: 'Hot rod lawn tractor',  icon: '🔥', price: 1500, speed: 5.2, transport: 8.6,  width: 1.4,  tank: 11,  burn: 0.7,  turn: 2.3,  accel: 5.4, radius: 0.7,  push: false, cam: [5.9, 3.8], req: { jobs: 10 }, desc: 'Candy-apple red with hand-painted flames. The fastest tractor between towns.' },
+  arctic:  { id: 'arctic',  model: 'zero',  look: 'fx', fx: { col: '#f2f6fa', rough: 0.3, metal: 0.3, stripe: '#3aa8ff', glow: '#9fe0ff' },                  name: 'Arctic Blizzard 56"',    type: 'Zero-turn',             icon: '❄️', price: 2000, speed: 5.6, transport: 8.0,  width: 1.45, tank: 15,  burn: 0.8,  turn: 3.15, accel: 5.7, radius: 0.78, push: false, zero: true, cam: [6.4, 4.1], req: { jobs: 13 }, desc: 'Pearl white with ice-blue stripes and a frosty glow underneath.' },
+  hoverx:  { id: 'hoverx',  model: 'ride',  look: 'fx', fx: { col: '#5b2bd6', rough: 0.25, metal: 0.55, glow: '#c05bff', hover: true, trim: '#e7d2ff' },     name: 'HoverRider X',           type: 'Hover lawn tractor',    icon: '🛰️', price: 2500, speed: 5.6, transport: 9.0,  width: 1.5,  tank: 14,  burn: 0.82, turn: 2.8,  accel: 6.0, radius: 0.74, push: false, cam: [6.0, 3.9], req: { jobs: 16 }, desc: 'A ride-on with no wheels at all. It floats on a purple air cushion.' },
+  thunder: { id: 'thunder', model: 'zero',  look: 'fx', fx: { col: '#ffc51a', rough: 0.3, metal: 0.35, stripe: '#121316', trim: '#121316' },                name: 'Thunderbolt 60"',        type: 'Pro zero-turn',         icon: '⚡', price: 3000, speed: 6.2, transport: 8.9,  width: 1.58, tank: 18,  burn: 0.95, turn: 3.3,  accel: 6.2, radius: 0.82, push: false, zero: true, cam: [6.6, 4.2], req: { jobs: 18 }, desc: 'Bumblebee yellow with black stripes. Fast enough to hear the thunder.' },
+  swamp:   { id: 'swamp',   model: 'ride',  look: 'fx', fx: { col: '#3f5a2a', rough: 0.6, metal: 0.15, stripe: '#c9b27a', lift: { body: 1.15, wheels: 1.5 } }, name: 'Swamp King 4x4',        type: 'Lifted lawn tractor',   icon: '🐊', price: 3500, speed: 5.8, transport: 9.2,  width: 1.7,  tank: 20,  burn: 1.0,  turn: 2.3,  accel: 5.2, radius: 0.86, push: false, cam: [6.6, 4.5], req: { jobs: 21 }, desc: 'Swamp green, jacked up on giant mud tyres. Rules every lawn it rolls onto.' },
+  galaxy:  { id: 'galaxy',  model: 'zero',  look: 'fx', fx: { col: '#4a22b0', rough: 0.2, metal: 0.35, stripe: '#ff4fd8', glow: '#ff4fd8', trim: '#ffd7f6' }, name: 'Galaxy Cruiser 66"',   type: 'Luxury zero-turn',      icon: '🌠', price: 4000, speed: 6.5, transport: 9.4,  width: 1.7,  tank: 22,  burn: 1.05, turn: 3.35, accel: 6.4, radius: 0.88, push: false, zero: true, cam: [6.8, 4.3], req: { jobs: 23 }, desc: 'Deep-space purple metallic with pink neon. Mows like a shooting star.' },
+  magma:   { id: 'magma',   model: 'titan', look: 'fx', fx: { col: '#1a1a1d', rough: 0.5, metal: 0.3, stripe: '#ff5a14', glow: '#ff5a14', flames: true },   name: 'Magma 5-Gang Reel',      type: 'Commercial reel mower', icon: '🌋', price: 4500, speed: 5.5, transport: 8.0,  width: 2.7,  tank: 30,  burn: 1.3,  turn: 1.8,  accel: 3.8, radius: 1.08, push: false, cam: [8.9, 6.1], req: { jobs: 25 }, desc: 'Volcanic black with glowing orange stripes and flames. Parks melt in minutes.' },
+  phantom: { id: 'phantom', model: 'zero',  look: 'fx', fx: { col: '#f2f5f9', rough: 0.1, metal: 0.5, stripe: '#1b1d20', glow: '#ffffff', trim: '#9aa3ab' },                  name: 'Chrome Phantom 72"',     type: 'Show zero-turn',        icon: '🪞', price: 5000, speed: 7.0, transport: 10,   width: 1.85, tank: 24,  burn: 1.1,  turn: 3.4,  accel: 6.8, radius: 0.94, push: false, zero: true, cam: [7.0, 4.4], req: { jobs: 27 }, desc: 'Mirror chrome from front to back. You can see the stripes in it.' },
+  emperor: { id: 'emperor', model: 'titan', look: 'fx', fx: { col: '#f2c33a', rough: 0.22, metal: 0.5, stripe: '#9a1428', trim: '#7a1020', glow: '#ffd76a' }, name: 'Golden Emperor 7-Gang', type: 'Royal reel mower',      icon: '👑', price: 5500, speed: 5.8, transport: 8.4,  width: 2.85, tank: 34,  burn: 1.35, turn: 1.9,  accel: 4.0, radius: 1.12, push: false, cam: [9.0, 6.2], req: { jobs: 29 }, desc: 'Solid gold with royal red stripes. One of the widest cuts in the game.' },
+  quantum: { id: 'quantum', model: 'zero',  look: 'fx', fx: { col: '#163a30', rough: 0.2, metal: 0.4, stripe: '#39ff88', glow: '#39ff88', hover: true, trim: '#39ff88' },     name: 'Quantum Z-1 Hyperdeck',  type: 'Hover zero-turn',       icon: '💠', price: 6000, speed: 7.6, transport: 11,   width: 2.2,  tank: 28,  burn: 1.2,  turn: 3.5,  accel: 7.5, radius: 1.0,  push: false, zero: true, cam: [7.2, 4.6], req: { jobs: 30 }, desc: 'The future of mowing: a floating zero-turn with a 2.2 m deck and green plasma glow.' },
   // ⚔️ limited event mowers: never for sale, you get the one you pick. Same mowing rate, different strengths.
   scott:   { id: 'scott',   model: 'ride',  look: 'brand', limited: true, brand: 'scott', name: BRAND.scott.name + ' Classic 30"', type: 'Limited ride-on', icon: '🟢', price: 0, speed: 2.9, transport: 3.2, width: 0.76, tank: 2.6, burn: 0.16, turn: 3.0, accel: 4.4, radius: 0.6, push: false, cam: [5.6, 3.6], desc: 'Green-keeper\'s ride-on: nimble and thrifty on fuel.' },
   rover:   { id: 'rover',   model: 'ride',  look: 'brand', limited: true, brand: 'rover', name: BRAND.rover.name + ' Mini Rider 30"', type: 'Limited ride-on', icon: '🔴', price: 0, speed: 2.9, transport: 5.2, width: 0.76, tank: 4.9, burn: 0.38, turn: 2.0, accel: 3.6, radius: 0.6, push: false, cam: [5.6, 3.6], desc: 'Compact ride-on: sit down, big tank and fast between lawns.' },
@@ -485,7 +498,8 @@ const MOWERS = {
   mm_ride: { id: 'mm_ride', model: 'ride',  look: 'brand', mowshop: true, brand: 'mowmaster', name: 'Mow Master Ride-On 44"',  type: 'Mow Shop ride-on',     icon: '🧡', price: 2500, speed: 5.1, transport: 8.4, width: 1.4,  tank: 14,  burn: 0.8,  turn: 2.5, accel: 5.2, radius: 0.7,  push: false, cam: [5.9, 3.8], desc: 'Quick and nimble. Gets between towns fast.' },
   jd_ride: { id: 'jd_ride', model: 'ride',  look: 'brand', mowshop: true, brand: 'deere',     name: 'John Deere Ride-On 48"',  type: 'Mow Shop ride-on',     icon: '💚', price: 2500, speed: 4.8, transport: 8.0, width: 1.52, tank: 17,  burn: 0.85, turn: 2.2, accel: 4.8, radius: 0.74, push: false, cam: [6.0, 3.9], desc: 'Wide 48" deck and a big tank. The classic green-and-yellow.' }
 };
-const MOWER_ORDER = ['push', 'lite', 'sp', 'wide', 'ride', 'tractor', 'zero', 'hover', 'zeropro', 'monster', 'platinum', 'titan', 'scott', 'rover', 'mm_push', 'jd_push', 'mm_ride', 'jd_ride'];
+const MOWER_ORDER = ['push', 'lite', 'sp', 'wide', 'ride', 'tractor', 'kart', 'zero', 'neon', 'hover', 'zeropro', 'inferno', 'monster', 'arctic', 'hoverx', 'platinum', 'thunder', 'titan',
+  'swamp', 'galaxy', 'magma', 'phantom', 'emperor', 'quantum', 'scott', 'rover', 'mm_push', 'jd_push', 'mm_ride', 'jd_ride'];
 const MOWSHOP = ['mm_push', 'jd_push', 'mm_ride', 'jd_ride'], CUSTOM_KIT_PRICE = 300;
 const mdl = id => (MOWERS[id] && MOWERS[id].model) || id;
 // Speed & Fuel Capacity are the headline upgrades (Ray's Upgrade Stall). Upgrades apply to every mower you own.
@@ -2076,7 +2090,45 @@ function applyMowerLook(body, info, look, def, cfg) {
     const plat = obm('platinum', () => std('#e4e8ee', 0.12, 1)), gold = obm('platGold', () => std('#e0b030', 0.22, 0.95));
     repaintBody(body, plat);
     [-1, 1].forEach(s => { const t = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 1.5), gold); t.position.set(s * 0.62, 0.62, 0.1); body.add(t); });
+  } else if (look === 'fx') fxLook(body, info, def);
+}
+// ✨ factory specials (v1.21): a fixed paint job plus any of racing stripes, pin-stripes, flames, neon underglow, a lift kit or a hover deck
+function fxLook(body, info, def) {
+  const F = def.fx, md = def.model, add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); body.add(m); return m; };
+  repaintBody(body, obm('fx_' + def.id, () => std(F.col, F.rough, F.metal)));
+  if (info.deck && (md === 'ride' || md === 'zero')) info.deck.scale.x = clamp(def.width / (md === 'ride' ? 1.07 : 1.37), 1, 1.65); // the deck is as wide as the cut
+  // twin racing stripes along the top: [y, z, length, offset from centre, stripe width] for each surface
+  const SAT = { ride: [[0.776, 0.5, 0.7, 0.12, 0.1]], zero: [[0.267, 0.62, 0.72, 0.2, 0.13], [0.906, -0.62, 0.54, 0.14, 0.1]], titan: [[1.276, 1.1, 0.8, 0.2, 0.15]], push: [[0.274, 0.03, 0.36, 0.06, 0.05]] };
+  if (F.stripe) { const mat = F.glow === F.stripe ? obm('fxS_' + F.stripe, () => new THREE.MeshBasicMaterial({ color: C(F.stripe) })) : obm('fxSt_' + F.stripe, () => std(F.stripe, 0.35, 0.3));
+    (SAT[md] || SAT.push).forEach(([y, z, len, off, w]) => [-1, 1].forEach(s => add(new THREE.BoxGeometry(w, 0.008, len), mat, s * off, y, z))); }
+  // thin pin-stripes down both sides
+  const TAT = { ride: [0.6, 0.6, 0.15, 1.3], zero: [0.62, 0.62, 0.1, 1.5], titan: [0.71, 0.95, -0.2, 2.0] };
+  if (F.trim && TAT[md]) { const [x, y, z, len] = TAT[md], mat = obm('fxT_' + F.trim, () => std(F.trim, 0.3, 0.6)); [-1, 1].forEach(s => add(new THREE.BoxGeometry(0.03, 0.03, len), mat, s * x, y, z)); }
+  // hot-rod flames on the sides of the hood: [x, y, z, length, height] (double-sided, so they read front-to-back on both sides)
+  const FAT = { ride: [[0.354, 0.62, 0.5, 0.66, 0.26]], titan: [[0.604, 1.02, 1.1, 0.78, 0.44], [0.704, 0.98, 0.25, 1.3, 0.5]] };
+  if (F.flames && FAT[md]) FAT[md].forEach(([x, y, z, len, h]) => [-1, 1].forEach(s => { const m = add(new THREE.PlaneGeometry(len, h), flameMat(), s * x, y, z); m.rotation.y = Math.PI / 2; }));
+  // neon: a glowing pool on the ground plus neon tubes under the frame
+  if (F.glow) {
+    const gm = obm('fxG_' + F.glow, () => new THREE.MeshBasicMaterial({ map: getGlowTex(), color: C(F.glow), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const pool = add(new THREE.PlaneGeometry(info.halfW * 2 + 0.9, info.frontZ - info.rearZ + 0.9), gm, 0, 0.03, (info.frontZ + info.rearZ) / 2); pool.rotation.x = -Math.PI / 2;
+    const NAT = { ride: [0.43, 0.29, -0.08, 1.5], zero: [0.45, 0.33, -0.25, 1.15], titan: [0.7, 0.66, -0.2, 2.0] };
+    if (NAT[md]) { const [x, y, z, len] = NAT[md], tm = obm('fxN_' + F.glow, () => new THREE.MeshBasicMaterial({ color: C(F.glow) })); [-1, 1].forEach(s => add(new THREE.BoxGeometry(0.028, 0.028, len), tm, s * x, y, z)); }
   }
+  if (F.lift) { // lift kit: bigger body on huge tyres (like the Mud Monster)
+    const sc = F.lift.body, rMax = Math.max(...info.wheels.map(w => w.r));
+    body.scale.setScalar(sc); info.bodyScale = sc; info.wheels.forEach(w => w.g.scale.setScalar(F.lift.wheels)); body.position.y += sc * (F.lift.wheels - 1) * rMax;
+  }
+  if (F.hover) { info.wheels.forEach(w => w.g.visible = false); body.position.y += md === 'push' ? 0.13 : 0.2; info.hover = true; } // no wheels: it floats (and bobs)
+}
+function flameMat() {
+  return obm('fxFlames', () => new THREE.MeshStandardMaterial({ transparent: true, roughness: 0.35, metalness: 0.2, side: THREE.DoubleSide, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2,
+    map: canvasTex(512, 200, (c, w, h) => { // flame tongues: base at the front (left of the picture), tips licking back
+      const g = c.createLinearGradient(0, 0, w, 0); g.addColorStop(0, '#fff27a'); g.addColorStop(0.35, '#ffb020'); g.addColorStop(0.7, '#ff5a14'); g.addColorStop(1, '#c80e0e');
+      const tips = [[0.95, 0.16], [0.6, 0.32], [0.86, 0.5], [0.55, 0.67], [0.8, 0.86]]; let y0 = 0.06;
+      c.fillStyle = g; c.beginPath(); c.moveTo(0, h * y0);
+      tips.forEach(([tx, ty], i) => { const y1 = i === tips.length - 1 ? 0.96 : (ty + tips[i + 1][1]) / 2; c.quadraticCurveTo(w * tx * 0.55, h * ((y0 + ty) / 2 - 0.05), w * tx, h * ty); c.quadraticCurveTo(w * tx * 0.5, h * ((ty + y1) / 2 + 0.04), w * 0.16, h * y1); y0 = y1; });
+      c.lineTo(0, h * 0.96); c.closePath(); c.fill(); c.strokeStyle = 'rgba(110,8,0,.65)'; c.lineWidth = 6; c.stroke();
+    }) }));
 }
 function disposeModel(m) {
   if (!m) return; if (m.root.parent) m.root.parent.remove(m.root);
@@ -3093,32 +3145,184 @@ function crewTargetYard() {
   const ys = j.yards.map(id => Yards.byId[id]), want = ys[S.crew.task === 'front' ? 0 : ys.length - 1];
   if (want && !want.complete) return want; return ys.find(Y => !Y.complete) || null;
 }
-function crewPlan(Y) {
-  const L = Town.lotsById[Y.lot], W = Crew.mw, pts = [];
-  if (L.kind === 'house') { if (Y.id.endsWith('_back')) { pts.push(lw(L, 12, -1.5), lw(L, 12, 20.4)); } else pts.push(lw(L, 0, -1.2)); }
-  const w = Math.max(0.3, W.width * 0.8), along = Y.W >= Y.D, m = W.radius * 0.6 + 0.2;
-  if (along) { let k = 0; for (let z = Y.minZ + w / 2 + 0.1; z < Y.minZ + Y.D; z += w, k++) { const a = { x: Y.minX + m, z }, b = { x: Y.minX + Y.W - m, z }; pts.push(...(k % 2 ? [b, a] : [a, b])); } }
-  else { let k = 0; for (let x = Y.minX + w / 2 + 0.1; x < Y.minX + Y.W; x += w, k++) { const a = { x, z: Y.minZ + m }, b = { x, z: Y.minZ + Y.D - m }; pts.push(...(k % 2 ? [b, a] : [a, b])); } }
-  // start the lawn from whichever end is closer
-  const entry = pts.length && L.kind === 'house' ? (Y.id.endsWith('_back') ? 2 : 1) : 0, lanes = pts.slice(entry);
-  const from = pts[entry - 1] || W; if (lanes.length && Math.hypot(lanes[lanes.length - 1].x - from.x, lanes[lanes.length - 1].z - from.z) < Math.hypot(lanes[0].x - from.x, lanes[0].z - from.z)) lanes.reverse();
-  return pts.slice(0, entry).concat(lanes);
-}
-function crewMissed(Y) { // nearest bit of long grass he hasn't tried yet (for the clean-up pass)
-  const W = Crew.mw; let best = null, bd = 1e9;
-  for (let j = 0; j < Y.nz; j += 2) for (let i = 0; i < Y.nx; i += 2) {
-    const idx = j * Y.nx + i; if (!Y.cuttable[idx] || Y.data[idx * 4] < 100 || Crew.tried.has(idx)) continue;
-    const x = Y.minX + (i + 0.5) / Y.cpm, z = Y.minZ + (j + 0.5) / Y.cpm, d = (x - W.x) ** 2 + (z - W.z) ** 2; if (d < bd) { bd = d; best = { x, z, idx }; }
+/* ---------- 👷 Jake's route planner ----------
+   Before he starts, Jake maps the lot on a 0.5 m grid. Fences, walls, the house, sheds, trees, flower beds, pools,
+   gnomes, toys, your truck and your mower are all "no go", with a gap the size of his mower round each one.
+   Then he mows long, dead-straight stripes along the lawn (split round anything in the way), plans routes (A*)
+   onto the lawn (through the side gate for back yards) and between stripes, and finishes with a clean-up pass.
+   If something new blocks him (like you parking in his way) he maps again and goes round it.
+   Jake's bumps never cost you anything: only your own driving can take money off a job. */
+const NAVCS = 0.5;
+function navBlocked(x, z, r, dyn) {
+  for (const c of queryCols(x, z, r + 0.3)) {
+    if (c.off) continue;
+    if (c.type === 'box') { const cx = clamp(x, c.x0, c.x1), cz = clamp(z, c.z0, c.z1); if ((x - cx) ** 2 + (z - cz) ** 2 < r * r) return true; }
+    else if (Math.hypot(x - c.x, z - c.z) < c.r + r) return true;
   }
+  const rb = r * 0.85; for (const b of Town.beds) if (x > b.x0 - rb && x < b.x1 + rb && z > b.z0 - rb && z < b.z1 + rb) return true; // keep his wheels out of the flowers
+  for (const k of dyn) if (Math.hypot(x - k.x, z - k.z) < k.r + r) return true;
+  return false;
+}
+function crewNav(L) { // the lot (all its lawns) plus the pavement in front, as a grid of free / blocked squares
+  const W = Crew.mw, r = W.radius * 0.9 + 0.06; let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+  const grow = R => { x0 = Math.min(x0, R.x0); x1 = Math.max(x1, R.x1); z0 = Math.min(z0, R.z0); z1 = Math.max(z1, R.z1); };
+  grow(lrect(L, -L.half, -3.5, L.half, 1)); (L.yards || []).forEach(id => { const y = Yards.byId[id]; grow({ x0: y.minX, x1: y.minX + y.W, z0: y.minZ, z1: y.minZ + y.D }); });
+  if (Math.abs(W.x - (x0 + x1) / 2) < 160 && Math.abs(W.z - (z0 + z1) / 2) < 160) grow({ x0: W.x - 3, x1: W.x + 3, z0: W.z - 3, z1: W.z + 3 }); // and wherever he's starting from, so he's routed round houses on the way in
+  x0 -= 2; x1 += 2; z0 -= 2; z1 += 2;
+  const dyn = Town.knock.filter(k => !k.gone && !k.down && k.x > x0 - 1 && k.x < x1 + 1 && k.z > z0 - 1 && k.z < z1 + 1).map(k => ({ x: k.x, z: k.z, r: k.r + 0.12 }));
+  if (Veh.model && !Game.drive) { const fx = Math.sin(Veh.h), fz = Math.cos(Veh.h), tfx = Math.sin(Veh.tr.h), tfz = Math.cos(Veh.tr.h), q = Veh.tr.len / 4; [[Veh.x + fx * 1.55, Veh.z + fz * 1.55], [Veh.x, Veh.z], [Veh.x - fx * 1.55, Veh.z - fz * 1.55], [Veh.tr.x + tfx * q, Veh.tr.z + tfz * q], [Veh.tr.x - tfx * q, Veh.tr.z - tfz * q]].forEach(([x, z]) => dyn.push({ x, z, r: 1.0 })); }
+  if (Game.mw && !Veh.load && Game.mode === 'foot') dyn.push({ x: Game.mw.x, z: Game.mw.z, r: Game.mw.radius + 0.25 }); // your mower, parked
+  const nx = Math.ceil((x1 - x0) / NAVCS), nz = Math.ceil((z1 - z0) / NAVCS), b = new Uint8Array(nx * nz);
+  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) b[j * nx + i] = navBlocked(x0 + (i + 0.5) * NAVCS, z0 + (j + 0.5) * NAVCS, r, dyn) ? 1 : 0;
+  return { x0, z0, nx, nz, b, r, dyn, sig: crewDynSig() };
+}
+// where the things that move are (your truck + trailer, your parked mower): if they move, Jake re-plans before he gets to them
+const crewDynSig = () => ({ v: Veh.model && !Game.drive ? [Veh.x, Veh.z, Veh.tr.x, Veh.tr.z] : null, m: Game.mw && !Veh.load && Game.mode === 'foot' ? [Game.mw.x, Game.mw.z] : null });
+function crewDynMoved(G) { const a = G.sig, b = crewDynSig(), far = (p, q) => !p !== !q || (p && p.some((v, i) => Math.abs(v - q[i]) > 0.4)); return far(a.v, b.v) || far(a.m, b.m); }
+function crewReroute(Yw) { // map the lot again, then make every leg he has left go round whatever's new
+  const G = Crew.nav = crewNav(Town.lotsById[Yw.lot]), W = Crew.mw, P = Crew.path, out = [], dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+  Crew.rrT = Game.t; Crew.from = { x: W.x, z: W.z }; let prev = Crew.from;
+  for (let k = Crew.wi; k < P.length; k++) {
+    let p = P[k];
+    if (p.lane === 1 && !navOk(G, p.x, p.z) && P[k + 1] && P[k + 1].lane === 2) { // start of a stripe is covered now: start it further along
+      const e = P[k + 1], L = dist(p, e); let q = null; for (let s = 0.25; s < L - 0.4; s += 0.25) { const t = s / L, c = { x: p.x + (e.x - p.x) * t, z: p.z + (e.z - p.z) * t }; if (navOk(G, c.x, c.z)) { q = c; break; } }
+      if (!q) { k++; continue; } p = { x: q.x, z: q.z, lane: 1 };
+    }
+    if (p.lane !== 2 && !navOk(G, p.x, p.z)) continue; // covered now: skip it (the clean-up pass gets any grass there)
+    if (navClear(G, prev, p)) { out.push(p); prev = p; continue; }
+    if (p.lane === 2) { // something new on this stripe: mow up to it, go round, and carry on along the stripe on the far side
+      const c1 = navCreep(G, prev, p, dist(prev, p)); if (dist(c1, prev) > 0.3) { out.push({ x: c1.x, z: c1.z, lane: 2 }); prev = c1; }
+      const L = dist(prev, p); let res = null; for (let s = 0; s <= L; s += 0.25) { const t = s / L, q = { x: p.x + (prev.x - p.x) * t, z: p.z + (prev.z - p.z) * t }; if (!navOk(G, q.x, q.z)) break; res = q; }
+      if (res && dist(res, p) > 0.4) { const r = navRoute(G, prev, res); if (r) { r.slice(0, -1).forEach(q => out.push({ x: q.x, z: q.z })); out.push({ x: res.x, z: res.z, lane: 1 }, p); prev = p; } }
+      continue;
+    }
+    const r = navRoute(G, prev, p); if (r) { r.slice(0, -1).forEach(q => out.push({ x: q.x, z: q.z })); out.push(p); prev = p; } // can't get there at all now: skip it
+  }
+  Crew.path = P.slice(0, Crew.wi).concat(out);
+}
+const navOk = (G, x, z) => !navBlocked(x, z, G.r, G.dyn); // exact check (no 0.5 m squares) for getting right up to things
+function navCreep(G, from, to, maxD) { // slide from a free spot toward a target for as long as it stays free
+  const d = Math.hypot(to.x - from.x, to.z - from.z), n = Math.floor(Math.min(d, maxD) / 0.05); let best = { x: from.x, z: from.z };
+  for (let k = 1; k <= n; k++) { const t = k * 0.05 / d, x = from.x + (to.x - from.x) * t, z = from.z + (to.z - from.z) * t; if (!navOk(G, x, z)) break; best = { x, z }; }
   return best;
 }
-function crewDrive(dt, tx, tz, mowing) {
-  const W = Crew.mw, dx = tx - W.x, dz = tz - W.z, d = Math.hypot(dx, dz), want = Math.atan2(dx, dz), turn = (W.def.zero ? 3.2 : W.turn) * 1.1;
-  W.h += clamp(angDiff(W.h, want), -turn * dt, turn * dt);
-  const align = Math.cos(angDiff(W.h, want)), sp = (mowing ? W.speed : Math.min(W.transport, 6.5)) * clamp(align, 0.12, 1) * clamp(d / 1.2, 0.35, 1);
-  W.fv = damp(W.fv || 0, sp, 4, dt);
+const navFree = (G, i, j) => i >= 0 && j >= 0 && i < G.nx && j < G.nz && !G.b[j * G.nx + i];
+const navAt = (G, x, z) => navFree(G, Math.floor((x - G.x0) / NAVCS), Math.floor((z - G.z0) / NAVCS));
+const navPos = (G, i, j) => ({ x: G.x0 + (i + 0.5) * NAVCS, z: G.z0 + (j + 0.5) * NAVCS });
+function navNearest(G, x, z, maxR) { // the closest free square to a spot
+  const ci = Math.floor((x - G.x0) / NAVCS), cj = Math.floor((z - G.z0) / NAVCS);
+  for (let rr = 0; rr <= maxR; rr++) { let best = null, bd = 1e9; for (let dj = -rr; dj <= rr; dj++) for (let di = -rr; di <= rr; di++) { if (Math.max(Math.abs(di), Math.abs(dj)) !== rr || !navFree(G, ci + di, cj + dj)) continue; const d = di * di + dj * dj; if (d < bd) { bd = d; best = { i: ci + di, j: cj + dj }; } } if (best) return best; }
+  return null;
+}
+function navClear(G, a, b) { const d = Math.hypot(b.x - a.x, b.z - a.z), n = Math.ceil(d / 0.2); for (let k = 0; k <= n; k++) { const t = k / Math.max(1, n), x = a.x + (b.x - a.x) * t, z = a.z + (b.z - a.z) * t; if (!navOk(G, x, z)) return false; } return true; } // exact: a straight leg must really be clear
+function navPath(G, from, to) { // A* round obstacles, then straightened into as few legs as possible
+  const s = navNearest(G, from.x, from.z, 10), t = navNearest(G, to.x, to.z, 4); if (!s || !t) return null;
+  const N = G.nx * G.nz, gS = new Float32Array(N).fill(1e9), came = new Int32Array(N).fill(-1), shut = new Uint8Array(N), si = s.j * G.nx + s.i, ti = t.j * G.nx + t.i;
+  const heap = [], push = (f, k) => { heap.push([f, k]); let c = heap.length - 1; while (c > 0) { const p = (c - 1) >> 1; if (heap[p][0] <= heap[c][0]) break; [heap[p], heap[c]] = [heap[c], heap[p]]; c = p; } };
+  const pop = () => { const top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; let c = 0; for (;;) { const l = c * 2 + 1, r = l + 1; let m = c; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === c) break; [heap[m], heap[c]] = [heap[c], heap[m]]; c = m; } } return top; };
+  const hEst = k => { const dx = Math.abs(k % G.nx - t.i), dz = Math.abs(((k / G.nx) | 0) - t.j); return Math.max(dx, dz) + 0.414 * Math.min(dx, dz); };
+  gS[si] = 0; push(hEst(si), si); let found = false, iter = 0;
+  while (heap.length && iter++ < 60000) {
+    const k = pop()[1]; if (shut[k]) continue; shut[k] = 1; if (k === ti) { found = true; break; }
+    const i = k % G.nx, j = (k / G.nx) | 0;
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+      if (!di && !dj) continue; const ni = i + di, nj = j + dj; if (!navFree(G, ni, nj)) continue;
+      if (di && dj && (!navFree(G, i + di, j) || !navFree(G, i, j + dj))) continue; // never cut a corner
+      const nk = nj * G.nx + ni, g = gS[k] + (di && dj ? 1.414 : 1); if (g < gS[nk]) { gS[nk] = g; came[nk] = k; push(g + hEst(nk), nk); }
+    }
+  }
+  if (!found) return null;
+  const cells = []; for (let k = ti; k !== -1; k = came[k]) cells.push(navPos(G, k % G.nx, (k / G.nx) | 0)); cells.reverse();
+  if (navOk(G, to.x, to.z)) { // finish exactly on the target, but only along a line that's really clear
+    const T = { x: to.x, z: to.z }; if (cells.length > 1 && navClear(G, cells[cells.length - 2], T)) cells[cells.length - 1] = T; else if (navClear(G, cells[cells.length - 1], T)) cells.push(T);
+  }
+  if (cells.length > 1 && navOk(G, from.x, from.z) && navClear(G, from, cells[1])) cells[0] = { x: from.x, z: from.z }; // start the legs from exactly where he is
+  const out = [cells[0]]; let a = 0; // keep only the corners: straight legs between them
+  while (a < cells.length - 1) { let b = cells.length - 1; while (b > a + 1 && !navClear(G, cells[a], cells[b])) b--; out.push(cells[b]); a = b; }
+  return out;
+}
+function navRoute(G, from, to) { // the points to drive through to end exactly on `to`, every leg checked clear (or null)
+  if (navOk(G, from.x, from.z) && navClear(G, from, to)) return [{ x: to.x, z: to.z }]; // straight there (most stripe-to-stripe turns)
+  const r = navPath(G, from, to); if (!r) return null;
+  const pts = r.slice(1), e = pts[pts.length - 1]; if (!e || e.x !== to.x || e.z !== to.z) pts.push({ x: to.x, z: to.z });
+  return navClear(G, pts.length > 1 ? pts[pts.length - 2] : from, to) ? pts : null;
+}
+function crewLanes(G, Y) { // long straight stripes along the lawn, each split into the bits that are clear
+  const W = Crew.mw, w = Math.max(0.3, W.width * 0.86), along = Y.W >= Y.D, a0 = along ? Y.minX : Y.minZ, aLen = along ? Y.W : Y.D, b0 = along ? Y.minZ : Y.minX, bLen = along ? Y.D : Y.W;
+  const P = (a, b) => along ? { x: a, z: b } : { x: b, z: a };
+  const segsAt = b => { const out = []; let s = null, last = null; for (let a = a0 + 0.1; a <= a0 + aLen - 0.1; a += 0.25) { const p = P(a, b); if (navAt(G, p.x, p.z) && Y.contains(p.x, p.z, 0.3)) { if (s === null) s = a; last = a; } else if (s !== null) { if (last - s > 0.5) out.push([s, last]); s = null; } } if (s !== null && last - s > 0.5) out.push([s, last]); return out; };
+  const nL = Math.max(1, Math.ceil((bLen - w) / (w * 0.92)) + 1), lanes = [];
+  for (let k = 0; k < nL; k++) {
+    let b = nL > 1 ? b0 + w / 2 + k * (bLen - w) / (nL - 1) : b0 + bLen / 2, segs = segsAt(b);
+    for (let tries = 0; !segs.length && tries < 6 && (k === 0 || k === nL - 1); tries++) { b += (k === 0 ? 1 : -1) * 0.1; segs = segsAt(b); } // edge stripe tight to a fence: nudge it in
+    // stretch each stripe right up to whatever stops it (exact check), so the grass next to obstacles gets cut too
+    segs.forEach(sg => { const lo = a0 + 0.05, hi = a0 + aLen - 0.05; let n = 0;
+      while (sg[0] < sg[1] && !navOk(G, P(sg[0], b).x, P(sg[0], b).z)) sg[0] += 0.05; // first pull both ends back until they're really clear…
+      while (sg[1] > sg[0] && !navOk(G, P(sg[1], b).x, P(sg[1], b).z)) sg[1] -= 0.05;
+      while (n++ < 14 && sg[1] + 0.05 <= hi && navOk(G, P(sg[1] + 0.05, b).x, P(sg[1] + 0.05, b).z)) sg[1] += 0.05; n = 0; while (n++ < 14 && sg[0] - 0.05 >= lo && navOk(G, P(sg[0] - 0.05, b).x, P(sg[0] - 0.05, b).z)) sg[0] -= 0.05; });
+    const ok = segs.filter(sg => sg[1] - sg[0] > 0.4); if (ok.length) lanes.push({ b, segs: ok });
+  }
+  return { lanes, P };
+}
+function crewPlanAll(Y) { // the whole job: drive in, stripe it, all routed round obstacles
+  const L = Town.lotsById[Y.lot], W = Crew.mw, G = Crew.nav = crewNav(L), { lanes, P } = crewLanes(G, Y), pts = [];
+  // start from whichever side of the lawn is nearer to Jake
+  if (lanes.length > 1) { const f = lanes[0], l = lanes[lanes.length - 1], pf = P(f.segs[0][0], f.b), pl = P(l.segs[0][0], l.b); if (Math.hypot(pl.x - W.x, pl.z - W.z) < Math.hypot(pf.x - W.x, pf.z - W.z)) lanes.reverse(); }
+  let cur = { x: W.x, z: W.z };
+  lanes.forEach((ln, k) => {
+    const segs = ln.segs.map(s => s.slice()); if (k % 2) { segs.reverse(); segs.forEach(s => s.reverse()); }
+    for (const [sa, ea] of segs) {
+      const st = P(sa, ln.b), en = P(ea, ln.b), dir = Math.sign(ea - sa) || 1; let legs = navRoute(G, cur, st);
+      // stripe starts tucked in beside something (a tree, the shed…) so he can't get straight there: come in along the stripe and back up into the corner
+      for (let k = 0.5; !legs && k <= Math.min(3, Math.abs(ea - sa) - 0.3); k += 0.5) { const q = P(sa + dir * k, ln.b); if (!navClear(G, q, st)) continue; const r = navRoute(G, cur, q); if (r) legs = r.concat([{ x: st.x, z: st.z }]); }
+      if (!legs) { const r = navPath(G, cur, st); legs = r ? r.slice(1, -1).concat([st]) : [st]; }
+      legs.slice(0, -1).forEach(p => pts.push({ x: p.x, z: p.z }));
+      pts.push({ x: st.x, z: st.z, lane: 1 }, { x: en.x, z: en.z, lane: 2 }); cur = en;
+    }
+  });
+  return pts;
+}
+function crewMissed(Y) { // nearest bit of long grass he hasn't tried yet that he can actually reach (clean-up pass)
+  const W = Crew.mw, G = Crew.nav, reach = Math.max(1, Math.round(W.width * 0.45 / NAVCS));
+  for (let tries = 0; tries < 25; tries++) {
+    let best = null, bd = 1e9;
+    for (let j = 0; j < Y.nz; j += 2) for (let i = 0; i < Y.nx; i += 2) {
+      const idx = j * Y.nx + i; if (!Y.cuttable[idx] || Y.data[idx * 4] < 100 || Crew.tried.has(idx)) continue;
+      const x = Y.minX + (i + 0.5) / Y.cpm, z = Y.minZ + (j + 0.5) / Y.cpm, d = (x - W.x) ** 2 + (z - W.z) ** 2; if (d < bd) { bd = d; best = { x, z, idx }; }
+    }
+    if (!best) return null;
+    const c = G && navNearest(G, best.x, best.z, reach); Crew.tried.add(best.idx);
+    if (!c) continue; // tucked behind something he can't reach: leave it for you
+    const spot = navCreep(G, navPos(G, c.i, c.j), best, 1.2), route = navPath(G, W, spot); if (!route) continue; // get as close to the long grass as is safe
+    route[route.length - 1] = spot;
+    return route.slice(1).map((p, n, a) => n === a.length - 1 ? { x: p.x, z: p.z, idx: best.idx, clean: 1 } : { x: p.x, z: p.z });
+  }
+  return null;
+}
+function crewTrimEdges(Y) { // the last little bits right against obstacles: Jake does them with his string trimmer
+  if (Y.complete || Y.pct() < 0.95) return; let n = 0;
+  for (let i = 0; i < Y.cuttable.length; i++) if (Y.cuttable[i] && Y.data[i * 4] >= 100) { Y.data[i * 4] = 20; n++; }
+  if (!n) return; Y.tex.needsUpdate = true; Y.complete = false; Y.doneCount = Y.total; if (Game.run) Game.run.crewCells = (Game.run.crewCells || 0) + n; // celebration + pay run as normal
+  toast(`✂️ ${CREW.name} trimmed the edges`, 'Round the fences, flowers and gnomes.', 'var(--sky)'); checkYardComplete(Y, true);
+}
+function crewDrive(dt, tx, tz, mowing, lane, careful, from) {
+  const W = Crew.mw, d = Math.hypot(tx - W.x, tz - W.z); let ax = tx, az = tz;
+  // on the job he steers along the planned line (from the last point to this one), not just at the point,
+  // so he never drifts off the checked-clear line and his stripes stay dead straight
+  if (from) { const lx = tx - from.x, lz = tz - from.z, L2 = lx * lx + lz * lz; if (L2 > 0.04) { const t = clamp(((W.x - from.x) * lx + (W.z - from.z) * lz) / L2, 0, 1), ah = Math.min(1, t + 0.7 / Math.sqrt(L2)); ax = from.x + lx * ah; az = from.z + lz * ah; } }
+  const want = Math.atan2(ax - W.x, az - W.z), turn = (W.def.zero ? 3.2 : W.turn) * 1.1, off = angDiff(W.h, want);
+  W.h += clamp(off, -turn * dt, turn * dt);
+  // on the job he never drives while turning sharply: he stops and turns on the spot (so he can't swing into a fence),
+  // and at the start of a stripe he lines up exactly first, so the stripe comes out dead straight
+  const align = Math.cos(off), pivot = careful && d > 0.15 && Math.abs(off) > (lane ? 0.1 : 0.3);
+  let sp = pivot ? 0 : (mowing ? W.speed : Math.min(W.transport, 6.5)) * (careful ? Math.max(0, align) ** 3 : clamp(align, 0.12, 1)) * clamp(d / 1.2, careful ? 0.25 : 0.35, 1);
+  if (careful) { // brakes in time to stop right on each point (no rolling on into the fence while he turns)
+    sp = Math.min(sp, Math.sqrt(4 * Math.max(0, d - 0.08)));
+    W.fv = pivot ? damp(W.fv || 0, 0, 14, dt) : Math.min(damp(W.fv || 0, sp, 4, dt), sp);
+  } else W.fv = damp(W.fv || 0, sp, 4, dt);
   let nx = W.x + Math.sin(W.h) * W.fv * dt, nz = W.z + Math.cos(W.h) * W.fv * dt;
   const r = collide(nx, nz, W.radius * 0.85), r2 = vehBlock(r.x, r.z, W.radius * 0.85); W.x = r2.x; W.z = r2.z; W.wheelRot = (W.wheelRot || 0) + W.fv * dt;
+  if (r.hit || r2.hit) Crew.hits = (Crew.hits || 0) + 1; // touched something (it never costs you money)
   return d;
 }
 function crewUpdate(dt) {
@@ -3141,18 +3345,26 @@ function crewUpdate(dt) {
   md.root.visible = true; P.root.visible = true;
   // work out what to do
   const Y = crewTargetYard();
-  if (Y && Crew.state !== 'work' && Y.dist(src.x, src.z) < 70) { Crew.state = 'work'; Crew.Y = Y; Crew.path = crewPlan(Y); Crew.wi = 0; Crew.tried.clear(); Crew.stuckT = 0; Crew.chk = { x: W.x, z: W.z, t: 0 }; toast(`👷 ${CREW.name} is mowing the ${Y.part.toLowerCase()}`, 'You do the rest!', 'var(--sky)'); }
+  if (Y && Crew.state !== 'work' && Y.dist(src.x, src.z) < 70) { Crew.state = 'work'; Crew.Y = Y; Crew.tried.clear(); Crew.path = crewPlanAll(Y); Crew.wi = 0; Crew.stuck = 0; Crew.from = { x: W.x, z: W.z }; Crew.chk = { x: W.x, z: W.z, t: 0 }; toast(`👷 ${CREW.name} is mowing the ${Y.part.toLowerCase()}`, 'You do the rest!', 'var(--sky)'); }
   let mowing = false;
   if (Crew.state === 'work') {
     const Yw = Crew.Y, j = activeJob();
     if (!Yw || Yw.complete || !j || !j.yards.includes(Yw.id)) { Crew.state = 'follow'; }
     else {
       let p = Crew.path[Crew.wi];
-      if (!p) { const miss = crewMissed(Yw); if (miss) { Crew.path.push(miss); p = miss; } else { Crew.state = 'follow'; } }
+      if (!p) { const miss = crewMissed(Yw); if (miss) { Crew.path.push(...miss); p = Crew.path[Crew.wi]; } else { crewTrimEdges(Yw); Crew.state = 'follow'; } }
+      if (p && Crew.nav && crewDynMoved(Crew.nav) && Game.t - (Crew.rrT || -9) > 0.8) { crewReroute(Yw); p = Crew.path[Crew.wi]; } // you moved the truck / parked your mower: re-plan before he reaches it
       if (p) {
-        mowing = Yw.contains(W.x, W.z, 0.2); const d = crewDrive(dt, p.x, p.z, mowing);
-        if (d < (p.idx !== undefined ? 0.35 : 0.6)) { if (p.idx !== undefined) Crew.tried.add(p.idx); Crew.wi++; Crew.chk = { x: W.x, z: W.z, t: 0 }; }
-        Crew.chk.t += dt; if (Crew.chk.t > 1.6) { if (Math.hypot(W.x - Crew.chk.x, W.z - Crew.chk.z) < 0.35) { if (p.idx !== undefined) Crew.tried.add(p.idx); Crew.wi++; } Crew.chk = { x: W.x, z: W.z, t: 0 }; } // stuck on something: skip it
+        mowing = Yw.contains(W.x, W.z, 0.2); const d = crewDrive(dt, p.x, p.z, mowing, p.lane === 2 || p.clean, true, Crew.from);
+        if (d < (p.lane || p.clean ? 0.15 : 0.3)) { Crew.wi++; Crew.stuck = 0; Crew.from = { x: p.x, z: p.z }; Crew.chk = { x: W.x, z: W.z, t: 0 }; }
+        Crew.chk.t += dt;
+        if (Crew.chk.t > 1.4) { // hardly moved: something's in the way (you, your mower, the truck…): map again and go round it
+          if (Math.hypot(W.x - Crew.chk.x, W.z - Crew.chk.z) < 0.3) {
+            if (++Crew.stuck >= 3) { Crew.wi++; Crew.stuck = 0; Crew.from = { x: W.x, z: W.z }; }
+            else crewReroute(Yw);
+          }
+          Crew.chk = { x: W.x, z: W.z, t: 0 };
+        }
       }
     }
   }
@@ -3648,7 +3860,7 @@ function renderBench() {
     h += gHead('Tools', 'Handy gear for finishing jobs') + `<div class="card"><div class="ic">✂️</div><div class="t"><h4>String trimmer</h4><small>Finish edges around trees, fences, gnomes & beds. Press <kbd>T</kbd> on foot, hold <kbd>Space</kbd>.</small></div>${S.hasTrimmer ? '<button class="btn" disabled>✔ Owned</button>' : `<button class="btn gold" data-act="buyTool" data-arg="trimmer">${money(TRIMMER_PRICE)}</button>`}</div>
       <div class="card"><div class="ic">⛽</div><div class="t"><h4>5 L gas can</h4><small>Fill at a pump, then press <kbd>G</kbd> by your mower to top up anywhere.</small></div>${S.hasGasCan ? `<button class="btn" disabled>✔ ${S.gasCan.toFixed(1)} L</button>` : `<button class="btn gold" data-act="buyTool" data-arg="can">${money(GASCAN_PRICE)}</button>`}</div>`;
   } else if (t === 'paint') {
-    const fixed = m.look === 'brand' || m.look === 'platinum';
+    const fixed = m.look === 'brand' || m.look === 'platinum' || m.look === 'fx';
     const groups = [['Free', p => !p.price && !p.pass && !p.quest && !p.event && !p.mowshop && !p.hidden], ['For sale', p => p.price], ['🎟️ Season Pass', p => p.pass], ['🎯 Quest rewards', p => p.quest], ['⚔️ Limited event', p => p.event], ['🏪 Mow Shop limited', p => p.mowshop]];
     h += gHead('Paint', 'Now: ' + esc(paintById(cfg.paint).name)) + (fixed ? `<div class="gNote">The ${esc(m.name)} keeps its factory finish${m.mowshop ? ' unless you paint it a Mow Shop limited colour' : ''}. Your paint shows on your other mowers.</div>` : '');
     if (!MS_COLOURS.every(id => S.own.paint.includes(id))) h += `<div class="gNote">🏪 The two Mow Shop limited colours come in the <b>Limited Colour Pack</b> (${money(CUSTOM_KIT_PRICE)}), only sold at the Mow Shop on Main Street.</div>`;
@@ -4991,6 +5203,8 @@ async function sendIdea() {
 
 /* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
 const UPDATES = [
+  { v: '1.21', date: 'Nov 2026', title: 'Factory Specials', add: ['12 new mowers in the Mower Shop, from $500 up to $6,000 ($500 more each time)', 'Each one has its own factory paint job: racing stripes, hot-rod flames, neon underglow, mirror chrome, solid gold, a lift kit or a hover deck', 'Street Kart, Neon Nightrider, Hot Rod Inferno, Arctic Blizzard, HoverRider X, Thunderbolt, Swamp King 4x4, Galaxy Cruiser, Magma Reel, Chrome Phantom, Golden Emperor and the Quantum Z-1 Hyperdeck', 'The more they cost, the more they mow. The bigger ones unlock as you finish more jobs'] },
+  { v: '1.20', date: 'Nov 2026', title: 'Jake Gets Smart', add: ['Jake now maps the lawn before he starts: fences, walls, sheds, trees, flower beds, gnomes, toys, your truck and your mower', 'He mows long, dead-straight stripes and stops to turn on the spot, so he doesn\'t clip fences on the turns', 'Park your truck or mower in his way and he plans a route round it before he gets there', 'He finishes with a clean-up pass and trims the edges, so the lawn ends up 100% done', 'Jake\'s bumps never cost you money: only your own driving can'] },
   { v: '1.19', date: 'Nov 2026', title: 'Jake Clocks In', add: ['Jake only turns up for jobs: he arrives when you accept one and heads home when it\'s done', 'Fixed: new jobs sometimes didn\'t appear after sleeping (since the petrol stations were added)'] },
   { v: '1.18', date: 'Nov 2026', title: 'Best in Show', add: ['The John Deere and Mow Master walk-behinds are now the best push mowers in the game', 'The Mow Shop\'s $300 pack now gives two limited colours: John Deere Green and Mow Master Orange', 'Bought the old Custom Colour Kit? You get both limited colours free'] },
   { v: '1.17', date: 'Nov 2026', title: 'The Mow Shop', add: ['New 🏪 Mow Shop on Main Street (next to the water tower)', 'Walk inside the Mow Shop showroom: the mowers spin on turntables with price signs, and Kev at the counter sells them', 'Limited John Deere and Mow Master walk-behinds ($2,000) and ride-ons ($2,500), only sold at the Mow Shop', 'Custom Colour Kit: paint your mowers any colour you like', 'Petrol stations in Oakridge, Seaview Bay and Summit Hills, each selling its own accessories'] },
