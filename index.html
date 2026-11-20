@@ -2734,7 +2734,8 @@ function postJobs() {
   }
   // the other towns: up to 3 jobs each once you've unlocked them (1 locked "teaser" job before that)
   if (!['new', 'active'].includes(S.tut.state)) TOWNS.slice(1).forEach(T => {
-    const tc = LOTS.filter(L => L.town === T.id && !list.some(j => j.lot === L.id)).map(L => ({ L, ys: L.yards.filter(id => Yards.byId[id].grown() > 0.55) })).filter(c => c.ys.length);
+    // only lots with lawns (not petrol stations)
+    const tc = LOTS.filter(L => L.town === T.id && L.client && L.yards && !list.some(j => j.lot === L.id)).map(L => ({ L, ys: L.yards.filter(id => Yards.byId[id].grown() > 0.55) })).filter(c => c.ys.length);
     for (let i = tc.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [tc[i], tc[j]] = [tc[j], tc[i]]; }
     tc.slice(0, S.stats.jobs >= T.req ? 3 : 1).forEach(c => list.push({ id: 'j' + S.day + '_' + c.L.id, lot: c.L.id, client: c.L.client, yards: c.ys, pay: jobPay(c.L.id, c.ys), day: S.day }));
   });
@@ -3072,6 +3073,16 @@ function crewBuild() {
   else { scene.add(P.root); resetPose(P); }
   Crew.state = 'follow'; Crew.ride = false;
 }
+function crewPuff() { const W = Crew.mw; if (!W) return; for (let i = 0; i < 24; i++) FX.puff.spawn(W.x + rand(-0.8, 0.8), worldH(W.x, W.z) + rand(0.2, 1.4), W.z + rand(-0.8, 0.8), rand(-0.6, 0.6), rand(0.3, 1.2), rand(-0.6, 0.6), rand(0.8, 1.4), rand(0.5, 0.9), COL.smoke, 1, 2); }
+function crewArrive() { // pulls up next to you, ready to work
+  const W = Crew.mw, p = crewSpot(); Object.assign(W, p, { fv: 0 }); Crew.state = 'follow'; Crew.ride = false; Crew.path = [];
+  crewPuff(); Sfx.horn('classic'); toast(`👷 ${CREW.name} is here to help!`, `He'll mow the ${S.crew.task} lawn of this job.`, 'var(--sky)');
+}
+function crewLeave() { // job finished (or cancelled): Jake heads home until the next one
+  if (Crew.model && Crew.model.root.visible && !Crew.ride) crewPuff();
+  crewDispose(); Crew.mw = null; Crew.state = 'follow'; Crew.ride = false; Crew.path = []; Crew.Y = null;
+  if (S.crew.hired) toast(`👋 ${CREW.name} headed home`, 'He\'ll be back for your next job.', 'var(--sky)');
+}
 function crewSpot() { // next to you (or next to the garage at the start of a day)
   const src = Game.pl || { x: 0, z: 0, h: 0 }, a = (src.h || 0) + Math.PI * 0.75;
   const p = collide(src.x + Math.sin(a) * 3, src.z + Math.cos(a) * 3, 0.8); return { x: p.x, z: p.z, h: src.h || 0 };
@@ -3112,7 +3123,10 @@ function crewDrive(dt, tx, tz, mowing) {
 }
 function crewUpdate(dt) {
   if (!crewActive()) { if (Crew.model) crewDispose(); return; }
-  if (!Crew.model || Crew.id !== S.crew.mower) crewBuild();
+  // Jake only shows up for work: he arrives when you accept a job and heads home when it's done (or cancelled)
+  if (!activeJob()) { if (Crew.model) crewLeave(); return; }
+  if (!Crew.model) { crewBuild(); crewArrive(); }
+  else if (Crew.id !== S.crew.mower) crewBuild();
   const W = Crew.mw, md = Crew.model, P = Crew.npc.P, src = mapPos();
   // he hops in your truck when you drive off (and hops out when you stop)
   if (Game.drive && (Crew.state !== 'work' || Math.hypot(W.x - Veh.x, W.z - Veh.z) > 120)) { Crew.ride = true; Crew.state = 'follow'; }
@@ -4977,6 +4991,7 @@ async function sendIdea() {
 
 /* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
 const UPDATES = [
+  { v: '1.19', date: 'Nov 2026', title: 'Jake Clocks In', add: ['Jake only turns up for jobs: he arrives when you accept one and heads home when it\'s done', 'Fixed: new jobs sometimes didn\'t appear after sleeping (since the petrol stations were added)'] },
   { v: '1.18', date: 'Nov 2026', title: 'Best in Show', add: ['The John Deere and Mow Master walk-behinds are now the best push mowers in the game', 'The Mow Shop\'s $300 pack now gives two limited colours: John Deere Green and Mow Master Orange', 'Bought the old Custom Colour Kit? You get both limited colours free'] },
   { v: '1.17', date: 'Nov 2026', title: 'The Mow Shop', add: ['New 🏪 Mow Shop on Main Street (next to the water tower)', 'Walk inside the Mow Shop showroom: the mowers spin on turntables with price signs, and Kev at the counter sells them', 'Limited John Deere and Mow Master walk-behinds ($2,000) and ride-ons ($2,500), only sold at the Mow Shop', 'Custom Colour Kit: paint your mowers any colour you like', 'Petrol stations in Oakridge, Seaview Bay and Summit Hills, each selling its own accessories'] },
   { v: '1.16', date: 'Nov 2026', title: 'Pick Your Server', add: ['Play is single player again: no more joining the online world by itself', 'Play Online → Play online: pick a public server and play your save with everyone on it', 'A little "Hide buttons" tab tucks the HUD buttons away (press it again to bring them back)', 'Leave an online server any time from the pause menu'] },
@@ -5893,10 +5908,10 @@ function crewHTML() {
   let h = `<div class="mdlg panel" style="width:min(640px,94vw)">${menuHead('👷 YOUR CREW', 'One worker who mows with you')}<div class="mbody">`;
   if (!c.hired) {
     const lock = S.stats.jobs < CREW.req, afford = S.money >= CREW.hire;
-    return h + `<div class="qcard ${!lock && afford && S.settings.hlAfford ? 'redHL' : ''}"><div class="ic">👷</div><div class="t"><h4>Hire ${CREW.name}</h4><small>He follows you everywhere (he rides in your truck), and mows the <b>front or back lawn</b> of each job on his own mower while you do the rest. He needs his own mower and takes <b>20%</b> of the pay for jobs he helps with.</small>
+    return h + `<div class="qcard ${!lock && afford && S.settings.hlAfford ? 'redHL' : ''}"><div class="ic">👷</div><div class="t"><h4>Hire ${CREW.name}</h4><small>He turns up when you accept a job (and rides in your truck), mows the <b>front or back lawn</b> on his own mower while you do the rest, then heads home when the job's done. He needs his own mower and takes <b>20%</b> of the pay for jobs he helps with.</small>
       ${lock ? `<small style="color:var(--bad)">🔒 Finish ${CREW.req} jobs first (${S.stats.jobs}/${CREW.req})</small>` : ''}</div><div class="side"><b class="cash" style="font-size:17px">${money(CREW.hire)}</b><button class="btn ${!lock && afford ? 'gold' : ''}" data-act="crewHire" ${lock ? 'disabled' : ''}>Hire ${CREW.name}</button></div></div></div></div>`;
   }
-  const status = !c.mower || !S.owned.includes(c.mower) || c.mower === mine ? `<span style="color:var(--bad)">needs a mower of his own</span>` : Net.on ? 'waiting at home (not in multiplayer)' : Crew.ride ? 'riding in your truck' : Crew.state === 'work' && Crew.Y ? `mowing the ${Crew.Y.part.toLowerCase()} (${Math.floor(Crew.Y.pct() * 100)}%)` : 'following you';
+  const status = !c.mower || !S.owned.includes(c.mower) || c.mower === mine ? `<span style="color:var(--bad)">needs a mower of his own</span>` : Net.on ? 'waiting at home (not in multiplayer)' : !activeJob() ? 'off duty: he turns up when you accept a job' : Crew.ride ? 'riding in your truck' : Crew.state === 'work' && Crew.Y ? `mowing the ${Crew.Y.part.toLowerCase()} (${Math.floor(Crew.Y.pct() * 100)}%)` : 'following you';
   h += `<div class="qcard"><div class="ic">👷</div><div class="t"><h4>${CREW.name}</h4><small>Right now: <b>${status}</b> · jobs helped: ${c.jobs || 0}</small></div></div>
     <div class="lbl">Which lawn does ${CREW.name} mow?</div><div class="tabs"><button class="btn ${c.task === 'front' ? 'sel' : ''}" data-act="crewTask" data-arg="front">🏡 Front lawn</button><button class="btn ${c.task === 'back' ? 'sel' : ''}" data-act="crewTask" data-arg="back">🌳 Back lawn</button></div>
     <div class="small muted">If the job only has one lawn, he helps you with it. On the golf course: front = Fairway 1, back = the last part of the job.</div>
