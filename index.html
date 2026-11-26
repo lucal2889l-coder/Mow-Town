@@ -379,6 +379,7 @@ textarea.inp{resize:none;min-height:112px;line-height:1.4;display:block}.inp{use
         <button class="hbtn" id="btnPass" data-act="openPass">🎟️ Pass <kbd>P</kbd><span class="badge" id="bdgPass"></span></button>
         <button class="hbtn" id="btnCrew" data-act="openCrew">👷 Crew <kbd>C</kbd></button>
         <button class="hbtn" id="btnMap" data-act="openMap">🗺️ Map <kbd>M</kbd></button>
+        <button class="hbtn" id="btnWorlds" data-act="openWorlds">🌍 Worlds <kbd>O</kbd></button>
         <button class="hbtn evBtn" id="btnEvent" data-act="openEvent"><span class="evT evTimer"></span><span>⚔️ Event <kbd>V</kbd></span></button>
       </div>
     </div>
@@ -498,8 +499,41 @@ const MOWERS = {
   mm_ride: { id: 'mm_ride', model: 'ride',  look: 'brand', mowshop: true, brand: 'mowmaster', name: 'Mow Master Ride-On 44"',  type: 'Mow Shop ride-on',     icon: '🧡', price: 2500, speed: 5.1, transport: 8.4, width: 1.4,  tank: 14,  burn: 0.8,  turn: 2.5, accel: 5.2, radius: 0.7,  push: false, cam: [5.9, 3.8], desc: 'Quick and nimble. Gets between towns fast.' },
   jd_ride: { id: 'jd_ride', model: 'ride',  look: 'brand', mowshop: true, brand: 'deere',     name: 'John Deere Ride-On 48"',  type: 'Mow Shop ride-on',     icon: '💚', price: 2500, speed: 4.8, transport: 8.0, width: 1.52, tank: 17,  burn: 0.85, turn: 2.2, accel: 4.8, radius: 0.74, push: false, cam: [6.0, 3.9], desc: 'Wide 48" deck and a big tank. The classic green-and-yellow.' }
 };
+// 🌴 🌊 12 mowers per world, only sold in that world. Priced against what you earn there, so the best ones take a while.
+// The big ones scale up the whole model so the deck really is as wide as the cut.
+const WORLD_MOWERS = [];
+function wm(world, id, model, name, type, icon, price, speed, transport, width, tank, burn, turn, accel, radius, fx, desc) {
+  const base = { ride: 1.07 * 1.65, zero: 1.37 * 1.65, titan: 2.6 }[model], s = Math.max(1, width / base), cam = { ride: [6.0, 3.9], zero: [6.6, 4.2], titan: [8.9, 6.1] }[model];
+  MOWERS[id] = { id, model, look: 'fx', world, fx: Object.assign({ rough: 0.35, metal: 0.3 }, fx, { scale: s }), name, type, icon, price, speed, transport, width, tank, burn, turn, accel, radius, push: false, zero: model === 'zero' || undefined, cam: [cam[0] * (0.55 + s * 0.45), cam[1] * (0.55 + s * 0.45)], desc };
+  WORLD_MOWERS.push(id);
+}
+//     world id           model    name                      type                    icon  price   spd  trans width tank burn turn acc  radius
+wm(2, 'j_bamboo',  'ride',  'Bamboo Buggy 90"',       'Jungle lawn tractor',   '🎋', 8000,   7.0, 11,   2.4,  34, 1.3,  2.6, 6.5, 1.05, { col: '#c9a35a', pattern: ['bamboo', '#c9a35a', '#7a5a2a'], leaves: '#3f9a2a' }, 'Built from real bamboo (and a big engine). Your first jungle machine.');
+wm(2, 'j_croc',    'zero',  'Croc Chomper 98"',       'Jungle zero-turn',      '🐊', 12000,  7.4, 11.5, 2.5,  36, 1.35, 3.4, 7.0, 1.1,  { col: '#4a7a2a', pattern: ['scales', '#4a7a2a', '#2a4a1a'], horn: '#f2eed8' }, 'Scaly green with a toothy front. Snaps up long grass.');
+wm(2, 'j_toucan',  'zero',  'Toucan Twister 100"',    'Jungle zero-turn',      '🦜', 16000,  7.8, 12,   2.55, 38, 1.4,  3.5, 7.3, 1.12, { col: '#16171c', stripe: '#ffb020', trim: '#ff5a14', glow: '#ffd23b' }, 'Glossy black with a bright orange-and-yellow beak stripe.');
+wm(2, 'j_jaguar',  'zero',  'Jaguar Prowler 102"',    'Jungle zero-turn',      '🐆', 21000,  8.2, 12.5, 2.6,  40, 1.45, 3.6, 7.8, 1.14, { col: '#e0a030', pattern: ['spots', '#e0a030', '#2a1a0a'] }, 'Golden with black rosettes. Quick on its feet.');
+wm(2, 'j_gorilla', 'ride',  'Gorilla Grinder 4x4',    'Lifted jungle tractor', '🦍', 27000,  7.6, 11.5, 3.0,  48, 1.6,  2.4, 6.2, 1.3,  { col: '#3a3a40', pattern: ['camo', '#3a3a40', '#22252a'], lift: { body: 1.1, wheels: 1.5 }, leaves: '#2f7a22' }, 'Silverback grey on giant mud tyres. Nothing stops it.');
+wm(2, 'j_python',  'zero',  'Python Coil 108"',       'Jungle zero-turn',      '🐍', 34000,  8.6, 13,   2.75, 44, 1.5,  3.6, 8.0, 1.2,  { col: '#9ad82a', pattern: ['scales', '#9ad82a', '#1b2a10'], glow: '#9ad82a' }, 'Lime-and-black snakeskin with a toxic green glow.');
+wm(2, 'j_tiki',    'titan', 'Tiki Thunder 7-Gang',    'Jungle reel mower',     '🗿', 42000,  6.4, 10,   3.9,  60, 1.9,  1.9, 4.4, 1.55, { col: '#8a5a2a', pattern: ['bamboo', '#a8743a', '#5a3a1a'], torches: true, leaves: '#3f9a2a' }, 'A carved-wood monster with tiki torches. Huge cut.');
+wm(2, 'j_tiger',   'zero',  'Tiger Stripe 114"',      'Jungle zero-turn',      '🐅', 50000,  9.0, 13.5, 2.9,  48, 1.6,  3.7, 8.3, 1.26, { col: '#ff8a1a', pattern: ['tiger', '#ff8a1a', '#16120c'], trim: '#ffffff' }, 'Orange with black tiger stripes. Fierce and fast.');
+wm(2, 'j_rhino',   'ride',  'Rhino Rammer 4x4',       'Lifted jungle tractor', '🦏', 60000,  8.0, 12.5, 3.4,  56, 1.8,  2.4, 6.6, 1.45, { col: '#8a8f94', pattern: ['camo', '#8a8f94', '#6a6f74'], lift: { body: 1.1, wheels: 1.55 }, horn: '#e8e2d0' }, 'Armoured grey with a real horn on the front.');
+wm(2, 'j_emerald', 'zero',  'Emerald Idol 118"',      'Jungle zero-turn',      '💚', 70000,  9.4, 14,   3.0,  52, 1.7,  3.8, 8.6, 1.3,  { col: '#1a9a5a', metal: 0.45, rough: 0.2, stripe: '#e0b030', trim: '#e0b030', glow: '#2fffa0' }, 'Polished emerald with gold trim, from a lost temple.');
+wm(2, 'j_volcano', 'titan', 'Volcano King 9-Gang',    'Jungle reel mower',     '🌋', 80000,  7.0, 11,   4.3,  70, 2.1,  2.0, 4.8, 1.7,  { col: '#1a1a1d', stripe: '#ff5a14', glow: '#ff5a14', flames: true, torches: true }, 'Black rock and lava. The widest cut in the jungle.');
+wm(2, 'j_temple',  'zero',  'Golden Temple Hover-Z',  'Jungle hover zero-turn','🏛️', 90000, 10.0, 15,   3.2,  56, 1.8,  3.9, 9.0, 1.38, { col: '#f2c33a', metal: 0.5, rough: 0.22, stripe: '#1a9a5a', glow: '#7cff6a', hover: true, leaves: '#3f9a2a' }, 'Solid gold, floating on green temple light. The jungle\'s best.');
+wm(3, 's_bubble',  'ride',  'Bubble Rider 130"',      'Sea tractor',           '🫧', 25000,  8.4, 12.5, 3.3,  50, 1.7,  2.7, 7.0, 1.4,  { col: '#7fd8ff', pattern: ['bubbles', '#7fd8ff', '#e8fbff'], dome: true }, 'Bubble-blue with a glass dome to keep you dry. Your first sea mower.');
+wm(3, 's_clown',   'zero',  'Clownfish Cruiser 128"', 'Sea zero-turn',         '🐠', 35000,  9.0, 13.5, 3.25, 52, 1.7,  3.8, 8.4, 1.4,  { col: '#ff7a1a', pattern: ['bands', '#ff7a1a', '#ffffff'], fin: '#ff7a1a' }, 'Orange and white bands with a little fin. Found it!');
+wm(3, 's_turtle',  'ride',  'Sea Turtle Tank',        'Sea tractor',           '🐢', 45000,  8.2, 12,   3.8,  60, 1.9,  2.4, 6.4, 1.6,  { col: '#5a8a3a', pattern: ['shell', '#6a9a3a', '#3a5a22'], lift: { body: 1.05, wheels: 1.3 } }, 'A shell-backed tank. Slow and steady mows the biggest lawns.');
+wm(3, 's_jelly',   'zero',  'Jellyfish Glider 132"',  'Sea hover zero-turn',   '🪼', 58000,  9.6, 14,   3.35, 56, 1.8,  3.9, 8.8, 1.42, { col: '#ff8fd8', rough: 0.15, metal: 0.2, glow: '#ff8fd8', hover: true, tentacles: '#ff8fd8' }, 'Glowing pink with floaty tentacles. Drifts over the sea grass.');
+wm(3, 's_shark',   'zero',  'Shark Attack 136"',      'Sea zero-turn',         '🦈', 72000, 10.0, 15,   3.45, 58, 1.9,  4.0, 9.2, 1.46, { col: '#7a8a98', pattern: ['belly', '#7a8a98', '#e8eef2'], fin: '#6a7a88', stripe: '#e8eef2' }, 'Grey and white with a big dorsal fin. Dun-dun… dun-dun…');
+wm(3, 's_octo',    'titan', 'Octopus Ink 9-Gang',     'Sea reel mower',        '🐙', 88000,  7.4, 11.5, 4.8,  80, 2.4,  2.0, 4.8, 1.9,  { col: '#8a3ad0', pattern: ['spots', '#8a3ad0', '#d89aff'], tentacles: '#8a3ad0' }, 'Eight arms, nine reels. A purple monster of a mower.');
+wm(3, 's_manta',   'zero',  'Manta Ray Wing 144"',    'Sea hover zero-turn',   '🐟', 105000, 10.4, 15.5, 3.65, 62, 2.0,  4.0, 9.5, 1.52, { col: '#1d2d5a', rough: 0.2, metal: 0.4, stripe: '#7ff0ff', glow: '#7ff0ff', hover: true }, 'Midnight blue and gliding on cyan light. Silent and smooth.');
+wm(3, 's_reef',    'ride',  'Coral Reef Royale',      'Lifted sea tractor',    '🪸', 125000, 9.4, 13.5, 4.2,  70, 2.1,  2.5, 7.0, 1.75, { col: '#ff6f61', pattern: ['spots', '#ff6f61', '#ffd0c0'], lift: { body: 1.08, wheels: 1.4 }, leaves: '#ff8fb0' }, 'Covered in living coral. The fanciest tractor in the ocean.');
+wm(3, 's_sub',     'ride',  'Submarine S-1',          'Sub-mower',             '🚤', 150000, 10.0, 16,   4.0,  72, 2.1,  2.8, 7.6, 1.7,  { col: '#ffd23b', stripe: '#1b1d20', prop: true, dome: true }, 'A yellow submarine with a propeller and a glass dome. We all mow in it.');
+wm(3, 's_pearl',   'zero',  'Pearl Diver 154"',       'Sea zero-turn',         '🦪', 180000, 10.8, 16,   3.9,  70, 2.1,  4.1, 9.8, 1.62, { col: '#f6f2ff', rough: 0.12, metal: 0.45, stripe: '#e0b0ff', trim: '#e0b030', glow: '#fff0ff' }, 'Shimmering pearl white. Every lawn it touches looks priceless.');
+wm(3, 's_kraken',  'titan', 'Kraken Destroyer 13-Gang', 'Sea reel mower',      '🦑', 220000, 8.0, 12,   5.4,  95, 2.7,  2.1, 5.0, 2.1,  { col: '#5a1020', pattern: ['spots', '#7a1a2a', '#2a0810'], tentacles: '#7a1a2a', glow: '#ff3a5a' }, 'The legendary sea monster, now with thirteen reels. Gigantic.');
+wm(3, 's_trident', 'zero',  'Trident of Atlantis',    'Sea hover zero-turn',   '🔱', 275000, 11.0, 17,  4.3,  80, 2.3,  4.2, 10,  1.78, { col: '#2fd8d0', rough: 0.18, metal: 0.45, stripe: '#e0b030', trim: '#e0b030', glow: '#7ff0ff', hover: true, fin: '#e0b030' }, 'The sea king\'s own mower: aqua, gold and floating. The best in any world.');
 const MOWER_ORDER = ['push', 'lite', 'sp', 'wide', 'ride', 'tractor', 'kart', 'zero', 'neon', 'hover', 'zeropro', 'inferno', 'monster', 'arctic', 'hoverx', 'platinum', 'thunder', 'titan',
-  'swamp', 'galaxy', 'magma', 'phantom', 'emperor', 'quantum', 'scott', 'rover', 'mm_push', 'jd_push', 'mm_ride', 'jd_ride'];
+  'swamp', 'galaxy', 'magma', 'phantom', 'emperor', 'quantum', ...WORLD_MOWERS, 'scott', 'rover', 'mm_push', 'jd_push', 'mm_ride', 'jd_ride'];
 const MOWSHOP = ['mm_push', 'jd_push', 'mm_ride', 'jd_ride'], CUSTOM_KIT_PRICE = 300;
 const mdl = id => (MOWERS[id] && MOWERS[id].model) || id;
 // Speed & Fuel Capacity are the headline upgrades (Ray's Upgrade Stall). Upgrades apply to every mower you own.
@@ -675,11 +709,36 @@ const CLIENTS = {
    Every town sits on the same east–west road (z = 0), so you can drive between them.
    Lots in the new towns are scaled up (us = width, vs = depth): bigger houses, much bigger lawns. */
 const TOWNS = [
-  { id: 'mow',  name: 'Mow Town',     x0: -228, x1: 178,  pay: 1,   us: 1,    vs: 1,    req: 0,  icon: '🏡', col: '#b9f56c', tag: 'Home sweet home' },
-  { id: 'oak',  name: 'Oakridge',     x0: 560,  x1: 830,  pay: 1.5, us: 1.22, vs: 1.25, req: 6,  icon: '🌳', col: '#ffcf4a', tag: 'Leafy streets and bigger yards' },
-  { id: 'bay',  name: 'Seaview Bay',  x0: 1150, x1: 1450, pay: 2.1, us: 1.42, vs: 1.45, req: 15, icon: '⛵', col: '#7ed4ff', tag: 'Beach houses with huge lawns' },
-  { id: 'peak', name: 'Summit Hills', x0: 1760, x1: 2100, pay: 3,   us: 1.65, vs: 1.7,  req: 30, icon: '🏰', col: '#c89bff', tag: 'Mansions, enormous lawns, big money' }
+  { id: 'mow',  name: 'Mow Town',     x0: -228, x1: 178,  pay: 1,   us: 1,    vs: 1,    req: 0,  icon: '🏡', col: '#b9f56c', tag: 'Home sweet home', world: 1 },
+  { id: 'oak',  name: 'Oakridge',     x0: 560,  x1: 830,  pay: 1.5, us: 1.22, vs: 1.25, req: 6,  icon: '🌳', col: '#ffcf4a', tag: 'Leafy streets and bigger yards', world: 1 },
+  { id: 'bay',  name: 'Seaview Bay',  x0: 1150, x1: 1450, pay: 2.1, us: 1.42, vs: 1.45, req: 15, icon: '⛵', col: '#7ed4ff', tag: 'Beach houses with huge lawns', world: 1 },
+  { id: 'peak', name: 'Summit Hills', x0: 1760, x1: 2100, pay: 3,   us: 1.65, vs: 1.7,  req: 30, icon: '🏰', col: '#c89bff', tag: 'Mansions, enormous lawns, big money', world: 1 }
 ];
+/* ---------- 🌍 Worlds: once you've mowed enough lawns and can pay the moving fee, you move to the next world ----------
+   Each world is its own stretch of road far from the others (you travel between them from the Worlds screen, O).
+   World 2 is a jungle, world 3 is under the sea: bigger lawns, bigger pay and 12 mowers you can only buy there. */
+const WORLDS = [null,
+  { id: 1, name: 'Mow Town Valley', short: 'Mow Town', icon: '🏡', col: '#b9f56c', tag: 'Where it all started', x0: -420, x1: 2400 },
+  { id: 2, name: 'The Jungle', short: 'Jungle', icon: '🌴', col: '#7be36a', tag: 'Jungle huts, giant lawns and wild mowers', x0: 4500, x1: 6100, lawns: 60, fee: 25000, home: 'home2',
+    homeName: 'Your Jungle Hut', homeLine: 'The jungle hut is lovely, sweetie! Mind the monkeys.' },
+  { id: 3, name: 'Deep Blue', short: 'Underwater', icon: '🌊', col: '#5fd4ff', tag: 'Sea-dome houses under the ocean and the biggest pay of all', x0: 8450, x1: 10150, lawns: 150, fee: 150000, home: 'home3',
+    homeName: 'Your Sea Dome', homeLine: 'An underwater house! I never thought I\'d say that. Wipe your flippers, honey.' }
+];
+// the towns in worlds 2 and 3 (their ends are worked out from how big their lots are)
+[[2, 'vine', 'Vine Valley', 5000, 5, 1.9, 1.95, '🦜', '#9be36a', 'Jungle huts and giant lawns', true],
+ [2, 'tiki', 'Tiki Falls', 0, 6.5, 2.1, 2.15, '🗿', '#ffb84a', 'Waterfalls, tiki torches and big money'],
+ [3, 'coral', 'Coral Cove', 9000, 10, 2.3, 2.35, '🐠', '#ff8fb0', 'Sea domes in a coral garden', true],
+ [3, 'atl', 'Atlantis Heights', 0, 13, 2.55, 2.6, '🔱', '#7ff0ff', 'The lost city: the richest lawns anywhere']].forEach(([world, id, name, cx, pay, us, vs, icon, col, tag, first]) => {
+  const step = 28 * us + 4, half = 14 * us, prev = TOWNS[TOWNS.length - 1];
+  if (!cx) cx = prev.x1 + 250 + 1.5 * step + half + 20;
+  const x0 = Math.round(cx - (first ? 2.5 : 1.5) * step + (first ? 6 : 0) - half - 20), x1 = Math.round(cx + 1.5 * step + half + 47);
+  TOWNS.push({ id, name, x0, x1, cx, pay, us, vs, req: 0, icon, col, tag, world, first });
+});
+const worldOfX = x => x > 7500 ? 3 : x > 3500 ? 2 : 1;
+const WORLD_GRASS = { 2: [0.8, 1.12, 0.74], 3: [0.5, 0.98, 0.95] };
+const isHomeLot = L => !!L && (L.id === 'home' || L.id === 'home2' || L.id === 'home3');
+const homeLotOf = w => Town.lotsById[w > 1 ? WORLDS[w].home : 'home'];
+const worldOfLot = L => townById(L.town).world || 1;
 const townById = id => TOWNS.find(T => T.id === id) || TOWNS[0];
 const townOfLot = L => townById(L.town);
 const townAtX = x => TOWNS.find(T => x > T.x0 - 40 && x < T.x1 + 40) || null;
@@ -689,28 +748,52 @@ const TOWN_PEOPLE = {
   bay: [['Captain Reyes', 'Capt. Reyes', 'Shipshape lawns only, sailor!'], ['The Lindqvists', 'Lindqvists', 'The sea air makes it grow so fast.'], ['Mrs. Whitmore', 'Mrs. Whitmore', 'I have guests from the yacht club tonight.'], ['The Tanakas', 'Tanakas', 'Gentle around the stones, please.'],
     ['Mr. Costa', 'Mr. Costa', 'Big lawn, big pay. Simple!'], ['The Bakers', 'Bakers', 'Fresh cookies if you do a good job!'], ['Dr. Ferreira', 'Dr. Ferreira', 'Straight stripes are good for the soul.'], ['Ms. Laurent', 'Ms. Laurent', 'Make it look like a postcard, darling.']],
   peak: [['The Sterlings', 'Sterlings', 'We only hire the best. Prove it.'], ['Mr. Blackwood', 'Blackwood', 'My lawn is bigger than your whole street.'], ['Lady Pemberton', 'Lady Pemberton', 'One expects perfection.'], ['The Montgomerys', 'Montgomerys', 'The garden party is at noon sharp.'],
-    ['Mr. Hale', 'Mr. Hale', 'I pay double for no damage. Remember that.'], ['The Carringtons', 'Carringtons', 'Mind the fountain. It\'s Italian marble.'], ['Ms. Valentine', 'Ms. Valentine', 'The photographers arrive at five.'], ['Dr. Hawthorne', 'Dr. Hawthorne', 'I timed the last kid. Beat it.']]
+    ['Mr. Hale', 'Mr. Hale', 'I pay double for no damage. Remember that.'], ['The Carringtons', 'Carringtons', 'Mind the fountain. It\'s Italian marble.'], ['Ms. Valentine', 'Ms. Valentine', 'The photographers arrive at five.'], ['Dr. Hawthorne', 'Dr. Hawthorne', 'I timed the last kid. Beat it.']],
+  // 🌴 the jungle
+  vine: [['Ranger Okoye', 'Ranger Okoye', 'Watch for snakes in the long grass. Big ones.'], ['The Montoyas', 'Montoyas', 'The parrots love a freshly cut lawn!'], ['Professor Amari', 'Prof. Amari', 'I study beetles. Please don\'t mow any.'], ['Chief Kalani', 'Chief Kalani', 'In the jungle, the grass grows overnight. Every night.'],
+    ['Mrs. Banerjee', 'Mrs. Banerjee', 'The monkeys stole my hose again.'], ['The Silvas', 'Silvas', 'Stripes as straight as bamboo, please!'], ['Dr. Ishikawa', 'Dr. Ishikawa', 'My orchids are worth more than your mower.'], ['Old Man Mbeki', 'Mr. Mbeki', 'I have lived here 80 years. Impress me.']],
+  tiki: [['Captain Moana', 'Capt. Moana', 'The waterfall makes the grass grow crazy fast.'], ['The Kahananuis', 'Kahananuis', 'Luau tonight! The lawn has to be perfect.'], ['Mr. Tavita', 'Mr. Tavita', 'Mind the tiki torches. They are very old.'], ['Lady Leilani', 'Lady Leilani', 'I only hire the best mower in the jungle.'],
+    ['The Fonotis', 'Fonotis', 'The toucans watch you work. No pressure.'], ['Dr. Ruiz', 'Dr. Ruiz', 'Straight lines calm the jaguars. True fact.'], ['Big Joe Kealoha', 'Big Joe', 'Big lawn, big pay. Don\'t mess it up.'], ['Ms. Palila', 'Ms. Palila', 'Make it look like a postcard from paradise!']],
+  // 🌊 under the sea
+  coral: [['Captain Nemo-Smith', 'Capt. Nemo', 'Keep your helmet on and your stripes straight.'], ['The Finnegans', 'Finnegans', 'The seahorses race on our lawn. Make it smooth!'], ['Dr. Marina Reyes', 'Dr. Reyes', 'Careful round the coral. It took 200 years to grow.'], ['Mrs. Shelley', 'Mrs. Shelley', 'I collect pearls. Don\'t run any over.'],
+    ['The Bubblesons', 'Bubblesons', 'Our sea grass is the fluffiest in the cove.'], ['Mr. Gill', 'Mr. Gill', 'Mow it like you mean it, surface kid.'], ['Professor Kelp', 'Prof. Kelp', 'Sea grass and land grass are basically cousins.'], ['The Coralinis', 'Coralinis', 'A turtle sleeps by the shed. Let him be.']],
+  atl: [['King Triton III', 'King Triton', 'The royal lawn deserves royal stripes.'], ['Lady Nerissa', 'Lady Nerissa', 'One expects the finest sea grass in Atlantis.'], ['The Poseidons', 'Poseidons', 'Our garden party starts when the tide turns.'], ['Admiral Abyss', 'Adm. Abyss', 'I pay in gold coins. Lots of them.'],
+    ['Ms. Pearlman', 'Ms. Pearlman', 'Perfect stripes or no pearls for you.'], ['The Krakensteins', 'Krakensteins', 'Our pet kraken is friendly. Mostly.'], ['Sir Wavesworth', 'Sir Wavesworth', 'The dolphins judge every lawn on the street.'], ['Queen Coralia', 'Queen Coralia', 'The richest lawn in the ocean. Treat it that way.']]
 };
 const TOWN_LOOK = {
   oak: { body: ['#e8d9b8', '#d8c0a0', '#c9d6e0', '#f2e2c8', '#b8c8a8'], roof: ['#5a3226', '#3a4250', '#4a3a2a', '#2a3a5a'] },
   bay: { body: ['#f4f2ea', '#bfe0ec', '#f0e0b0', '#e8f0f4', '#f6d6c8'], roof: ['#2a5a7a', '#3a6a8a', '#8a5a3a', '#2e3036'] },
-  peak: { body: ['#f4f2ea', '#e6e0d4', '#d8d0c4', '#f0ece4', '#cfc6b8'], roof: ['#2e3036', '#3a2a2a', '#2a3a3a', '#4a3a5a'] }
+  peak: { body: ['#f4f2ea', '#e6e0d4', '#d8d0c4', '#f0ece4', '#cfc6b8'], roof: ['#2e3036', '#3a2a2a', '#2a3a3a', '#4a3a5a'] },
+  vine: { body: ['#a8743a', '#8a5a2a', '#c09050', '#9a6a38', '#b88848'], roof: ['#d8b860', '#c8a450', '#e0c070'] },          // bamboo walls, straw thatch
+  tiki: { body: ['#8a5a2a', '#a8743a', '#7a4a22', '#b07a40', '#c8945a'], roof: ['#c8a450', '#d8b860', '#b89040'] },
+  coral: { body: ['#f6c6b8', '#bfe6e6', '#f0e6c8', '#ffd4e0', '#c8e0ff'], roof: ['#5fd4ff', '#7ff0d0', '#ff8fb0', '#b49cff'] },  // pastel sea domes
+  atl: { body: ['#f2f6fa', '#e0f4f4', '#f6ecd8', '#e8e0ff', '#d8f0ff'], roof: ['#e0b030', '#7ff0ff', '#5fd4ff', '#ffd76a'] }
 };
 // ⛽ the petrol stations in the new towns (each one sells its own accessories inside)
 const STATIONS = {
   oak:  { name: 'OAKRIDGE FUEL', short: 'Oakridge Fuel', col: '#2f6a24', clerk: 'Bev',     hello: 'Welcome to Oakridge Fuel! Fresh from the woods: a pennant and a proper tool rack.' },
   bay:  { name: 'SEAVIEW GAS',   short: 'Seaview Gas',   col: '#1d6fa8', clerk: 'Marco',   hello: 'Ahoy! Beach stuff for your mower: a surfboard rack and an anchor bumper.' },
-  peak: { name: 'SUMMIT PETROL', short: 'Summit Petrol', col: '#5a3a8a', clerk: 'Celeste', hello: 'Good day. Only the finest up here: a gold grille and a champagne cooler.' }
+  peak: { name: 'SUMMIT PETROL', short: 'Summit Petrol', col: '#5a3a8a', clerk: 'Celeste', hello: 'Good day. Only the finest up here: a gold grille and a champagne cooler.' },
+  vine: { name: 'VINE VALLEY FUEL', short: 'Vine Valley Fuel', col: '#2f7a2a', clerk: 'Kofi', hello: 'Welcome to the jungle! Fill up before the monkeys drink it all.' },
+  tiki: { name: 'TIKI GAS', short: 'Tiki Gas', col: '#b85a1a', clerk: 'Leilani', hello: 'Aloha! Coconut-scented gas, only the best for jungle mowers.' },
+  coral: { name: 'CORAL FUEL', short: 'Coral Fuel', col: '#d84a7a', clerk: 'Finn', hello: 'Bubble bubble! Yes, the pumps work underwater. Don\'t ask how.' },
+  atl: { name: 'ATLANTIS PETROL', short: 'Atlantis Petrol', col: '#1a8aa8', clerk: 'Nerina', hello: 'Welcome to Atlantis. Our fuel is blessed by the sea king himself.' }
 };
 const storeName = L => L && L.station ? L.station.short : 'Pump & Go';
 (function addTowns() {
   const pool = ['roses', 'birdbath', 'gnomes', 'shed', 'swing', 'trampoline', 'goal', 'toys', 'fountain', 'hedges', 'zen', 'pool', 'bbq', 'veggie', 'trees'];
   const clash = { shed: ['zen'], zen: ['shed'], pool: ['fountain', 'veggie'], fountain: ['pool'], veggie: ['pool'] }; // things that would sit on top of each other
+  const wpool = { 2: ['roses', 'shed', 'swing', 'toys', 'fountain', 'hedges', 'zen', 'pool', 'bbq', 'veggie', 'trees', 'gnomes'], 3: ['roses', 'birdbath', 'gnomes', 'fountain', 'zen', 'toys', 'trees', 'hedges', 'shed'] };
   TOWNS.slice(1).forEach((T, ti) => {
-    const r = mulberry32(500 + ti), people = TOWN_PEOPLE[T.id], look = TOWN_LOOK[T.id], cx = (T.x0 + T.x1) / 2, step = 28 * T.us + 4;
+    const r = mulberry32(500 + ti), people = TOWN_PEOPLE[T.id], look = TOWN_LOOK[T.id], cx = T.cx || (T.x0 + T.x1) / 2, step = 28 * T.us + 4, tp = wpool[T.world] || pool;
+    if (T.first) { // 🏠 your house in this world (Mom moved with you)
+      const W = WORLDS[T.world], id = W.home;
+      LOTS.push({ id, x: Math.round(cx - 2.5 * step + 6), side: 1, w: 28, kind: 'house', client: id, town: T.id, us: T.us, vs: T.vs, body: look.body[0], roof: look.roof[0], extras: ['swing'] });
+      CLIENTS[id] = { name: W.homeName, short: 'Home', rate: 0.22, own: true, line: W.homeLine, town: T.id };
+    }
     people.forEach((p, i) => {
       const side = i < 4 ? -1 : 1, k = i % 4, id = T.id + '_' + i, ex = [];
-      for (let tries = 0; ex.length < 3 && tries < 40; tries++) { const e = pool[Math.floor(r() * pool.length)]; if (!ex.includes(e) && !ex.some(o => (clash[o] || []).includes(e))) ex.push(e); }
+      for (let tries = 0; ex.length < 3 && tries < 40; tries++) { const e = tp[Math.floor(r() * tp.length)]; if (!ex.includes(e) && !ex.some(o => (clash[o] || []).includes(e))) ex.push(e); }
       LOTS.push({ id, x: Math.round(cx + (k - 1.5) * step + (side > 0 ? 6 : 0)), side, w: 28, kind: 'house', client: id, town: T.id, us: T.us, vs: T.vs,
         body: look.body[Math.floor(r() * look.body.length)], roof: look.roof[Math.floor(r() * look.roof.length)], extras: ex });
       CLIENTS[id] = { name: p[0], short: p[1], rate: 0.3 + r() * 0.06, line: p[2], town: T.id };
@@ -784,6 +867,7 @@ function defaultSave() {
     veh: { car: 'ute', trailer: 'small', owned: ['ute', 'small'] },   // 🚚 your truck and trailer
     crew: { hired: false, mower: null, task: 'back', jobs: 0 },       // 👷 one worker who mows with you
     towns: { mow: 1 },                                                // towns you've driven to
+    world: 1, worlds: [1],                                            // 🌍 the world you live in now, and every world you've moved to
     settings: { master: 0.8, sfx: 0.9, engine: 0.55, amb: 0.5, music: 0.5, quality: 'auto', shake: 1, fps: false, sens: 1, tips: true, mowerCtl: 'wasd',
       hlAfford: true, hlJobs: true, popUpg: true, popQuest: true, weather: true, muted: false } // helper toggles live in phone → Settings
   };
@@ -828,6 +912,7 @@ function readSlot(n) {
     if (o.event && o.event.teamLawns == null) s.event.teamLawns = s.event.lawns; // lawns mowed before the team scoreboard still count                                   // saves from before the tutorial existed never get it forced on them
     s.owned = s.owned.filter((id, i, a) => MOWERS[id] && a.indexOf(id) === i); if (!s.owned.includes('push')) s.owned.unshift('push'); // fix duplicate/unknown mowers
     if (!MOWERS[s.mower] || !s.owned.includes(s.mower)) s.mower = 'push';
+    if (!Array.isArray(s.worlds) || !s.worlds.includes(1)) s.worlds = [1]; if (!WORLDS[s.world] || !s.worlds.includes(s.world)) s.world = 1; // 🌍
     for (const k in s.upgrades) s.upgrades[k] = clamp(Math.floor(s.upgrades[k] || 0), 0, UPG_MAX);
     if (s.own.paint.includes('custom')) MS_COLOURS.forEach(id => { if (!s.own.paint.includes(id)) s.own.paint.push(id); }); // bought the v1.17 kit: you get the limited colours
     return s;
@@ -1145,8 +1230,27 @@ function yardMaterials(Y) {
 }
 // Town ground (verges, non-job grass): noisy short grass + dirt
 const GROUND_U = { uGTint: { value: new THREE.Vector3(1, 1, 1) }, uGFrost: { value: 0 }, uGLeaves: { value: 0 } }; // set by the season
-function makeTownGroundMat() {
+function makeTownGroundMat(w = 1) {
   const m = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  if (w > 1) { // 🌴 jungle floor (moss and mud) · 🌊 sea-floor sand with ripples and patches of sea grass
+    m.onBeforeCompile = sh => {
+      sh.vertexShader = 'varying vec3 vGW;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = 'varying vec3 vGW;\n' + NOISE_GLSL + sh.fragmentShader.replace('vec4 diffuseColor = vec4( diffuse, opacity );', w === 2 ? `
+        vec2 q = vGW.xz - vec2(${WORLDS[w].x0}.0, 0.0);
+        float n = vnoise(q * 0.7) * 0.45 + vnoise(q * 3.1) * 0.3 + vnoise(q * 0.11) * 0.25;
+        vec3 g = mix(vec3(0.04, 0.14, 0.03), vec3(0.11, 0.26, 0.05), n);
+        g = mix(g, vec3(0.2, 0.13, 0.06), smoothstep(0.7, 0.82, vnoise(q * 0.18 + 3.0)) * 0.75);
+        vec4 diffuseColor = vec4(g, 1.0);` : `
+        vec2 q = vGW.xz - vec2(${WORLDS[w].x0}.0, 0.0);
+        float n = vnoise(q * 0.5) * 0.5 + vnoise(q * 2.7) * 0.3 + vnoise(q * 0.09) * 0.2;
+        float rip = 0.5 + 0.5 * sin(q.x * 1.3 + vnoise(q * 0.3) * 6.0);
+        vec3 g = mix(vec3(0.15, 0.16, 0.13), vec3(0.26, 0.25, 0.18), n) * (0.86 + 0.16 * rip);
+        g = mix(g, vec3(0.06, 0.2, 0.17), smoothstep(0.66, 0.8, vnoise(q * 0.16 + 9.0)) * 0.8);
+        vec4 diffuseColor = vec4(g, 1.0);`);
+    };
+    m.customProgramCacheKey = () => 'worldGround' + w; // the two worlds' shaders differ, so don't let three.js share one program
+    return m;
+  }
   m.onBeforeCompile = sh => {
     Object.assign(sh.uniforms, GROUND_U);
     sh.vertexShader = 'varying vec3 vGW;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvGW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
@@ -1213,20 +1317,28 @@ function buildEnvironment() {
   scene.add(Env.hills);
 }
 const _ca = new THREE.Color(), _cb = new THREE.Color();
+// how each world tints the sky, sun and fog (blended over the normal day–night cycle)
+const WORLD_LOOK = {
+  2: { top: '#3f8ad0', hor: '#d8f0c0', sun: '#fff0c0', ground: '#1f3a14', k: 0.3, si: 1, hi: 1.05, fog: [55, 270], hills: '#2f6a24', hemiG: '#2a4a1a' },
+  3: { top: '#03294a', hor: '#1a7aa6', sun: '#8fe8ff', ground: '#0a2a3a', k: 0.88, si: 0.62, hi: 1.15, fog: [16, 150], hemiG: '#0d3e52', sea: true }
+};
 function lerpKey(h, f) { let i = 0; while (i < SKY_KEYS.length - 2 && SKY_KEYS[i + 1].h <= h) i++; const a = SKY_KEYS[i], b = SKY_KEYS[i + 1], t = clamp((h - a.h) / (b.h - a.h), 0, 1); return f(a, b, smooth(t)); }
 let skyT = -1;
 function updateTimeOfDay(force) {
   const h = (S.clock / 60) % 24;
   if (!force && Math.abs(h - skyT) < 0.02) return; skyT = h;
   const top = lerpKey(h, (a, b, t) => _ca.copy(C(a.top)).lerp(C(b.top), t).clone()), hor = lerpKey(h, (a, b, t) => _cb.copy(C(a.hor)).lerp(C(b.hor), t).clone());
-  colorSky(Env.sky.geometry, top, hor, C('#2a3a1c'));
-  const sunC = lerpKey(h, (a, b, t) => C(a.sun).lerp(C(b.sun), t)), si = lerpKey(h, (a, b, t) => lerp(a.si, b.si, t)), hi = lerpKey(h, (a, b, t) => lerp(a.hi, b.hi, t));
+  const sunC = lerpKey(h, (a, b, t) => C(a.sun).lerp(C(b.sun), t)); let si = lerpKey(h, (a, b, t) => lerp(a.si, b.si, t)), hi = lerpKey(h, (a, b, t) => lerp(a.hi, b.hi, t));
+  const WL = WORLD_LOOK[Env.world || 1]; // 🌴 steamy green haze · 🌊 deep blue water
+  if (WL) { const dark = clamp(si / 2.4, 0.08, 1); top.lerp(C(WL.top).multiplyScalar(dark), WL.k); hor.lerp(C(WL.hor).multiplyScalar(dark), WL.k); sunC.lerp(C(WL.sun), WL.k * 0.7); si *= WL.si; hi *= WL.hi; }
+  colorSky(Env.sky.geometry, top, hor, C(WL ? WL.ground : '#2a3a1c'));
   const dayF = clamp((h - 5.8) / 14.8, 0, 1), el = Math.sin(dayF * Math.PI) * 62 * Math.PI / 180 + 0.04, az = lerp(-1.4, 1.4, dayF);
   Env.sunDir.set(Math.cos(el) * Math.sin(az), Math.sin(el), Math.cos(el) * Math.cos(az) * 0.6 - 0.3).normalize();
   Env.sun.color.copy(sunC); Env.sun.intensity = si; Env.hemi.intensity = hi; Env.hemi.color.copy(hor).lerp(_ca.set(1, 1, 1), 0.4);
   Env.night = clamp(1 - si / 1.0, 0, 1) * (h > 18 || h < 7 ? 1 : 0);
-  Env.moon.intensity = Env.night * 0.55; Env.stars.material.opacity = Env.night * 0.9;
-  scene.fog.color.copy(hor); Env.sunSprite.material.opacity = si > 0 ? 1 : 0;
+  Env.moon.intensity = Env.night * 0.55; Env.stars.material.opacity = WL && WL.sea ? 0 : Env.night * 0.9;
+  scene.fog.color.copy(hor); Env.sunSprite.material.opacity = si > 0 && !(WL && WL.sea) ? 1 : 0;
+  scene.fog.near = WL ? WL.fog[0] : 80; scene.fog.far = WL ? WL.fog[1] : 340;
   scene.environment = Env.night > 0.6 ? Env.envs.night : (h > 18.5 || h < 7.5) ? Env.envs.gold : Env.envs.day;
   renderer.toneMappingExposure = lerp(1.0, 1.25, Env.night);
   Town.lampMat && (Town.lampMat.emissiveIntensity = Env.night * 3);
@@ -1330,6 +1442,8 @@ class Yard {
     const lt = LAWN_TYPES[this.lot.startsWith('race') ? 0 : hashStr(this.id) % LAWN_TYPES.length]; this.grassType = lt.name; this.lt = lt;
     const tint = (c, m) => ({ value: c.clone().multiply(new THREE.Color(m[0], m[1], m[2])) });
     this.U.uBase = tint(SU.uBase.value, lt.m); this.U.uTip = tint(SU.uTip.value, lt.m); this.U.uCutCol = tint(SU.uCutCol.value, lt.c || lt.m);
+    this.wt = WORLD_GRASS[worldOfX(this.minX)]; // 🌴 lush jungle grass · 🌊 teal sea grass
+    if (this.wt) { const m = new THREE.Color(...this.wt); this.U.uBase.value.multiply(m); this.U.uTip.value.multiply(m); this.U.uCutCol.value.multiply(m); }
     this.mats = yardMaterials(this);
     const g = new THREE.PlaneGeometry(this.W, this.D, Math.min(110, Math.ceil(this.W * 1.5)), Math.min(100, Math.ceil(this.D * 1.5)));
     g.rotateX(-Math.PI / 2); g.translate(this.minX + this.W / 2, 0, this.minZ + this.D / 2);
@@ -1468,9 +1582,9 @@ function roadSign(x, z, lines) { // green highway sign with distances
 }
 function buildTown() {
   Town.root = Town.group = new THREE.Group(); scene.add(Town.group); initTownMats(); Town.parts = [];
-  const rng = mulberry32(2026), last = TOWNS[TOWNS.length - 1];
+  const rng = mulberry32(2026), W1 = TOWNS.filter(T => T.world === 1), last = W1[W1.length - 1];
   const gx0 = STREET.x0 - 160, gx1 = last.x1 + 260;
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(gx1 - gx0, 440, 1, 1).rotateX(-Math.PI / 2), makeTownGroundMat()); ground.position.set((gx0 + gx1) / 2, 0, 0); ground.receiveShadow = true; Town.group.add(ground);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(gx1 - gx0, 440, 1, 1).rotateX(-Math.PI / 2), makeTownGroundMat(1)); ground.position.set((gx0 + gx1) / 2, 0, 0); ground.receiveShadow = true; Town.group.add(ground);
   // 🏡 Mow Town: Main Street, its lots and the woods around it (built exactly as before)
   townGroup('mow', STREET.x0 - 40, STREET.x1 + 40);
   buildStreet(STREET.x0, STREET.x1, true);
@@ -1480,23 +1594,65 @@ function buildTown() {
   // 🛣️ the highway east to the other towns, with the ⛳ golf course along the way
   const r2 = mulberry32(777);
   Town.group = Town.root;
-  for (let i = 0; i + 1 < TOWNS.length; i++) {
-    const a = TOWNS[i].x1, b = TOWNS[i + 1].x0; buildStreet(a, b, false);
+  for (let i = 0; i + 1 < W1.length; i++) {
+    const a = W1[i].x1, b = W1[i + 1].x0; buildStreet(a, b, false);
     for (let x = a + 20; x < b - 20; x += 9 + r2() * 10) [-1, 1].forEach(s => { const z = s * (14 + r2() * 70); if (!(s > 0 && x > 280 && x < 460 && z < 95)) Town.trees.push({ x, z, s: 1 + r2() * 0.9, t: r2() < 0.5 ? 'pine' : 'round' }); });
-    const left = TOWNS.slice(i + 1).map(T => [T.name, Math.round((T.x0 - a) / 100) / 10 + ' km']).slice(0, 3);
+    const left = W1.slice(i + 1).map(T => [T.name, Math.round((T.x0 - a) / 100) / 10 + ' km']).slice(0, 3);
     roadSign(a + 30, -(STREET.half + 3), left);
   }
   townGroup('golf', 280, 460); buildLot(Town.lotsById.golf || LOTS.find(L => L.id === 'golf'), r2);
   // 🌳 ⛵ 🏰 the new towns
-  TOWNS.slice(1).forEach((T, i) => {
+  TOWNS.slice(1).filter(T => T.world === 1).forEach((T, i) => {
     const r = mulberry32(900 + i); townGroup(T.id, T.x0 - 60, T.x1 + 60);
     buildStreet(T.x0, T.x1, true);
     for (const L of LOTS) if (L.town === T.id) buildLot(L, r);
     for (let x = T.x0 - 20; x < T.x1 + 20; x += 7 + r() * 6) [-1, 1].forEach(s => { const z = s * (LOT0 + 40 * T.vs + 14 + r() * 25); Town.trees.push({ x: x + r() * 4, z, s: 1.1 + r() * 0.9, t: r() < 0.4 ? 'pine' : 'round' }); });
     townSign(T, T.x0 + 6, Math.PI / 2); townSign(T, T.x1 - 6, -Math.PI / 2);
   });
+  [2, 3].forEach(buildWorld); // 🌴 🌊
   Town.group = Town.root; // everything shared (instanced trees, bushes, lamps, decorations) goes on the root
   dressTown(); buildTreesInstanced(); buildBushesInstanced(); buildLamps();
+}
+// 🌴 🌊 a whole world: its own ground, a road with its towns on it, trees and a dead end at each side
+function buildWorld(w) {
+  const W = WORLDS[w], ts = TOWNS.filter(T => T.world === w), r = mulberry32(4000 + w), wx0 = ts[0].x0 - 200, wx1 = ts[ts.length - 1].x1 + 200;
+  townGroup('world' + w, wx0 - 120, wx1 + 120); W.g = Town.group;
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(wx1 - wx0 + 600, 460, 1, 1).rotateX(-Math.PI / 2), makeTownGroundMat(w)); ground.position.set((wx0 + wx1) / 2, 0, 0); ground.receiveShadow = true; Town.group.add(ground);
+  const tt = () => r() < 0.5 ? 'pine' : 'round', dense = w === 2 ? 2.2 : 1, road = (a, b) => { buildStreet(a, b, false); for (let x = a + 12; x < b - 12; x += (7 + r() * 8) / dense) [-1, 1].forEach(s => Town.trees.push({ x, z: s * (12 + r() * 120), s: 1 + r() * 0.9, t: tt() })); };
+  road(wx0, ts[0].x0); for (let i = 0; i + 1 < ts.length; i++) road(ts[i].x1, ts[i + 1].x0); road(ts[ts.length - 1].x1, wx1);
+  for (let i = 0; i + 1 < ts.length; i++) roadSign(ts[i].x1 + 30, -(STREET.half + 3), [[ts[i + 1].name, Math.round((ts[i + 1].x0 - ts[i].x1) / 100) / 10 + ' km'], [ts[i + 1].pay + '× pay', '']]);
+  // the edge of the world: a barrier across everything and a sign telling you how to travel
+  const sign = canvasTex(512, 256, (c, ww, h) => { c.fillStyle = '#16212a'; c.fillRect(0, 0, ww, h); c.strokeStyle = W.col; c.lineWidth = 10; c.strokeRect(10, 10, ww - 20, h - 20); c.textAlign = 'center'; c.fillStyle = W.col; c.font = '900 50px "Arial Black",Impact,sans-serif'; c.fillText(W.icon + ' ' + W.name.toUpperCase(), ww / 2, 90); c.fillStyle = '#f2e6c0'; c.font = '700 30px Arial'; c.fillText('End of the road', ww / 2, 150); c.fillText('Press O to travel between worlds', ww / 2, 200); });
+  [[wx0, 1], [wx1, -1]].forEach(([x, s]) => {
+    addCol({ type: 'box', x0: x - 1, x1: x + 1, z0: -230, z1: 230, y1: 3 });
+    for (let z = -STREET.half; z <= STREET.half; z += 1.6) boxAt({ x0: x - 0.3, x1: x + 0.3, z0: z - 0.7, z1: z + 0.7 }, 0, 1.1, (Math.round(z / 1.6) % 2) ? M.white : M.red);
+    const sg = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 2.3), new THREE.MeshStandardMaterial({ map: sign, side: THREE.DoubleSide })); sg.position.set(x + s * 6, 2.6, -(STREET.half + 2.5)); sg.rotation.y = s * Math.PI / 2; Town.group.add(sg);
+    for (let z = -220; z < 220; z += 4 + r() * 4) if (Math.abs(z) > 9) Town.trees.push({ x: x + s * (2 + r() * 10), z, s: 1.2 + r(), t: tt() });
+  });
+  ts.forEach((T, i) => {
+    const rr = mulberry32(950 + w * 10 + i); townGroup(T.id, T.x0 - 60, T.x1 + 60);
+    buildStreet(T.x0, T.x1, true);
+    for (const L of LOTS) if (L.town === T.id) buildLot(L, rr);
+    for (let x = T.x0 - 20; x < T.x1 + 20; x += (6 + rr() * 6) / dense) [-1, 1].forEach(s => { const z = s * (LOT0 + 40 * T.vs + 8 + rr() * 50); Town.trees.push({ x: x + rr() * 4, z, s: 1.1 + rr() * 0.9, t: rr() < 0.5 ? 'pine' : 'round' }); });
+    townSign(T, T.x0 + 6, Math.PI / 2); townSign(T, T.x1 - 6, -Math.PI / 2);
+  });
+  // ground cover everywhere that isn't a lot or the road: 🌿 ferns in the jungle, 🪨 rocks and anemones under the sea
+  const lots = LOTS.filter(L => worldOfLot(L) === w), free = (x, z) => Math.abs(z) > 9 && !lots.some(L => Math.sign(z) === L.side && Math.abs(x - L.x) < L.w / 2 * (L.us || 1) + 3 && Math.abs(z) < LOT0 + 40 * (L.vs || 1) + 3);
+  const pts = []; for (let k = 0; k < 2600 && pts.length < 1100; k++) { const x = lerp(wx0 + 10, wx1 - 10, r()), z = (r() - 0.5) * 420; if (free(x, z)) pts.push({ x, z, s: 0.7 + r() * 0.9 }); }
+  const dm = new THREE.Object3D(), col = new THREE.Color();
+  if (w === 2) {
+    const fern = new THREE.InstancedMesh(new THREE.ConeGeometry(0.28, 1, 3), obm('fern', () => std('#ffffff', 0.85, 0, { flatShading: true, side: THREE.DoubleSide })), pts.length * 6); let n = 0;
+    pts.forEach(p => { const c = pick(['#2f7a22', '#3f8a2a', '#25661c', '#4f9a30']); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + p.x; dm.position.set(p.x + Math.sin(a) * 0.45 * p.s, 0.35 * p.s, p.z + Math.cos(a) * 0.45 * p.s); dm.rotation.set(1.05, a, 0, 'YXZ'); dm.scale.set(p.s, p.s * 1.5, p.s * 0.2); dm.updateMatrix(); fern.setMatrixAt(n, dm.matrix); fern.setColorAt(n++, col.copy(C(c)).multiplyScalar(0.85 + r() * 0.3)); } });
+    fern.castShadow = true; fern.frustumCulled = false; W.g.add(fern);
+  } else {
+    const rock = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1, 0), obm('seaRock', () => std('#ffffff', 0.9, 0, { flatShading: true })), pts.length), anem = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.06, 0.1, 1, 5), obm('anem', () => std('#ffffff', 0.6, 0, { emissive: C('#301020'), emissiveIntensity: 0.5 })), pts.length * 5); let n = 0;
+    pts.forEach((p, i) => {
+      if (i % 2) { dm.position.set(p.x, 0.2 * p.s, p.z); dm.rotation.set(r() * 3, r() * 3, 0); dm.scale.set(p.s * 0.9, p.s * 0.55, p.s * 0.8); dm.updateMatrix(); rock.setMatrixAt(i, dm.matrix); rock.setColorAt(i, col.copy(C(pick(['#5a6a72', '#6a7a7a', '#4a5a62']))).multiplyScalar(0.85 + r() * 0.3)); }
+      else { dm.scale.set(0, 0, 0); dm.updateMatrix(); rock.setMatrixAt(i, dm.matrix); rock.setColorAt(i, col.set(0, 0, 0)); const c = pick(['#ff6fb0', '#ffb04a', '#c86aff', '#5ff0d8', '#ff5a5a']);
+        for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2; dm.position.set(p.x + Math.sin(a) * 0.12, 0.3 * p.s, p.z + Math.cos(a) * 0.12); dm.rotation.set(0.35 * Math.cos(a), 0, -0.35 * Math.sin(a)); dm.scale.set(p.s, p.s * 0.7, p.s); dm.updateMatrix(); anem.setMatrixAt(n, dm.matrix); anem.setColorAt(n++, col.copy(C(c))); } }
+    });
+    anem.count = n; [rock, anem].forEach(m => { m.castShadow = true; m.frustumCulled = false; W.g.add(m); });
+  }
 }
 // Towns far down the road are hidden (they're past the fog anyway), which keeps school laptops fast
 function cullTowns() { const cx = camera.position.x; for (const p of Town.parts || []) p.g.visible = cx > p.x0 - 360 && cx < p.x1 + 360; }
@@ -1504,11 +1660,25 @@ function cullTowns() { const cx = camera.position.x; for (const p of Town.parts 
 /* ---------- Houses ---------- */
 const FRONT_YARD = { u0: -9.5, v0: 3 }; // the lawn starts here; the strip by the sidewalk and side is plain verge
 function buildHouse(L, rng) {
-  const half = L.half, home = L.id === 'home', cl = CLIENTS[L.client];
-  const body = obm('body' + L.body, () => std(L.body, 0.9)), roofM = obm('roof' + L.roof, () => std(L.roof, 0.85));
+  const half = L.half, home = L.id === 'home', cl = CLIENTS[L.client], wld = worldOfLot(L);
+  // (🌴 jungle huts have bamboo walls)
+  const body = wld === 2 ? obm('jbody' + L.body, () => new THREE.MeshStandardMaterial({ map: fxPattern('bamboo', L.body, '#4a2e14'), roughness: 0.9 })) : obm('body' + L.body, () => std(L.body, 0.9)), roofM = wld === 1 ? obm('roof' + L.roof, () => std(L.roof, 0.85)) : wld === 2 ? obm('thatch' + L.roof, () => std(L.roof, 1, 0, { flatShading: true })) : obm('dome' + L.roof, () => std(L.roof, 0.25, 0.3));
   boxAt(lrect(L, -9, 11, 4, 21), 0, 5.4, body, true).userData.col.y1 = 8.2; // roof height for camera collision
-  const roof = new THREE.Mesh(prismGeo(14, 11.2, 2.7), roofM); const rc = lw(L, -2.5, 16); roof.position.set(rc.x, 5.4, rc.z); roof.scale.set(L.us, 1, L.vs); roof.castShadow = true; Town.group.add(roof);
-  const chim = lw(L, -6.5, 17); boxAt({ x0: chim.x - 0.45, x1: chim.x + 0.45, z0: chim.z - 0.45, z1: chim.z + 0.45 }, 5.4, 8.2, obm('brick', () => std('#9a4a34', 0.9)));
+  const rc = lw(L, -2.5, 16);
+  if (wld === 1) {
+    const roof = new THREE.Mesh(prismGeo(14, 11.2, 2.7), roofM); roof.position.set(rc.x, 5.4, rc.z); roof.scale.set(L.us, 1, L.vs); roof.castShadow = true; Town.group.add(roof);
+    const chim = lw(L, -6.5, 17); boxAt({ x0: chim.x - 0.45, x1: chim.x + 0.45, z0: chim.z - 0.45, z1: chim.z + 0.45 }, 5.4, 8.2, obm('brick', () => std('#9a4a34', 0.9)));
+  } else if (wld === 2) { // 🌴 a tall, shaggy thatched roof with a wide overhang, and tiki torches by the path
+    const h = 3.6 + 2.4 * L.us, roof = new THREE.Mesh(new THREE.ConeGeometry(1, 1, 4, 1), roofM); roof.rotation.y = Math.PI / 4;
+    roof.scale.set((6.5 * L.us + 1.4) / 0.7071, h, (5 * L.vs + 1.4) / 0.7071); roof.position.set(rc.x, 5.4 + h / 2 - 0.2, rc.z); roof.castShadow = true; Town.group.add(roof);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.4, 6), obm('thatchTip', () => std('#6a4a22', 0.9))); tip.position.set(rc.x, 5.2 + h + 0.4, rc.z); Town.group.add(tip);
+    [-4.1, -0.9].forEach(u => { const p = lw(L, u, 10.5), post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 1.7, 6), obm('fxTorch', () => std('#5a3a1a', 0.9))); post.position.set(p.x, 0.85, p.z); Town.group.add(post);
+      const f = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.36, 7), obm('torchFlame', () => new THREE.MeshBasicMaterial({ color: C('#ffb020') }))); f.position.set(p.x, 1.86, p.z); Town.group.add(f); addCol({ type: 'circle', x: p.x, z: p.z, r: 0.1 }); });
+  } else { // 🌊 a big sea dome on top, with a glowing pearl
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 12, 0, Math.PI * 2, 0, Math.PI / 2), roofM); dome.scale.set(6.5 * L.us * 1.1, 2.2 + 1.2 * L.us, 5 * L.vs * 1.15); dome.position.set(rc.x, 5.4, rc.z); dome.castShadow = true; Town.group.add(dome);
+    const pearl = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 10), Town.lampMat); pearl.position.set(rc.x, 5.4 + 2.2 + 1.2 * L.us + 0.4, rc.z); Town.group.add(pearl);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1, 0.08, 6, 36), obm('domeRing', () => std('#e0b030', 0.3, 0.8))); ring.rotation.x = Math.PI / 2; ring.scale.set(6.5 * L.us * 1.1, 5 * L.vs * 1.15, 1); ring.position.set(rc.x, 5.45, rc.z); Town.group.add(ring);
+  }
   // windows/door sit just proud of the front (v=11) and back (v=21) walls
   [[-8.2, -6.2], [-0.6, 1.4], [2.0, 3.4]].forEach(([a, b]) => boxAt(lrect(L, a, 10.9, b, 11.02), 1.0, 2.3, Town.windowMat));
   [[-8.2, -6.2], [-4.8, -2.8], [-0.6, 1.4], [2, 3.4]].forEach(([a, b]) => boxAt(lrect(L, a, 10.9, b, 11.02), 3.3, 4.6, Town.windowMat));
@@ -1521,7 +1691,7 @@ function buildHouse(L, rng) {
   else {
     boxAt(lrect(L, 4, 11, 10.5, 18), 0, 3.4, body, true); boxAt(lrect(L, 3.9, 10.9, 10.6, 18.1), 3.4, 3.62, roofM);
     boxAt(lrect(L, 4.6, 10.94, 9.9, 11.02), 0, 2.6, M.garageDoor);
-    if (rng() < 0.6) buildCar(lw(L, 7.25, 4.5), L.side, pick(['#c8302a', '#2a5fc8', '#e8e8e2', '#3a3a3a', '#6a8a9a']));
+    if (rng() < 0.6 && !isHomeLot(L)) buildCar(lw(L, 7.25, 4.5), L.side, pick(['#c8302a', '#2a5fc8', '#e8e8e2', '#3a3a3a', '#6a8a9a'])); // (your own driveway stays free for your mower)
   }
   // mailbox
   const mb = lw(L, -12.6, 0.6), post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.1, 6), M.wood); post.position.set(mb.x, 0.55, mb.z); Town.group.add(post);
@@ -1532,7 +1702,7 @@ function buildHouse(L, rng) {
   // back yard privacy fence with an open gate between the garage and the side fence
   const fh = 1.7;
   [[-half + 0.35, 36.85, half - 0.35, 37.0], [-half + 0.35, 21.0, -half + 0.5, 37], [half - 0.5, 21.0, half - 0.35, 37], [-half + 0.35, 20.95, -9, 21.1], [4, 20.95, 10.5, 21.1]]
-    .forEach(([a, b, c, d]) => boxAt(lrect(L, a, b, c, d), 0, fh, M.fence, true));
+    .forEach(([a, b, c, d]) => boxAt(lrect(L, a, b, c, d), 0, fh, wld === 1 ? M.fence : wld === 2 ? obm('bambooFence', () => std('#b89a52', 0.9)) : obm('coralFence', () => std('#ff8fa0', 0.8)), true));
   // yards
   const front = new Yard(L.id + '_front', L.id, 'Front yard', lrect(L, FRONT_YARD.u0, FRONT_YARD.v0, 3.9, 10.15), rng);
   front.exclRect(lrect(L, -3.25, -1, -1.75, 12));
@@ -1802,7 +1972,8 @@ function buildField(L, rng) {
 
 /* ---------- Instanced trees, bushes, lamps (cheap draw calls) ---------- */
 function buildTreesInstanced() {
-  const T = Town.trees, n = T.length, rng = mulberry32(7), dm = new THREE.Object3D(), col = new THREE.Color();
+  [2, 3].forEach(w => buildWorldTrees(w, Town.trees.filter(t => worldOfX(t.x) === w)));
+  const T = Town.trees.filter(t => worldOfX(t.x) === 1), n = T.length, rng = mulberry32(7), dm = new THREE.Object3D(), col = new THREE.Color();
   const trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.14, 0.22, 2, 7), obm('trunk', () => std('#5a3f2a', 0.95)), n);
   const crowns = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), obm('crown', () => std('#ffffff', 0.9, 0, { flatShading: true })), n * 3);
   const pines = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 2.6, 8), obm('pine', () => std('#ffffff', 0.9, 0, { flatShading: true })), n * 2);
@@ -1814,6 +1985,47 @@ function buildTreesInstanced() {
   });
   crowns.count = ci; pines.count = pi; Town.crowns = crowns; Town.pines = pines; // recoloured every season
   [trunks, crowns, pines].forEach(m => { m.castShadow = true; m.receiveShadow = true; Town.group.add(m); });
+}
+// 🌴 palms and giant jungle trees · 🌊 kelp forests and coral (they live in the world's own group, so they're hidden elsewhere)
+function buildWorldTrees(w, T) {
+  if (!T.length) return; const g = WORLDS[w].g, rng = mulberry32(70 + w), dm = new THREE.Object3D(), col = new THREE.Color(), parts = [];
+  // (count stays at full size while filling: three.js sizes the colour buffer from it on the first setColorAt)
+  const im = (geo, mat, n) => { const m = new THREE.InstancedMesh(geo, mat, Math.max(1, n)); m.userData.n = 0; m.castShadow = true; m.receiveShadow = true; parts.push(m); return m; };
+  const set = (m, x, y, z, rx, ry, rz, sx, sy, sz, c, ord = 'XYZ') => { dm.position.set(x, y, z); dm.rotation.set(rx, ry, rz, ord); dm.scale.set(sx, sy, sz); dm.updateMatrix(); m.setMatrixAt(m.userData.n, dm.matrix); if (c) m.setColorAt(m.userData.n, col.copy(C(c)).multiplyScalar(0.85 + rng() * 0.3)); m.userData.n++; };
+  if (w === 2) {
+    const trunk = im(new THREE.CylinderGeometry(0.1, 0.17, 1, 7), obm('palmTrunk', () => std('#8a6a44', 0.95)), T.length * 2);
+    const frond = im(new THREE.ConeGeometry(0.42, 1, 4), obm('frond', () => std('#ffffff', 0.85, 0, { flatShading: true })), T.length * 7);
+    const crown = im(new THREE.IcosahedronGeometry(1, 1), obm('jcrown', () => std('#ffffff', 0.9, 0, { flatShading: true })), T.length * 4);
+    T.forEach(t => {
+      if (t.t === 'pine') { // 🌴 palm: tall leaning trunk, drooping fronds
+        const h = 5 + t.s * 2.5, lean = (rng() - 0.5) * 0.25, a = rng() * 6;
+        set(trunk, t.x, h / 2, t.z, lean, a, 0, t.s, h, t.s);
+        const tx = t.x + Math.sin(a) * Math.sin(lean) * h * 0.5, tz = t.z + Math.cos(a) * Math.sin(lean) * h * 0.5;
+        for (let k = 0; k < 7; k++) { const an = k / 7 * Math.PI * 2 + a; set(frond, tx + Math.sin(an) * 1.0 * t.s, h - 0.35, tz + Math.cos(an) * 1.0 * t.s, Math.PI / 2 + 0.45, an, 0, t.s * 0.9, t.s * 2.6, t.s * 0.25, pick(['#3f9a2a', '#4fa82e', '#2f8a22']), 'YXZ'); }
+      } else { // 🌳 giant jungle tree: thick trunk, wide dark crowns
+        const s = t.s * 1.5; set(trunk, t.x, 3 * s, t.z, 0, 0, 0, s * 2.2, 6 * s, s * 2.2);
+        for (let k = 0; k < 4; k++) { const ss = s * (1.6 + rng() * 0.8); set(crown, t.x + (rng() - 0.5) * 2.4 * s, s * (5.6 + rng() * 1.8), t.z + (rng() - 0.5) * 2.4 * s, rng() * 3, rng() * 3, 0, ss, ss * 0.6, ss, pick(['#1f5a1a', '#2a6a20', '#245f1c', '#33782a'])); }
+      }
+    });
+  } else {
+    const kelp = im(new THREE.CylinderGeometry(0.12, 0.26, 1, 5), obm('kelp', () => std('#ffffff', 0.8, 0, { flatShading: true, emissive: C('#1a2a08'), emissiveIntensity: 0.6 })), T.length * 3);
+    const blade = im(new THREE.ConeGeometry(0.45, 1, 3), obm('kelpBlade', () => std('#ffffff', 0.8, 0, { flatShading: true, side: THREE.DoubleSide, emissive: C('#1a2a08'), emissiveIntensity: 0.6 })), T.length * 6);
+    const branch = im(new THREE.CylinderGeometry(0.09, 0.16, 1, 6), obm('coralB', () => std('#ffffff', 0.7, 0, { flatShading: true })), T.length * 6);
+    const blob = im(new THREE.IcosahedronGeometry(1, 1), obm('coralBlob', () => std('#ffffff', 0.75, 0, { flatShading: true })), T.length * 4);
+    T.forEach(t => {
+      if (t.t === 'pine') { // 🌿 kelp: tall wavy strands with leafy blades
+        for (let k = 0; k < 3; k++) { const h = 5 + t.s * 4 + rng() * 5, x = t.x + (rng() - 0.5) * 1.6, z = t.z + (rng() - 0.5) * 1.6, rx = (rng() - 0.5) * 0.2, rz = (rng() - 0.5) * 0.2;
+          set(kelp, x, h / 2, z, rx, 0, rz, t.s, h, t.s, pick(['#7a9a32', '#6a8a2a', '#8aaa3a']));
+          for (let b = 0; b < 2; b++) set(blade, x + Math.sin(rz) * -h * (0.3 + b * 0.35), h * (0.3 + b * 0.35), z + Math.sin(rx) * h * (0.3 + b * 0.35), 0, rng() * 6, 0.9 * (b ? 1 : -1), t.s * 1.2, t.s * 2.4, t.s * 0.08, pick(['#8ab03a', '#9ac04a'])); }
+      } else { // 🪸 coral: branches with coloured tips, and a round brain coral
+        const c = pick(['#ff6f8f', '#ff9a4a', '#b46aff', '#ffd23b', '#ff5a7a', '#4ad8c8']);
+        for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 + rng(), tilt = 0.3 + rng() * 0.5, len = (2.2 + rng() * 2.6) * t.s;
+          set(branch, t.x + Math.sin(a) * Math.sin(tilt) * len / 2, Math.cos(tilt) * len / 2, t.z + Math.cos(a) * Math.sin(tilt) * len / 2, tilt * Math.cos(a), 0, -tilt * Math.sin(a), t.s * 1.5, len, t.s * 1.5, c); }
+        set(blob, t.x + (rng() - 0.5) * 2.5, 0.6 * t.s, t.z + (rng() - 0.5) * 2.5, 0, rng() * 6, 0, t.s * 1.3, t.s * 0.9, t.s * 1.3, pick(['#ff9ab0', '#ffd0a0', '#c8a0ff', '#9af0d8']));
+      }
+    });
+  }
+  parts.forEach(m => { m.count = m.userData.n; m.frustumCulled = false; g.add(m); });
 }
 function buildBushesInstanced() {
   const B = Town.bushes, im = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), obm('bush', () => std('#2f6a28', 0.92, 0, { flatShading: true })), Math.max(1, B.length)), dm = new THREE.Object3D();
@@ -2095,7 +2307,8 @@ function applyMowerLook(body, info, look, def, cfg) {
 // ✨ factory specials (v1.21): a fixed paint job plus any of racing stripes, pin-stripes, flames, neon underglow, a lift kit or a hover deck
 function fxLook(body, info, def) {
   const F = def.fx, md = def.model, add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); body.add(m); return m; };
-  repaintBody(body, obm('fx_' + def.id, () => std(F.col, F.rough, F.metal)));
+  repaintBody(body, obm('fx_' + def.id, () => F.pattern ? new THREE.MeshStandardMaterial({ map: fxPattern(...F.pattern), roughness: F.rough, metalness: F.metal }) : std(F.col, F.rough, F.metal)));
+  fxExtras(body, info, def);
   if (info.deck && (md === 'ride' || md === 'zero')) info.deck.scale.x = clamp(def.width / (md === 'ride' ? 1.07 : 1.37), 1, 1.65); // the deck is as wide as the cut
   // twin racing stripes along the top: [y, z, length, offset from centre, stripe width] for each surface
   const SAT = { ride: [[0.776, 0.5, 0.7, 0.12, 0.1]], zero: [[0.267, 0.62, 0.72, 0.2, 0.13], [0.906, -0.62, 0.54, 0.14, 0.1]], titan: [[1.276, 1.1, 0.8, 0.2, 0.15]], push: [[0.274, 0.03, 0.36, 0.06, 0.05]] };
@@ -2119,6 +2332,40 @@ function fxLook(body, info, def) {
     body.scale.setScalar(sc); info.bodyScale = sc; info.wheels.forEach(w => w.g.scale.setScalar(F.lift.wheels)); body.position.y += sc * (F.lift.wheels - 1) * rMax;
   }
   if (F.hover) { info.wheels.forEach(w => w.g.visible = false); body.position.y += md === 'push' ? 0.13 : 0.2; info.hover = true; } // no wheels: it floats (and bobs)
+  if (F.scale > 1) { // 🌴 🌊 world mowers: the whole machine is scaled up so the deck matches the (huge) cut
+    const s = F.scale; body.scale.multiplyScalar(s); body.position.y *= s; info.bodyScale = (info.bodyScale || 1) * s;
+    info.deckOff *= s; info.deckLen *= s;
+  }
+}
+// painted patterns for the world mowers (jungle animals, sea creatures)
+const PAT = {}; // (textures get their own cache: obm is for materials)
+function fxPattern(kind, a, b) {
+  const key = kind + a + b; if (PAT[key]) return PAT[key];
+  return (PAT[key] = (() => { const t = canvasTex(256, 256, (c, w, h) => {
+    c.fillStyle = a; c.fillRect(0, 0, w, h); c.fillStyle = b; c.strokeStyle = b; const r = mulberry32(hashStr(kind + a));
+    if (kind === 'bamboo') { for (let x = 0; x < w; x += 32) { c.globalAlpha = 0.35; c.fillRect(x + 26, 0, 6, h); c.globalAlpha = 1; for (let y = 20 + (x % 64); y < h; y += 64) c.fillRect(x, y, 30, 5); } }
+    else if (kind === 'scales') { for (let y = 0, row = 0; y < h + 32; y += 22, row++) for (let x = (row % 2) * 16; x < w + 32; x += 32) { c.lineWidth = 4; c.beginPath(); c.arc(x, y, 16, 0, Math.PI); c.stroke(); } }
+    else if (kind === 'spots') { for (let k = 0; k < 26; k++) { const x = r() * w, y = r() * h, s = 8 + r() * 12; c.lineWidth = 5; c.beginPath(); c.arc(x, y, s, 0, 7); c.stroke(); c.beginPath(); c.arc(x, y, s * 0.35, 0, 7); c.fill(); } }
+    else if (kind === 'tiger') { c.lineWidth = 14; c.lineCap = 'round'; for (let x = -20; x < w + 20; x += 38) { c.beginPath(); c.moveTo(x, 0); c.bezierCurveTo(x + 30, h * 0.3, x - 25, h * 0.6, x + 12, h); c.stroke(); } }
+    else if (kind === 'camo') { for (let k = 0; k < 18; k++) { c.beginPath(); c.ellipse(r() * w, r() * h, 18 + r() * 30, 10 + r() * 20, r() * 3, 0, 7); c.fill(); } }
+    else if (kind === 'bubbles') { c.lineWidth = 3; for (let k = 0; k < 30; k++) { const x = r() * w, y = r() * h, s = 4 + r() * 14; c.beginPath(); c.arc(x, y, s, 0, 7); c.stroke(); c.globalAlpha = 0.6; c.beginPath(); c.arc(x - s * 0.35, y - s * 0.35, s * 0.25, 0, 7); c.fill(); c.globalAlpha = 1; } }
+    else if (kind === 'bands') { for (let x = 0; x < w; x += 128) { c.fillRect(x + 40, 0, 40, h); c.fillStyle = '#16171c'; c.fillRect(x + 36, 0, 4, h); c.fillRect(x + 80, 0, 4, h); c.fillStyle = b; } }
+    else if (kind === 'shell') { c.lineWidth = 5; for (let y = 0, row = 0; y < h + 40; y += 36, row++) for (let x = (row % 2) * 30; x < w + 40; x += 60) { c.beginPath(); for (let k = 0; k < 6; k++) { const an = k / 6 * Math.PI * 2; c.lineTo(x + Math.cos(an) * 24, y + Math.sin(an) * 20); } c.closePath(); c.stroke(); } }
+    else if (kind === 'belly') { c.fillRect(0, h * 0.6, w, h * 0.4); }
+  }); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 2); return t; })());
+}
+// fins, propellers, domes, tentacles, horns, leaves and tiki torches (placed from the model's own size)
+function fxExtras(body, info, def) {
+  const F = def.fx, md = def.model, top = info.topY, fz = info.frontZ, rz = info.rearZ, hw = info.halfW, midZ = (fz + rz) / 2;
+  const put = (g, x, y, z) => { g.position.set(x, y, z); body.add(g); return g; };
+  if (F.fin) { const m = new THREE.Mesh(new THREE.ConeGeometry(0.42, 0.9, 4), obm('fxFin' + F.fin, () => std(F.fin, 0.35, 0.3))); m.scale.set(0.18, 1, 1); m.rotation.x = -0.35; put(m, 0, top + (md === 'titan' ? 1.6 : 0.55), md === 'zero' ? -0.55 : midZ - 0.3); }
+  if (F.horn) { const m = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.55, 10), obm('fxHorn' + F.horn, () => std(F.horn, 0.5))); m.rotation.x = Math.PI / 2 - 0.5; put(m, 0, top * (md === 'zero' ? 0.45 : 0.78), fz + 0.12); }
+  if (F.leaves) { const lm = obm('fxLeaf' + F.leaves, () => std(F.leaves, 0.85, 0, { flatShading: true })); [[-1, 0.2], [1, -0.1], [-1, -0.6], [1, 0.5], [0, -0.85]].forEach(([s, t], i) => { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16 + (i % 3) * 0.04, 0), lm); m.scale.set(1.4, 0.6, 1.1); put(m, s * hw * 0.85, top * 0.85, midZ + t * (fz - rz) * 0.4); }); }
+  if (F.dome) { const g = new THREE.Mesh(new THREE.SphereGeometry(0.62, 18, 12, 0, Math.PI * 2, 0, Math.PI / 2), obm('fxDome', () => std('#bfefff', 0.05, 0.3, { transparent: true, opacity: 0.28, depthWrite: false }))); const s = info.seat || [0, top, 0]; put(g, s[0], s[1] + 0.1, s[2] + 0.05); g.scale.set(1, 1.35, 1.05);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.04, 6, 24), MAT.chrome); ring.rotation.x = Math.PI / 2; put(ring, s[0], s[1] + 0.1, s[2] + 0.05); }
+  if (F.prop) { const o = new THREE.Group(), g = new THREE.Group(); o.rotation.y = Math.PI / 2; o.add(g); const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.2, 10), MAT.chrome); hub.rotation.z = Math.PI / 2; g.add(hub); for (let k = 0; k < 3; k++) { const bl = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.5, 0.12), MAT.chrome); bl.position.set(0, Math.cos(k * 2.09) * 0.25, Math.sin(k * 2.09) * 0.25); bl.rotation.x = -k * 2.09; g.add(bl); } info.reels.push(g); put(o, 0, top * 0.55, rz - 0.12); } // spins with the blades
+  if (F.tentacles) { const tm = obm('fxTent' + F.tentacles, () => std(F.tentacles, 0.4, 0.1, { emissive: C(F.tentacles), emissiveIntensity: 0.25 })); for (let k = 0; k < 6; k++) { const s = k % 2 ? 1 : -1, t = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.05, 6, 12, Math.PI * 1.4), tm); t.rotation.y = s * Math.PI / 2; put(t, s * (hw + 0.05), 0.24, rz + (fz - rz) * (0.2 + Math.floor(k / 2) * 0.28)); } }
+  if (F.torches) { const pole = obm('fxTorch', () => std('#5a3a1a', 0.9)), flame = obm('fxFlame', () => new THREE.MeshBasicMaterial({ color: C('#ffb020') })); [-1, 1].forEach(s => { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.9, 6), pole); put(p, s * hw * 0.8, top + 0.35, rz + 0.25); const f = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.26, 7), flame); put(f, s * hw * 0.8, top + 0.92, rz + 0.25); }); }
 }
 function flameMat() {
   return obm('fxFlames', () => new THREE.MeshStandardMaterial({ transparent: true, roughness: 0.35, metalness: 0.2, side: THREE.DoubleSide, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2,
@@ -2264,11 +2511,14 @@ function fadeOut(cb) { const f = $('#fade'); f.style.opacity = 1; setTimeout(() 
 
 /* ---------- Spawning the player & mower ---------- */
 function spawnAtHome() {
-  const home = Town.lotsById.home, G = Town.garage, d = lw(home, 1.5, 3.5);
+  const w = curWorld(), home = homeLotOf(w), G = Town.garage, d = lw(home, 1.5, 3.5);
   Game.pl = { x: d.x, z: d.z, y: 0, h: home.side < 0 ? Math.PI - 0.5 : 0.5, vx: 0, vz: 0, phase: 0, stepT: 0 }; // facing the house & garage
   Game.mode = 'foot'; Game.cam.yaw = Game.pl.h; Game.cam.pitch = 0.36;
   if (Game.drive) { Game.drive = false; if (Game.P) Game.P.root.visible = true; }
-  Veh.load = false; placeMower(S.mower, G.park.x, G.park.z, G.parkH);
+  Veh.load = false;
+  if (w === 1) placeMower(S.mower, G.park.x, G.park.z, G.parkH);
+  else { const p = lw(home, 7.25, 5.5); placeMower(S.mower, p.x, p.z, home.side < 0 ? 0 : Math.PI); } // 🌴 🌊 parked on the driveway
+  setWorldLook(w);
   spawnVehicles(true); crewHome(); // the truck is parked out front and Jake waits by the garage
 }
 function placeMower(id, x, z, h) {
@@ -2765,6 +3015,7 @@ function updateDog(p, dt) {
 const activeJob = () => S.active ? S.jobs.list.find(j => j.id === S.active) : null;
 function jobPay(lot, yards) { const cl = CLIENTS[Town.lotsById[lot].client]; let a = 0; yards.forEach(id => { const Y = Yards.byId[id]; a += Y.total / 16; }); return Math.max(8, Math.round(a * cl.rate * (yards.length > 1 ? 1.1 : 1) * seasonOf(S.day).pay * townOfLot(Town.lotsById[lot]).pay)); } // the far towns pay more
 function postJobs() {
+  if (curWorld() > 1) return postWorldJobs(curWorld());
   const r = mulberry32(hashStr('jobs' + S.day)), cand = [];
   for (const L of LOTS) {
     if (!L.client || CLIENTS[L.client].own || CLIENTS[L.client].race || L.town !== 'mow') continue; // the other towns post their own jobs below
@@ -2785,7 +3036,7 @@ function postJobs() {
     list.push({ id: 'j' + S.day + '_' + c.L.id, lot: c.L.id, client: c.L.client, yards: ys, pay: jobPay(c.L.id, ys), day: S.day });
   }
   // the other towns: up to 3 jobs each once you've unlocked them (1 locked "teaser" job before that)
-  if (!['new', 'active'].includes(S.tut.state)) TOWNS.slice(1).forEach(T => {
+  if (!['new', 'active'].includes(S.tut.state)) TOWNS.slice(1).filter(T => T.world === 1).forEach(T => {
     // only lots with lawns (not petrol stations)
     const tc = LOTS.filter(L => L.town === T.id && L.client && L.yards && !list.some(j => j.lot === L.id)).map(L => ({ L, ys: L.yards.filter(id => Yards.byId[id].grown() > 0.55) })).filter(c => c.ys.length);
     for (let i = tc.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [tc[i], tc[j]] = [tc[j], tc[i]]; }
@@ -2796,6 +3047,18 @@ function postJobs() {
   if (lucky.length) { const j = lucky[Math.floor(r() * lucky.length)]; j.lucky = true; j.pay *= 2; }
   S.jobs = { day: S.day, list };
   const seen = {}; list.forEach(j => { if (S.jobsSeen[j.id]) seen[j.id] = 1; }); S.jobsSeen = seen; // forget old days
+}
+// 🌴 🌊 jobs in the jungle and under the sea: up to 4 a day in each town
+function postWorldJobs(w) {
+  const r = mulberry32(hashStr('jobs' + w + '_' + S.day)), list = S.jobs.list.filter(j => j.id === S.active);
+  TOWNS.filter(T => T.world === w).forEach(T => {
+    const tc = LOTS.filter(L => L.town === T.id && L.client && L.yards && L.yards.length && !CLIENTS[L.client].own && !list.some(j => j.lot === L.id)).map(L => ({ L, ys: L.yards.filter(id => Yards.byId[id].grown() > 0.55) })).filter(c => c.ys.length);
+    for (let i = tc.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [tc[i], tc[j]] = [tc[j], tc[i]]; }
+    tc.slice(0, 4).forEach(c => { let ys = c.ys; if (ys.length > 1 && r() < 0.35) ys = [ys[Math.floor(r() * ys.length)]]; list.push({ id: 'j' + S.day + '_' + c.L.id, lot: c.L.id, client: c.L.client, yards: ys, pay: jobPay(c.L.id, ys), day: S.day }); });
+  });
+  const lucky = list.filter(j => j.id !== S.active); if (lucky.length) { const j = lucky[Math.floor(r() * lucky.length)]; j.lucky = true; j.pay *= 2; }
+  S.jobs = { day: S.day, list };
+  const seen = {}; list.forEach(j => { if (S.jobsSeen[j.id]) seen[j.id] = 1; }); S.jobsSeen = seen;
 }
 // Job requirements & difficulty (shown on the Jobs screen, enforced when accepting)
 function jobReq(j) {
@@ -2859,6 +3122,7 @@ function finishJob(j) {
   Sfx.complete(); setTimeout(() => { Sfx.cash(); cashFly(Math.min(14, 4 + Math.round(total / 12))); }, 700); addPassXP(coop ? Math.round(xp * Math.max(0.35, share)) : xp); tutEvent('jobDone'); save(); saveYards(); netJobs();
   if (j.lucky) { S.stats.lucky = (S.stats.lucky || 0) + 1; setTimeout(() => { banner('⭐ LUCKY LAWN!<small>Double pay</small>'); Sfx.jackpot(); }, 500); }
   if (!coop && stars >= 4 && tip > 0) setTimeout(() => bonusSpin(tip), 1500);
+  setTimeout(checkWorldReady, 4000); // 🌍 enough lawns and money for the next world?
 }
 // 🎰 a great job spins the bonus wheel: your tip gets multiplied by 1.5×, 2× or 3×
 function bonusSpin(tip) {
@@ -3014,7 +3278,7 @@ function spawnVehicles(atHome) {
   if (Veh.carId !== S.veh.car) { if (Veh.model) disposeModel({ root: Veh.model.g }); Veh.model = buildTruck(S.veh.car); Veh.carId = S.veh.car; }
   if (Veh.trId !== S.veh.trailer) { if (Veh.tr) disposeModel({ root: Veh.tr.g }); Veh.tr = Object.assign(buildTrailer(S.veh.trailer), { x: Veh.x, z: Veh.z, h: Veh.h }); Veh.trId = S.veh.trailer; atHome = atHome || !Veh.placed; }
   if (atHome) { // parked on Main Street in front of home, facing east
-    const home = Town.lotsById.home; Object.assign(Veh, { x: home.x + 4, z: -2.1, h: Math.PI / 2, v: 0, steer: 0, load: false, placed: true });
+    const home = homeLotOf(curWorld()); Object.assign(Veh, { x: home.x + 4 * home.us, z: -2.1, h: Math.PI / 2, v: 0, steer: 0, load: false, placed: true });
     Veh.tr.h = Veh.h; Veh.tr.x = Veh.x - Math.sin(Veh.h) * (2.5 + Veh.tr.hitch); Veh.tr.z = Veh.z - Math.cos(Veh.h) * (2.5 + Veh.tr.hitch);
   } else { Veh.tr.x = Veh.x - Math.sin(Veh.tr.h) * (2.5 + Veh.tr.hitch); Veh.tr.z = Veh.z - Math.cos(Veh.tr.h) * (2.5 + Veh.tr.hitch); }
   syncVehicles(0);
@@ -3626,17 +3890,25 @@ function updateHud(dt) {
   setHTML('hintLine', hint);
 }
 /* ---------- Minimap ---------- */
-const MAP = { x0: -262, x1: TOWNS[TOWNS.length - 1].x1 + 120, z0: -112, z1: 112, s: 2, base: null };
-function buildMinimapBase() {
+// one map per world (the worlds are far apart): MAP always describes the world you're in
+const MAP = { x0: -262, x1: TOWNS.filter(T => T.world === 1).pop().x1 + 120, z0: -112, z1: 112, s: 2, base: null, bases: {}, w: 0 };
+function setMapWorld(w) {
+  if (MAP.w === w) return; MAP.w = w; const ts = TOWNS.filter(T => T.world === w);
+  if (w === 1) Object.assign(MAP, { x0: -262, x1: ts[ts.length - 1].x1 + 120, z0: -112, z1: 112 });
+  else { const zb = Math.round(LOT0 + 40 * Math.max(...ts.map(T => T.vs)) + 14); Object.assign(MAP, { x0: ts[0].x0 - 230, x1: ts[ts.length - 1].x1 + 230, z0: -zb, z1: zb }); }
+  MAP.base = MAP.bases[w] || (MAP.bases[w] = buildMinimapBase(w));
+}
+function buildMinimapBase(w) {
   const c = document.createElement('canvas'); c.width = (MAP.x1 - MAP.x0) * MAP.s; c.height = (MAP.z1 - MAP.z0) * MAP.s; const x = c.getContext('2d');
   const R = (x0, z0, x1, z1, col) => { x.fillStyle = col; x.fillRect((x0 - MAP.x0) * MAP.s, (z0 - MAP.z0) * MAP.s, (x1 - x0) * MAP.s, (z1 - z0) * MAP.s); };
-  R(MAP.x0, MAP.z0, MAP.x1, MAP.z1, '#2e5222');
-  Town.trees.forEach(t => { x.fillStyle = '#1f3d18'; x.beginPath(); x.arc((t.x - MAP.x0) * MAP.s, (t.z - MAP.z0) * MAP.s, 2.2 * t.s * MAP.s, 0, 7); x.fill(); });
-  TOWNS.forEach(T => R(T.x0, -STREET.half - STREET.walk, T.x1, STREET.half + STREET.walk, '#9a978e'));
-  R(STREET.x0, -STREET.half, TOWNS[TOWNS.length - 1].x1, STREET.half, '#3a3c40'); // Main Street + the highway
-  Yards.list.forEach(Y => R(Y.minX, Y.minZ, Y.minX + Y.W, Y.minZ + Y.D, '#4a7a32'));
+  const pal = { 1: ['#2e5222', '#1f3d18', '#4a7a32'], 2: ['#1f4a1a', '#143a12', '#3f8a2a'], 3: ['#b8a878', '#8a5a6a', '#3a8a7a'] }[w], ts = TOWNS.filter(T => T.world === w);
+  R(MAP.x0, MAP.z0, MAP.x1, MAP.z1, pal[0]);
+  Town.trees.forEach(t => { if (t.x < MAP.x0 - 20 || t.x > MAP.x1 + 20) return; x.fillStyle = pal[1]; x.beginPath(); x.arc((t.x - MAP.x0) * MAP.s, (t.z - MAP.z0) * MAP.s, 2.2 * t.s * MAP.s, 0, 7); x.fill(); });
+  ts.forEach(T => R(T.x0, -STREET.half - STREET.walk, T.x1, STREET.half + STREET.walk, '#9a978e'));
+  R(w === 1 ? STREET.x0 : MAP.x0 + 30, -STREET.half, w === 1 ? ts[ts.length - 1].x1 : MAP.x1 - 30, STREET.half, '#3a3c40'); // Main Street + the highway
+  Yards.list.forEach(Y => R(Y.minX, Y.minZ, Y.minX + Y.W, Y.minZ + Y.D, pal[2]));
   Town.mapRects.forEach(m => R(m.r.x0, m.r.z0, m.r.x1, m.r.z1, m.c));
-  MAP.base = c;
+  return c;
 }
 function drawMapMarkers(x, sx, sy, sc, full) {
   const P = (wx, wz) => [(wx - sx) * sc, (wz - sy) * sc];
@@ -3644,15 +3916,18 @@ function drawMapMarkers(x, sx, sy, sc, full) {
   const j = activeJob();
   S.jobs.list.forEach(jb => jb.yards.forEach(id => { const Y = Yards.byId[id], [a, b] = P(Y.minX, Y.minZ); x.strokeStyle = jb.id === S.active ? '#ffcf4a' : 'rgba(255,207,74,.55)'; x.lineWidth = jb.id === S.active ? 3 : 1.5; x.strokeRect(a, b, Y.W * sc, Y.D * sc); }));
   const icon = (t, wx, wz, size) => { const [a, b] = P(wx, wz); x.font = size + 'px "Segoe UI Emoji",sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(t, a, b); };
-  const home = Town.lotsById.home, gas = Town.lotsById.gas, sz = full ? 16 : 14;
-  icon('🏠', home.door.x, home.door.z, sz); icon('⛽', gas.door.x, gas.door.z, sz); icon('🏁', (Town.lotsById.raceA.x + Town.lotsById.raceB.x) / 2, Town.lotsById.raceA.door.z + 8, sz); if (Town.stall) icon('🔧', Town.stall.x, Town.stall.z + 2, sz);
-  icon('⛳', Town.lotsById.golf.door.x, Town.lotsById.golf.door.z + 20, sz);
-  const ms = Town.lotsById.mowshop; if (ms) icon('🏪', ms.door.x, ms.door.z - 6, sz);
-  TOWNS.slice(1).forEach(T => { const g = Town.lotsById[T.id + '_gas']; if (g) icon('⛽', g.door.x, g.door.z, sz); });
+  const home = homeLotOf(MAP.w || 1), gas = Town.lotsById.gas, sz = full ? 16 : 14, w1 = (MAP.w || 1) === 1;
+  icon('🏠', home.door.x, home.door.z, sz);
+  if (w1) {
+    icon('⛽', gas.door.x, gas.door.z, sz); icon('🏁', (Town.lotsById.raceA.x + Town.lotsById.raceB.x) / 2, Town.lotsById.raceA.door.z + 8, sz); if (Town.stall) icon('🔧', Town.stall.x, Town.stall.z + 2, sz);
+    icon('⛳', Town.lotsById.golf.door.x, Town.lotsById.golf.door.z + 20, sz);
+    const ms = Town.lotsById.mowshop; if (ms) icon('🏪', ms.door.x, ms.door.z - 6, sz);
+  }
+  TOWNS.slice(1).forEach(T => { const g = Town.lotsById[T.id + '_gas']; if (g && T.world === (MAP.w || 1)) icon('⛽', g.door.x, g.door.z, sz); });
   if (full) {
-    icon('🌳', Town.lotsById.park.door.x, Town.lotsById.park.door.z, 16); icon('⚽', Town.lotsById.field.door.x, Town.lotsById.field.door.z, 16);
+    if (w1) { icon('🌳', Town.lotsById.park.door.x, Town.lotsById.park.door.z, 16); icon('⚽', Town.lotsById.field.door.x, Town.lotsById.field.door.z, 16); }
     S.jobs.list.forEach(jb => { const L = Town.lotsById[jb.lot]; const [a, b] = P(L.door.x, L.door.z); x.fillStyle = jb.lucky ? '#fff27a' : '#ffcf4a'; x.font = '800 11px Segoe UI'; x.fillText((jb.lucky ? '⭐ ' : '') + money(jb.pay), a, b - 13); });
-    TOWNS.forEach(T => { const [a, b] = P((T.x0 + T.x1) / 2, -STREET.half - 74 * T.vs); x.font = '900 ' + Math.max(12, Math.min(26, sc * 14)) + 'px "Arial Black",Impact,sans-serif'; x.fillStyle = T.col; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeText(T.icon + ' ' + T.name.toUpperCase(), a, b); x.fillText(T.icon + ' ' + T.name.toUpperCase(), a, b); if (S.stats.jobs < T.req) { x.font = '700 11px Segoe UI'; x.fillStyle = '#fff'; x.fillText(`🔒 ${T.req} jobs to work here`, a, b + 16); } });
+    TOWNS.filter(T => T.world === (MAP.w || 1)).forEach(T => { const [a, b] = P((T.x0 + T.x1) / 2, -STREET.half - 74 * T.vs); x.font = '900 ' + Math.max(12, Math.min(26, sc * 14)) + 'px "Arial Black",Impact,sans-serif'; x.fillStyle = T.col; x.strokeStyle = '#000'; x.lineWidth = 3; x.strokeText(T.icon + ' ' + T.name.toUpperCase(), a, b); x.fillText(T.icon + ' ' + T.name.toUpperCase(), a, b); if (S.stats.jobs < T.req) { x.font = '700 11px Segoe UI'; x.fillStyle = '#fff'; x.fillText(`🔒 ${T.req} jobs to work here`, a, b + 16); } });
   }
   if (Veh.model && !Game.drive) icon(vehDef().icon, Veh.x, Veh.z, sz);
   if (Crew.model && Crew.mw && !Crew.ride) icon('👷', Crew.mw.x, Crew.mw.z, sz - 2);
@@ -3682,11 +3957,11 @@ function blitMapBase(x, sx, sy, sc, W, H) {
 /* ---------- 🗺️ The big map (press M) ---------- */
 const MapV = { cx: 0, cz: 0, sc: 1.6, drag: null };
 function mapHTML() {
-  const me = mapPos(), here = TOWNS.find(T => me.x > T.x0 - 40 && me.x < T.x1 + 40);
-  return `<div class="mdlg panel" style="width:min(1120px,97vw)">${menuHead('🗺️ MAP', 'Drag to look around · mouse wheel to zoom · click to set a waypoint · M to close')}
-    <div class="tabs"><button class="btn" data-act="mapGo" data-arg="me">📍 Where am I${here ? ' · ' + esc(here.name) : ''}</button>${TOWNS.map(T => `<button class="btn" data-act="mapGo" data-arg="${T.id}">${T.icon} ${esc(T.name)}${S.stats.jobs < T.req ? ' 🔒' : T.pay > 1 ? ' · ' + T.pay + '× pay' : ''}</button>`).join('')}<button class="btn" data-act="mapGo" data-arg="all">🛣️ Whole road</button>${Game.waypoint ? '<button class="btn" data-act="clearWp">✕ Clear waypoint</button>' : ''}</div>
+  const me = mapPos(), here = TOWNS.find(T => me.x > T.x0 - 40 && me.x < T.x1 + 40), W = WORLDS[MAP.w || 1];
+  return `<div class="mdlg panel" style="width:min(1120px,97vw)">${menuHead('🗺️ MAP · ' + W.icon + ' ' + esc(W.name.toUpperCase()), 'Drag to look around · mouse wheel to zoom · click to set a waypoint · M to close')}
+    <div class="tabs"><button class="btn" data-act="mapGo" data-arg="me">📍 Where am I${here ? ' · ' + esc(here.name) : ''}</button>${TOWNS.filter(T => T.world === W.id).map(T => `<button class="btn" data-act="mapGo" data-arg="${T.id}">${T.icon} ${esc(T.name)}${S.stats.jobs < T.req ? ' 🔒' : T.pay > 1 ? ' · ' + T.pay + '× pay' : ''}</button>`).join('')}<button class="btn" data-act="mapGo" data-arg="all">🛣️ Whole road</button>${Game.waypoint ? '<button class="btn" data-act="clearWp">✕ Clear waypoint</button>' : ''}<button class="btn gold" data-act="openWorlds">🌍 Worlds <kbd>O</kbd></button></div>
     <canvas id="mapBig" style="width:100%;border-radius:12px;cursor:grab;touch-action:none"></canvas>
-    <div class="small muted">🏠 home · ⛽ gas · 🔧 upgrades · ⛳ golf course · ${vehDef().icon} your truck · 👷 ${CREW.name} · gold boxes = jobs (⭐ = Lucky Lawn, 2× pay). Drive east along the highway to reach the other towns.</div></div>`;
+    <div class="small muted">🏠 home · ⛽ gas${W.id === 1 ? ' · 🔧 upgrades · ⛳ golf course' : ''} · ${vehDef().icon} your truck · 👷 ${CREW.name} · gold boxes = jobs (⭐ = Lucky Lawn, 2× pay). Drive along the road to reach the other towns. Other worlds: 🌍 Worlds (O).</div></div>`;
 }
 function mapFocus(k) {
   const cv = $('#mapBig'), W = cv ? cv.clientWidth : 1000, me = mapPos();
@@ -4009,6 +4284,7 @@ const ACT = {
   waypoint: a => { const L = Town.lotsById[a]; Game.waypoint = { x: L.door.x, z: L.door.z, label: L.client ? CLIENTS[L.client].short : a }; toast('📍 Waypoint set', Game.waypoint.label); },
   clearWp: () => { Game.waypoint = null; if (Game.state === 'menu' && Menu.cur === 'map') renderMenu(); else drawPhoneMap(); },
   mapGo: a => { mapFocus(a); drawBigMap(); },
+  openWorlds: () => openMenu('worlds'), worldGo: a => moveToWorld(+a),
   // truck & trailer, worker
   vehBuy: a => { if (vehBuy(a)) renderMenu(); }, vehUse: a => { vehUse(a); renderMenu(); }, shopTab: a => { Menu.shopTab = a; renderMenu(); },
   crewHire: () => { crewHire(); renderMenu(); }, crewMower: a => { S.crew.mower = a; Crew.mw = null; save(); Sfx.click(); toast(`👷 ${CREW.name} will use the ${MOWERS[a].name}`, ''); renderMenu(); },
@@ -4095,7 +4371,7 @@ addEventListener('keydown', e => {
     if (code === 'Escape') pauseGame();
     else if (code === 'Tab') openPhone();
     else if (code === 'KeyQ') openMenu('quests'); else if (code === 'KeyJ') openMenu('jobs'); else if (code === 'KeyV') openMenu('event'); else if (code === 'KeyB') openMenu('shop'); else if (code === 'KeyP') openMenu('pass');
-    else if (code === 'KeyM') openMenu('map'); else if (code === 'KeyC') openMenu('crew'); else if (code === 'KeyY') openMenu('style');
+    else if (code === 'KeyM') openMenu('map'); else if (code === 'KeyC') openMenu('crew'); else if (code === 'KeyY') openMenu('style'); else if (code === 'KeyO') openMenu('worlds');
     else if (Game.drive) { if (code === 'KeyE') { const it = Game.prompt && Game.prompt.e; if (it) it.act(); } else if (code === 'KeyH') Sfx.horn('truck'); }
     else if (code === 'Enter' && tutIsInfo()) tutNext();
     else if (code === 'KeyE' && !Game.pumping) { const it = Game.prompt && Game.prompt.e; if (it) it.act(); }
@@ -4109,7 +4385,7 @@ addEventListener('keydown', e => {
   if (Game.state === 'menu' && !e.repeat) {
     if (code === 'Escape') { e.preventDefault(); if (Menu.cur !== 'tutw') closeMenu(); return; }
     if (typing) { const id = document.activeElement.id; if (code === 'Enter' && id === 'nameInp') nameSave(); else if (code === 'Enter' && id === 'adminAmt') ACT.adminMoneyAny(); else if (code === 'Enter' && /^adm(Money|Lawns|Jobs|Earned)$/.test(id)) admSaveStats(); return; } // letters go into the text box, not the menu shortcuts
-    const m = { KeyJ: 'jobs', KeyQ: 'quests', KeyB: 'shop', KeyP: 'pass', KeyV: 'event', KeyM: 'map', KeyC: 'crew', KeyY: 'style' }[code]; if (m && !['tutw', 'stall', 'ideas', 'log', 'name', 'admin', 'lb'].includes(Menu.cur)) { openMenu(m); return; }
+    const m = { KeyJ: 'jobs', KeyQ: 'quests', KeyB: 'shop', KeyP: 'pass', KeyV: 'event', KeyM: 'map', KeyC: 'crew', KeyY: 'style', KeyO: 'worlds' }[code]; if (m && !['tutw', 'stall', 'ideas', 'log', 'name', 'admin', 'lb'].includes(Menu.cur)) { openMenu(m); return; }
   }
   if (code === 'Escape') {
     e.preventDefault();
@@ -4257,6 +4533,7 @@ function updatePlay(dt) {
   Game.prompt = findInteractions();
   checkStory(dt);
   const fxp = mapPos(); updateGrassLOD(dt, fxp.x, fxp.z); // inside a building: keep the lawns outside loaded
+  setWorldLook(worldOfX(fxp.x)); updateSeaFX(dt); // 🌍 sky, fog and sea life for the world you're in
   updateInterior(dt); updateRace(dt); updateRemote(dt); netTick(dt); updateWeather(dt);
   if (Game.boostT > 0) Game.boostT = Math.max(0, Game.boostT - dt);
   const G = Town.garage; updateGarageDoor(dt, Math.hypot(fxp.x - G.front.x, fxp.z - G.front.z) < 8 || (pl.x > G.inside.x0 - 0.5 && pl.x < G.inside.x1 + 0.5 && pl.z > G.inside.z0 - 0.5 && pl.z < G.inside.z1 + 0.5));
@@ -4851,7 +5128,7 @@ function buildInteriors() {
   add(bed, new THREE.BoxGeometry(1.2, 0.45, 2.1), M.wood, W / 2 - 0.85, 0.23, 1.2); add(bed, new THREE.BoxGeometry(1.15, 0.12, 1.6), obm('blanket', () => std('#3a7ac8', 0.95)), W / 2 - 0.85, 0.5, 1.45); add(bed, new THREE.BoxGeometry(0.8, 0.14, 0.4), M.white, W / 2 - 0.85, 0.52, 0.4);
   const npc = buildNpc(1.12);
   Interior.house = { g, wallMat, sofaMat, npc, bed, spawn: { x: 0, z: D / 2 - 0.9 }, npcPos: { x: 0.9, z: -0.2 }, exit: { x: 0, z: D / 2 - 0.4 }, bedPos: { x: W / 2 - 0.85, z: 1.2 } };
-  for (const L of houseLots()) roomColliders(houseOrigin(L), W, D, [[-1.45, -D / 2, 1.45, -D / 2 + 1.1, 1], [-0.65, -D / 2 + 1.7, 0.65, -D / 2 + 2.35, 0.5], [-W / 2, -1.45, -W / 2 + 0.55, 0.25, 1.2], [W / 2 - 0.45, -D / 2 + 0.75, W / 2, -D / 2 + 2.05, 2]].concat(L.id === 'home' ? [[W / 2 - 1.45, 0.15, W / 2 - 0.25, 2.25, 0.6]] : []));
+  for (const L of houseLots()) roomColliders(houseOrigin(L), W, D, [[-1.45, -D / 2, 1.45, -D / 2 + 1.1, 1], [-0.65, -D / 2 + 1.7, 0.65, -D / 2 + 2.35, 0.5], [-W / 2, -1.45, -W / 2 + 0.55, 0.25, 1.2], [W / 2 - 0.45, -D / 2 + 0.75, W / 2, -D / 2 + 2.05, 2]].concat(isHomeLot(L) ? [[W / 2 - 1.45, 0.15, W / 2 - 0.25, 2.25, 0.6]] : []));
   // ---- Pump & Go store
   const s = new THREE.Group(); s.position.set(STORE_O.x, 0, STORE_O.z); scene.add(s);
   const tiles = canvasTex(128, 128, (c) => { for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { c.fillStyle = (i + j) % 2 ? '#d8d6d0' : '#eceae4'; c.fillRect(i * 32, j * 32, 32, 32); } }); tiles.wrapS = tiles.wrapT = THREE.RepeatWrapping; tiles.repeat.set(6, 5);
@@ -4938,9 +5215,9 @@ function enterBuilding(kind, L) {
       R.npc.P.shirtMat.color.copy(C(look[0])); R.npc.P.capMat.color.copy(C(look[1])); R.wallMat.color.copy(C(L.body)).multiplyScalar(0.92); R.sofaMat.color.copy(C(L.roof)).lerp(C('#8a8a9a'), 0.4);
       R.npc.P.root.position.set(o.x + R.npcPos.x, 0, o.z + R.npcPos.z); R.npc.P.root.rotation.set(0, 0, 0);
       drawTag(R.npc.tag, cl.own ? 'Mom' : cl.name + (S.jobs.list.some(j => j.lot === L.id) && S.active !== S.jobs.list.find(j => j.lot === L.id).id ? ' 💼' : ''), cl.own ? '#ff9ac8' : '#ffcf4a');
-      R.bed.visible = L.id === 'home';
+      R.bed.visible = isHomeLot(L);
       Interior.items = [{ kind: 'exit', x: o.x + R.exit.x, z: o.z + R.exit.z, r: 1.4 }, { kind: 'npc', name, lot: L, x: o.x + R.npcPos.x, z: o.z + R.npcPos.z + 0.9, r: 1.9 }];
-      if (L.id === 'home') Interior.items.push({ kind: 'bed', x: o.x + R.bedPos.x - 0.9, z: o.z + R.bedPos.z, r: 1.6 });
+      if (isHomeLot(L)) Interior.items.push({ kind: 'bed', x: o.x + R.bedPos.x - 0.9, z: o.z + R.bedPos.z, r: 1.6 });
     }
     Interior.cur = { kind, L, back, o, R }; showRoom(R, true);
     Object.assign(Game.pl, { x: o.x + R.spawn.x, z: o.z + R.spawn.z, h: Math.PI, vx: 0, vz: 0 }); Game.cam.yaw = Math.PI; Game.cam.pitch = 0.32; Game.trimOn = false;
@@ -4992,7 +5269,7 @@ function closeMenu() {
 function refreshOpenUI() { if (Game.state === 'menu') renderMenu(); else if (Game.state === 'bench') renderBench(); }
 function renderMenu() {
   const c = Menu.cur, el = $('#scr-menu'), box = el.querySelector('.mbody, .bbody'), sy = box ? box.scrollTop : 0;
-  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'admin' ? adminHTML() : c === 'lb' ? lbHTML() : c === 'map' ? mapHTML() : c === 'crew' ? crewHTML() : c === 'style' ? styleHTML() : c === 'mowshop' ? mowShopHTML() : c === 'name' ? nameHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
+  el.innerHTML = c === 'jobs' ? jobsHTML() : c === 'event' ? eventHTML() : c === 'admin' ? adminHTML() : c === 'lb' ? lbHTML() : c === 'map' ? mapHTML() : c === 'worlds' ? worldsHTML() : c === 'crew' ? crewHTML() : c === 'style' ? styleHTML() : c === 'mowshop' ? mowShopHTML() : c === 'name' ? nameHTML() : c === 'ideas' ? ideasHTML() : c === 'log' ? logHTML() : c === 'quests' ? questsHTML() : c === 'shop' ? shopHTML() : c === 'stall' ? stallHTML() : c === 'pass' ? passHTML() : c === 'tutw' ? tutWelcomeHTML() : '';
   const mb = el.querySelector('.mbody, .bbody'); if (mb) mb.scrollTop = sy;
   if (c === 'pass') { const row = $('#passRow'), cur = row && row.querySelector('.cur'); if (cur) row.scrollLeft = cur.offsetLeft - 160; }
   if (c === 'map') { drawBigMap(MapV.fresh); MapV.fresh = false; }
@@ -5203,6 +5480,7 @@ async function sendIdea() {
 
 /* ---------- 📜 Update log: newest first. Add a new entry at the top with every update ---------- */
 const UPDATES = [
+  { v: '1.22', date: 'Nov 2026', title: 'New Worlds', add: ['🌍 Two new worlds! Mow enough lawns and pay the moving fee to move on (Worlds button, or press O)', '🌴 The Jungle (60 lawns + $25,000): thatched jungle huts, palm trees, giant lawns, 5× and 6.5× pay', '🌊 Deep Blue (150 lawns + $150,000): sea-dome houses under the ocean, coral, kelp, fish and bubbles, 10× and 13× pay', '12 new mowers in each world, only sold there: jaguars, tigers, rhinos and golden temples in the jungle; sharks, octopuses, submarines and the Trident of Atlantis under the sea', 'Each world has its own house (Mom moved too), petrol stations, map and jobs', 'Once you\'ve moved, travelling between your worlds is free'] },
   { v: '1.21', date: 'Nov 2026', title: 'Factory Specials', add: ['12 new mowers in the Mower Shop, from $500 up to $6,000 ($500 more each time)', 'Each one has its own factory paint job: racing stripes, hot-rod flames, neon underglow, mirror chrome, solid gold, a lift kit or a hover deck', 'Street Kart, Neon Nightrider, Hot Rod Inferno, Arctic Blizzard, HoverRider X, Thunderbolt, Swamp King 4x4, Galaxy Cruiser, Magma Reel, Chrome Phantom, Golden Emperor and the Quantum Z-1 Hyperdeck', 'The more they cost, the more they mow. The bigger ones unlock as you finish more jobs'] },
   { v: '1.20', date: 'Nov 2026', title: 'Jake Gets Smart', add: ['Jake now maps the lawn before he starts: fences, walls, sheds, trees, flower beds, gnomes, toys, your truck and your mower', 'He mows long, dead-straight stripes and stops to turn on the spot, so he doesn\'t clip fences on the turns', 'Park your truck or mower in his way and he plans a route round it before he gets there', 'He finishes with a clean-up pass and trims the edges, so the lawn ends up 100% done', 'Jake\'s bumps never cost you money: only your own driving can'] },
   { v: '1.19', date: 'Nov 2026', title: 'Jake Clocks In', add: ['Jake only turns up for jobs: he arrives when you accept one and heads home when it\'s done', 'Fixed: new jobs sometimes didn\'t appear after sleeping (since the petrol stations were added)'] },
@@ -5979,6 +6257,7 @@ function jobsHTML() {
 
 /* ---------- Mower Shop ---------- */
 function mowerLock(id) { if (MOWERS[id].limited && !S.owned.includes(id)) return 'Limited event mower — it can\'t be bought with money';
+  const wd = MOWERS[id].world; if (wd && !S.owned.includes(id)) { if (!worldOpen(wd)) return `Move to ${WORLDS[wd].name} to unlock it (🌍 Worlds, O)`; if (curWorld() !== wd) return `Only sold in ${WORLDS[wd].name}: travel there to buy it`; }
   if (MOWERS[id].mowshop && Menu.cur !== 'mowshop' && !S.owned.includes(id)) return 'Only sold at the Mow Shop on Main Street'; const r = MOWERS[id].req; return r && r.jobs && S.stats.jobs < r.jobs ? `Finish ${r.jobs} jobs to unlock (${S.stats.jobs}/${r.jobs})` : null; }
 function buyMower(id) {
   const m = MOWERS[id]; if (!m) return false;
@@ -6040,7 +6319,9 @@ function shopHTML() {
   const bar = (label, v, max, txt) => `<span>${label}</span><div class="pbar"><i style="width:${(clamp(Math.sqrt(v / max), 0.05, 1) * 100).toFixed(0)}%"></i></div><span>${txt}</span>`;
   if (Menu.shopTab === 'vehicles') return vehShopHTML();
   let h = `<div class="mdlg panel" style="width:min(940px,96vw)">${menuHead('🛒 MOWER SHOP', 'Delivered instantly · Ray\'s speed & fuel upgrades apply to every mower')}${shopTabs()}<div class="mbody"><div class="mgrid">`;
-  MOWER_ORDER.slice().sort((a, b) => (MOWERS[b].limited ? 1 : 0) - (MOWERS[a].limited ? 1 : 0)).forEach(id => { // limited mowers first
+  const tw = shopWorld();
+  if (tw > 1) h += `<div class="small muted" style="grid-column:1/-1">${WORLDS[tw].icon} <b>${esc(WORLDS[tw].name)} mowers</b>: only sold in ${esc(WORLDS[tw].name)}. Built for its giant lawns, and priced so the best ones take some saving up.${worldOpen(tw) ? '' : ' 🔒 Move there first (🌍 Worlds, O).'}</div>`;
+  MOWER_ORDER.filter(id => (MOWERS[id].world || 1) === tw).sort((a, b) => (MOWERS[b].limited ? 1 : 0) - (MOWERS[a].limited ? 1 : 0)).forEach(id => { // limited mowers first
     if (MOWERS[id].limited && !S.owned.includes(id) && eventOver()) return; // gone once the event ends
     const m = MOWERS[id], st = mowerStats(id), own = S.owned.includes(id), eq = S.mower === id, lock = mowerLock(id), afford = S.money >= m.price, lim = m.limited && !own;
     const hot = S.settings.hlAfford && !own && !lock && afford, cls = (eq ? 'eq' : own ? 'own' : lim ? 'limited' : lock ? 'lock' : afford ? '' : 'cant') + (hot ? ' redHL' : '');
@@ -6085,7 +6366,8 @@ function mowShopHTML() {
     : `<div class="qcard ${S.settings.hlAfford && S.money >= CUSTOM_KIT_PRICE ? 'redHL' : ''}"><div class="ic">🎨</div><div class="t"><h4>Limited Colour Pack</h4><small>Two limited paints for any mower: <b style="color:${BRAND.deere.col}">■ John Deere Green</b> and <b style="color:${BRAND.mowmaster.col}">■ Mow Master Orange</b>. Only sold at the Mow Shop.</small></div><div class="side"><b class="cash" style="font-size:17px">${money(CUSTOM_KIT_PRICE)}</b><button class="btn ${S.money >= CUSTOM_KIT_PRICE ? 'gold' : ''}" data-act="msKit">Buy both colours</button></div></div>`;
   return h + '<div class="small muted">These mowers are only sold here. Ray\'s speed and fuel upgrades work on them too.</div></div></div>';
 }
-const shopTabs = () => `<div class="tabs"><button class="btn ${Menu.shopTab !== 'vehicles' ? 'sel' : ''}" data-act="shopTab" data-arg="mowers">🚜 Mowers</button><button class="btn ${Menu.shopTab === 'vehicles' ? 'sel' : ''}" data-act="shopTab" data-arg="vehicles">🚚 Trucks & trailers</button></div>`;
+const shopWorld = () => ({ w1: 1, w2: 2, w3: 3 })[Menu.shopTab] || curWorld();
+const shopTabs = () => `<div class="tabs">${[1, 2, 3].map(w => `<button class="btn ${Menu.shopTab !== 'vehicles' && shopWorld() === w ? 'sel' : ''}" data-act="shopTab" data-arg="w${w}">${WORLDS[w].icon} ${w === 1 ? 'Mowers' : esc(WORLDS[w].short) + ' mowers'}${worldOpen(w) ? '' : ' 🔒'}</button>`).join('')}<button class="btn ${Menu.shopTab === 'vehicles' ? 'sel' : ''}" data-act="shopTab" data-arg="vehicles">🚚 Trucks & trailers</button></div>`;
 function vehShopHTML() {
   const card = (id, d, kind) => {
     const own = S.veh.owned.includes(id), use = kind === 'car' ? S.veh.car === id : S.veh.trailer === id, lock = d.req && S.stats.jobs < d.req, afford = S.money >= d.price;
@@ -6309,6 +6591,7 @@ function applySeason(force) { // repaints the whole town for the current season
   const v = a => new THREE.Color(a[0], a[1], a[2]), g = v(s.grass);
   Yards.list.forEach(Y => {
     if (!Y.U || !Y.lt) return; const m = v(Y.lt.m);
+    if (Y.wt) { const wt = v(Y.wt); Y.U.uBase.value.copy(SU.uBase.value).multiply(m).multiply(wt); Y.U.uTip.value.copy(SU.uTip.value).multiply(m).multiply(wt); Y.U.uCutCol.value.copy(SU.uCutCol.value).multiply(v(Y.lt.c || Y.lt.m)).multiply(wt); return; } // the jungle and the sea have no seasons
     Y.U.uBase.value.copy(SU.uBase.value).multiply(m).multiply(g); Y.U.uTip.value.copy(SU.uTip.value).multiply(m).multiply(g); Y.U.uCutCol.value.copy(SU.uCutCol.value).multiply(v(Y.lt.c || Y.lt.m)).multiply(g);
     if (s.frost) { Y.U.uTip.value.lerp(C('#dfe8ee'), s.frost * 0.4); Y.U.uCutCol.value.lerp(C('#c8d4dc'), s.frost * 0.25); }
   });
@@ -6329,7 +6612,8 @@ function seasonChanged() {
 // falling leaves (autumn), snow (winter) and blossom petals (spring) around the camera
 const Weather = { kind: null, p: null, acc: 0 };
 function updateWeather(dt) {
-  const k = S.settings.weather ? Weather.kind : null; if (!k || Interior.cur || Q().density < 10) { if (Weather.p) Weather.p.update(dt); return; }
+  // (no snow, leaves or blossom in the jungle or under the sea)
+  const k = S.settings.weather && (Env.world || 1) === 1 ? Weather.kind : null; if (!k || Interior.cur || Q().density < 10) { if (Weather.p) Weather.p.update(dt); return; }
   if (!Weather.p) Weather.p = new Particles(520, new THREE.PlaneGeometry(1, 0.7), new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide }), { gravity: 0.22, drag: 0.6 });
   const rate = k === 'snow' ? 70 : k === 'leaves' ? 22 : 14, cols = k === 'snow' ? ['#ffffff', '#eef4ff'] : k === 'leaves' ? ['#d8641e', '#e8a02a', '#b0321e', '#c8801e'] : ['#ffc4dc', '#f2a6c8', '#ffffff'];
   Weather.acc += dt * rate;
@@ -6411,7 +6695,7 @@ function instanced(geo, mat, items, place, shadow = true) { // one draw call for
   im.castShadow = shadow; im.receiveShadow = true; Town.group.add(im); return im;
 }
 function dressTown() {
-  const houses = LOTS.filter(L => L.kind === 'house'), white = std('#ffffff', 0.7); white.userData.shared = true;
+  const houses = LOTS.filter(L => L.kind === 'house' && worldOfLot(L) === 1), white = std('#ffffff', 0.7); white.userData.shared = true; // porches & shutters are a Mow Town Valley thing
   // stone edging around the (smaller) front lawns, with a gap for the path
   const { u0: fu, v0: fv } = FRONT_YARD, edge = [];
   houses.forEach(L => { edge.push({ L, u: (fu - 3.25) / 2, v: fv - 0.09, w: -3.25 - fu, d: 0.18 }, { L, u: (-1.75 + 3.9) / 2, v: fv - 0.09, w: 5.65, d: 0.18 }, { L, u: fu - 0.09, v: (fv + 10.15) / 2, w: 0.18, d: 10.15 - fv }); });
@@ -6499,12 +6783,82 @@ function updateSkyLife(dt) {
   if (Sky.birds) {
     const dm = new THREE.Object3D(), t = Game.t;
     Sky.flock.forEach((b, i) => { b.a += dt * b.sp; const a = b.a - b.off * 0.06, R = b.R + (b.off % 2 ? 2 : -2) * Math.ceil(b.off / 2); dm.position.set(b.cx + Math.cos(a) * R, b.h + Math.sin(t * 0.7 + b.off) * 0.6, b.cz + Math.sin(a) * R); dm.rotation.set(0, -a, 0); dm.scale.set(1, 0.4 + Math.abs(Math.sin(t * 9 + b.ph)) * 1.4, 1); dm.updateMatrix(); Sky.birds.setMatrixAt(i, dm.matrix); });
-    Sky.birds.instanceMatrix.needsUpdate = true; Sky.birds.visible = Env.night < 0.5 && seasonOf(S.day).id !== 'winter';
+    Sky.birds.instanceMatrix.needsUpdate = true; Sky.birds.visible = Env.night < 0.5 && (seasonOf(S.day).id !== 'winter' || Env.world === 2) && Env.world !== 3;
   }
 }
 function tintMountains(hor) { // hazy silhouettes that follow the sky colour (and get snowier in winter)
-  if (!Sky.mtnMat) return; const day = 1 - Env.night * 0.8, w = seasonOf(S.day).id === 'winter';
-  Sky.mtnMat.color.copy(hor).lerp(C('#4a5a6e'), 0.42).multiplyScalar(day); Sky.capMat.color.copy(hor).lerp(C('#ffffff'), w ? 0.85 : 0.6).multiplyScalar(day);
+  if (!Sky.mtnMat) return; const day = 1 - Env.night * 0.8, w = seasonOf(S.day).id === 'winter', jungle = Env.world === 2;
+  Sky.mtnMat.color.copy(hor).lerp(C(jungle ? '#2f5a2a' : '#4a5a6e'), jungle ? 0.6 : 0.42).multiplyScalar(day);
+  if (jungle) Sky.capMat.color.copy(Sky.mtnMat.color); else Sky.capMat.color.copy(hor).lerp(C('#ffffff'), w ? 0.85 : 0.6).multiplyScalar(day); // green jungle peaks, no snow
+}
+
+/* ---------- 🌍 Worlds at runtime: the look of the world you're in, sea life, moving between worlds ---------- */
+const curWorld = () => (S && S.world) || 1;
+function setWorldLook(w) {
+  if (Env.world === w) return; Env.world = w; const WL = WORLD_LOOK[w];
+  if (Sky.clouds) Sky.clouds.visible = w !== 3; if (Sky.mtnG) Sky.mtnG.visible = w !== 3; if (Env.hills) Env.hills.visible = w !== 3;
+  if (Sea.g) Sea.g.visible = w === 3;
+  if (w === 1) applySeason(true); // back home: the season's colours again
+  else { if (Env.hills && WL.hills) Env.hills.children[0].material.color.copy(C(WL.hills)); Env.hemi.groundColor.copy(C(WL.hemiG)); }
+  setMapWorld(w); updateTimeOfDay(true);
+}
+// 🌊 under the sea: bubbles rising round you, shafts of light from the surface and schools of fish
+const Sea = { g: null, t: 0 };
+function buildSeaFX() {
+  const g = Sea.g = new THREE.Group(); g.visible = false; scene.add(g);
+  const n = 320, pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) pos.set([rand(-45, 45), rand(0, 30), rand(-45, 45)], i * 3);
+  const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  Sea.bub = new THREE.Points(bg, new THREE.PointsMaterial({ color: 0xd8f6ff, size: 0.2, transparent: true, opacity: 0.75, depthWrite: false })); Sea.bub.frustumCulled = false; g.add(Sea.bub);
+  const ray = canvasTex(32, 256, (c, w, h) => { const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gr; c.fillRect(0, 0, w, h); });
+  Sea.rays = []; for (let i = 0; i < 9; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: ray, color: C('#9fe8ff'), transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, rotation: 0.22 })); s.scale.set(5 + Math.random() * 6, 60, 1); s.userData.o = [rand(-50, 50), rand(-50, 50), Math.random() * 6]; g.add(s); Sea.rays.push(s); }
+  // fish: schools that swim in loops over the lawns of Coral Cove and Atlantis Heights
+  const fg = new THREE.ConeGeometry(0.22, 0.8, 6); fg.rotateX(Math.PI / 2); fg.scale(0.55, 1, 1);
+  const ts = TOWNS.filter(T => T.world === 3), schools = []; ts.forEach(T => { for (let x = T.x0 - 60; x < T.x1 + 60; x += 55) [-1, 1].forEach(s => schools.push({ cx: x + rand(-10, 10), cz: s * rand(20, 80), y: rand(3, 9), R: rand(6, 14), sp: rand(0.25, 0.5) * (Math.random() < 0.5 ? -1 : 1), a: rand(0, 6), c: pick(['#ffb020', '#ff6f61', '#7ff0ff', '#ffd23b', '#c89bff', '#ffffff']) })); });
+  Sea.schools = schools; Sea.fish = new THREE.InstancedMesh(fg, obm('fish', () => std('#ffffff', 0.5, 0.2)), schools.length * 7); Sea.fish.frustumCulled = false; scene.add(Sea.fish); Sea.fish.visible = false;
+  const col = new THREE.Color(); schools.forEach((sc, i) => { for (let k = 0; k < 7; k++) Sea.fish.setColorAt(i * 7 + k, col.copy(C(sc.c)).multiplyScalar(0.8 + Math.random() * 0.35)); });
+}
+function updateSeaFX(dt) {
+  const on = Env.world === 3; if (Sea.fish) Sea.fish.visible = on; if (!on || !Sea.g) return;
+  const cp = camera.position; Sea.t += dt; Sea.g.position.set(cp.x, 0, cp.z);
+  const p = Sea.bub.geometry.attributes.position; for (let i = 0; i < p.count; i++) { let y = p.getY(i) + dt * (0.8 + (i % 5) * 0.25); if (y > 30) y = 0; p.setY(i, y); p.setX(i, p.getX(i) + Math.sin(Sea.t * 2 + i) * dt * 0.15); } p.needsUpdate = true;
+  Sea.rays.forEach(s => { const o = s.userData.o; s.position.set(o[0] + Math.sin(Sea.t * 0.2 + o[2]) * 3, 30, o[1]); s.material.opacity = (0.06 + 0.05 * Math.sin(Sea.t * 0.7 + o[2])) * (1 - Env.night); });
+  const dm = new THREE.Object3D(); Sea.schools.forEach((sc, i) => { sc.a += dt * sc.sp; for (let k = 0; k < 7; k++) { const a = sc.a - k * 0.12 * Math.sign(sc.sp), r = sc.R + (k % 3 - 1) * 0.8; dm.position.set(sc.cx + Math.cos(a) * r, sc.y + Math.sin(Sea.t * 1.5 + k) * 0.3 + (k % 2) * 0.5, sc.cz + Math.sin(a) * r); dm.rotation.set(0, -a + (sc.sp > 0 ? Math.PI : 0), 0); dm.updateMatrix(); Sea.fish.setMatrixAt(i * 7 + k, dm.matrix); } });
+  Sea.fish.instanceMatrix.needsUpdate = true;
+}
+// can you move to world w? (lawns mowed + the moving fee)
+const worldOpen = w => (S.worlds || [1]).includes(w);
+function worldReady(w) { const W = WORLDS[w]; return { lawns: S.stats.lawns >= W.lawns, cash: S.money >= W.fee, prev: worldOpen(w - 1) }; }
+function moveToWorld(w) {
+  const W = WORLDS[w]; if (!W || w === curWorld() || Race.on || Net.on && Net.isGuestCoop && Net.isGuestCoop()) { Sfx.error(); return; }
+  if (!worldOpen(w)) {
+    const r = worldReady(w); if (!r.prev) { Sfx.error(); toast('🔒 Not yet', `Move to ${WORLDS[w - 1].name} first.`, 'var(--bad)'); return; }
+    if (!r.lawns || !r.cash) { Sfx.error(); toast(`🔒 ${W.name} isn't open yet`, `Mow ${W.lawns} lawns (${S.stats.lawns}/${W.lawns}) and have ${money(W.fee)} for the move.`, 'var(--bad)'); return; }
+    S.money -= W.fee; S.worlds = (S.worlds || [1]).concat([w]); S.flags['moved' + w] = 1;
+  }
+  if (S.active) { S.active = null; Game.run = null; } // jobs don't follow you to another world
+  closeMenu(); if (Game.mode !== 'foot') exitMower(); if (Interior.cur) leaveInteriorNow();
+  fadeOut(() => {
+    S.world = w; Game.townId = undefined; Game.waypoint = null; Menu.shopTab = null; postJobs(); spawnAtHome(); updateTimeOfDay(true);
+    banner(`${W.icon} ${W.name.toUpperCase()}<small>${esc(W.tag)}</small>`); Sfx.fanfare(); save(); saveYards();
+    setTimeout(() => toast(`${W.icon} Welcome to ${W.name}!`, w > 1 ? `${S.jobs.list.length} jobs on the board (J) · ${WORLD_MOWERS.filter(id => MOWERS[id].world === w).length} new mowers in the Shop (B)` : 'Back home in Mow Town Valley.', 'var(--gold)'), 1500);
+  });
+}
+// once you can afford the next world, tell the player (just once)
+function checkWorldReady() {
+  for (const w of [2, 3]) { if (worldOpen(w) || !worldOpen(w - 1) || S.flags['ready' + w]) continue; const r = worldReady(w); if (r.lawns && r.cash) { S.flags['ready' + w] = 1; Sfx.unlock(); toast(`🌍 You can move to ${WORLDS[w].name}!`, `Press O (Worlds) · moving costs ${money(WORLDS[w].fee)}.`, 'var(--gold)'); } }
+}
+function worldsHTML() {
+  const cards = [1, 2, 3].map(w => {
+    const W = WORLDS[w], here = curWorld() === w, open = worldOpen(w), ts = TOWNS.filter(T => T.world === w), pays = ts.map(T => T.pay), nm = WORLD_MOWERS.filter(id => MOWERS[id].world === w).length;
+    const r = w > 1 ? worldReady(w) : null, bar = (v, max) => `<div class="pbar"><i style="width:${Math.round(clamp(v / max, 0, 1) * 100)}%"></i></div>`;
+    const req = !open && r ? `<div class="small" style="margin:6px 0">🌱 Lawns mowed: <b>${Math.min(S.stats.lawns, W.lawns)} / ${W.lawns}</b>${bar(S.stats.lawns, W.lawns)}💵 Moving fee: <b>${money(Math.min(S.money, W.fee))} / ${money(W.fee)}</b>${bar(S.money, W.fee)}${!r.prev ? `<span class="muted">Move to ${esc(WORLDS[w - 1].name)} first.</span>` : ''}</div>` : '';
+    const btn = here ? '<button class="btn" disabled>📍 You live here</button>' : open ? `<button class="btn primary" data-act="worldGo" data-arg="${w}">🚚 Travel there (free)</button>`
+      : `<button class="btn ${r.lawns && r.cash && r.prev ? 'gold' : ''}" data-act="worldGo" data-arg="${w}" ${r.lawns && r.cash && r.prev ? '' : 'disabled'}>🔒 Move here · ${money(W.fee)}</button>`;
+    return `<div class="mcard ${here ? 'eq' : open ? 'own' : 'lock'}" style="padding:14px"><h4 style="font-size:20px">${W.icon} ${esc(W.name)}</h4><div class="ty">${esc(W.tag)}</div>
+      <div class="small" style="margin:6px 0">${ts.map(T => `${T.icon} ${esc(T.name)} · <b>${T.pay}× pay</b>`).join('<br>')}${w > 1 ? `<br>🚜 ${nm} mowers you can only buy here (${money(Math.min(...WORLD_MOWERS.filter(id => MOWERS[id].world === w).map(id => MOWERS[id].price)))}–${money(Math.max(...WORLD_MOWERS.filter(id => MOWERS[id].world === w).map(id => MOWERS[id].price)))})` : ''}</div>${req}${btn}</div>`;
+  }).join('');
+  return `<div class="mdlg panel" style="width:min(980px,96vw)">${menuHead('🌍 WORLDS', 'Mow enough lawns and save up the moving fee to move to the next world · O to close')}<div class="mbody"><div class="mgrid">${cards}</div>
+    <div class="small muted" style="margin-top:8px">Moving is a one-off fee: after that you can travel between your worlds for free. Your money, mowers, truck and Jake come with you. Every world has bigger lawns and better pay than the last.</div></div></div>`;
 }
 
 function toastFps() { let el = $('#fpsBox'); if (!el) { el = document.createElement('div'); el.id = 'fpsBox'; el.style.cssText = 'position:absolute;right:10px;bottom:8px;font-size:11px;opacity:.7;font-weight:700'; $('#ui').appendChild(el); } el.textContent = S.settings.fps ? Math.round(Game.fps) + ' fps' : ''; }
@@ -6517,7 +6871,7 @@ function boot() {
   scene.traverse(o => { if (o.isInstancedMesh) o.frustumCulled = false; }); // instanced trees, bushes & lamps span every town, so never cull them by their (tiny) base shape
   initFX(); buildInteriors(); updatePaint(); applyDecor(); updatePlayerLook();
   resetWorldFresh(); applySeason(true); // each save slot loads its own lawns when you pick it
-  buildMinimapBase(); applyQuality(); spawnAtHome(); updateTimeOfDay(true);
+  setMapWorld(1); buildSeaFX(); applyQuality(); spawnAtHome(); updateTimeOfDay(true);
   if (localBan()) showBan(); else if (Acct) showTitle(); else showSignin('new'); $('#loading').remove(); // new players (and old saves) start at the sign-in screen
   requestAnimationFrame(t => { lastT = t; frame(t); });
   addEventListener('beforeunload', () => { save(); saveYards(); });
